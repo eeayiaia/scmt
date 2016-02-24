@@ -1,54 +1,20 @@
 package main
 
-import "fmt"
-import "superk/devices"
+import (
+	"fmt"
+
+	"superk/devices"
+
+	"strings"
+	"time"
+)
 
 func main() {
-	fmt.Println("Stub!")
+	devices.Init()
 
-	/*	sshConfig := &ssh.ClientConfig{
-			User: "selund",
-			Auth: []ssh.AuthMethod{
-				ssh.Password("galenanka1"),
-			},
-		}
+	slaves := make([]*devices.Slave, 2)
 
-		connection, err := ssh.Dial("tcp", "129.16.22.6:2222", sshConfig)
-		if err != nil {
-			fmt.Println("Error when connecting: {}", err)
-		}
-
-		session, err := connection.NewSession()
-		if err != nil {
-			fmt.Println("Error when creating a session: {}", err)
-		}
-		defer session.Close()
-
-		var stdoutBuf bytes.Buffer
-		session.Stdout = &stdoutBuf
-
-		stdin, err := session.StdinPipe()
-		if err != nil {
-			fmt.Println("Error when creating stdin-pipe: {}", err)
-		}
-
-		//session.Run("hostname -f; pwd; ssh odroid@10.46.0.101")
-		session.Shell()
-
-		stdin.Write([]byte("hostname -f\n"))
-		stdin.Write([]byte("ls -la\n"))
-		stdin.Write([]byte("exit\n"))
-
-		session.Wait()
-
-		//	stdin.Write([]byte("odroid\n"))
-		//	stdin.Write([]byte("hostname -f; exit\n"))
-		//session.Run("odroid")
-		//session.Run("hostname -f")
-
-		fmt.Println("Result: " + stdoutBuf.String())*/
-
-	slave := devices.Slave{
+	slaves[0] = &devices.Slave{
 		Hostname:        "",
 		HardwareAddress: "",
 		IpAddress:       "129.16.22.6:2222",
@@ -57,6 +23,32 @@ func main() {
 		Password: "galenanka3",
 	}
 
-	ch := slave.RunInShell("hostname -f")
-	fmt.Printf(<-ch)
+	slaves[1] = &devices.Slave{
+		Hostname:        "",
+		HardwareAddress: "",
+		IpAddress:       "129.16.22.6:2222",
+
+		UserName: "selund",
+		Password: "galenanka1",
+	}
+
+	// Add the devices to the device list async
+	for i, slave := range slaves {
+		go func(i int, slave *devices.Slave) {
+			devices.AddDevice(slave)
+		}(i, slave)
+	}
+
+	// Wait for the devices to be async added
+	for devices.Count() < 2 {
+		time.Sleep(10 * time.Millisecond)
+	}
+
+	// Execute `whoami` on the devices
+	chs := devices.RunOnAll("whoami")
+	for _, ch := range chs {
+		result := <-ch
+
+		fmt.Println(strings.Trim(result, "\n"))
+	}
 }
