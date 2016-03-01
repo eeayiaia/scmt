@@ -17,6 +17,8 @@ type Slave struct {
 
 	UserName string
 	Password string
+
+	lock *Sync.Mutex // Lock before changing ..
 }
 
 var devices []*Slave
@@ -50,6 +52,30 @@ func AddDevice(device *Slave) {
 	devicesMutex.Unlock()
 }
 
+/*
+	Register a new device
+		NOTE: this is different from 'adding' due to the fact that
+		we create the device itself
+*/
+func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
+	slave := &Slave{
+		HardwareAddress: hardwareAddress,
+		IpAddress:       ipAddress,
+
+		lock: &sync.Mutex{},
+	}
+
+	// TODO: do stuff like set a static ip-address and
+	//			 prepare the device
+	//	Init:
+	//		- Hostname
+	//		- UserName & Password
+
+	AddDevice(slave)
+
+	return slave
+}
+
 func Count() int {
 	return len(devices)
 }
@@ -59,6 +85,10 @@ func Count() int {
 */
 func RunOnAll(query string) []chan string {
 	chs := make([]chan string, 0)
+
+	devicesMutex.lock()
+	defer devicesMutex.Unlock()
+
 	for _, slave := range devices {
 		ch := slave.RunInShell(query)
 		chs = append(chs, ch)
