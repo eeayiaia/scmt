@@ -18,7 +18,7 @@ type Slave struct {
 	UserName string
 	Password string
 
-	lock *Sync.Mutex // Lock before changing ..
+	lock *sync.Mutex // Lock before changing ..
 }
 
 var devices []*Slave
@@ -83,14 +83,14 @@ func Count() int {
 /*
 	Concurrently runs a query (bash) on all connected slaves
 */
-func RunOnAll(query string) []chan string {
+func RunOnAll(query string, sudo bool) []chan string {
 	chs := make([]chan string, 0)
 
-	devicesMutex.lock()
+	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
 
 	for _, slave := range devices {
-		ch := slave.RunInShell(query)
+		ch := slave.RunInShell(query, sudo)
 		chs = append(chs, ch)
 	}
 	return chs
@@ -100,7 +100,7 @@ func RunOnAll(query string) []chan string {
 	Runs a command in a remote shell on a specific slave
 		NOTE: this should *not* be used to run consecutive commands!
 */
-func (s *Slave) RunInShell(query string) chan string {
+func (s *Slave) RunInShell(query string, sudo bool) chan string {
 	ch := make(chan string)
 
 	go func() {
@@ -109,7 +109,7 @@ func (s *Slave) RunInShell(query string) chan string {
 			ch <- "error: " + err.Error()
 		}
 
-		ch <- rc.RunInShell(query)
+		ch <- rc.RunInShell(query, sudo)
 	}()
 
 	return ch

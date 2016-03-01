@@ -45,7 +45,7 @@ func main() {
 	}
 
 	// Execute `whoami` on the devices
-	chs := devices.RunOnAll("whoami")
+	chs := devices.RunOnAll("whoami", true)
 	for _, ch := range chs {
 		result := <-ch
 

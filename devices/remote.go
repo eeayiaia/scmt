@@ -33,7 +33,7 @@ func NewRemoteConnection(device *Slave) (*RemoteConnection, error) {
 }
 
 /* NOTE: this is a blocking function .. */
-func (conn *RemoteConnection) RunInShell(query string) string {
+func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 	session, err := conn.Connection.NewSession()
 	if err != nil {
 		fmt.Println("[DeviceRemote] could not open a new session towards ", conn.Device.IpAddress, ": ", err)
@@ -44,50 +44,19 @@ func (conn *RemoteConnection) RunInShell(query string) string {
 
 	var stdoutBuf bytes.Buffer
 	session.Stdout = &stdoutBuf
+	//	session.Stdin = strings.NewReader(conn.Device.Password)
 
-	session.Run(query)
+	var q string
+	if sudo {
+		q = "echo " + conn.Device.Password + " | sudo -S " + query
+	} else {
+		q = query
+	}
+
+	e := session.Run(q)
+	if e != nil {
+		fmt.Println(e.Error())
+	}
 
 	return stdoutBuf.String()
 }
-
-/*	sshConfig := &ssh.ClientConfig{
-		User: "selund",
-		Auth: []ssh.AuthMethod{
-			ssh.Password("galenanka1"),
-		},
-	}
-
-	connection, err := ssh.Dial("tcp", "129.16.22.6:2222", sshConfig)
-	if err != nil {
-		fmt.Println("Error when connecting: {}", err)
-	}
-
-	session, err := connection.NewSession()
-	if err != nil {
-		fmt.Println("Error when creating a session: {}", err)
-	}
-	defer session.Close()
-
-	var stdoutBuf bytes.Buffer
-	session.Stdout = &stdoutBuf
-
-	stdin, err := session.StdinPipe()
-	if err != nil {
-		fmt.Println("Error when creating stdin-pipe: {}", err)
-	}
-
-	//session.Run("hostname -f; pwd; ssh odroid@10.46.0.101")
-	session.Shell()
-
-	stdin.Write([]byte("hostname -f\n"))
-	stdin.Write([]byte("ls -la\n"))
-	stdin.Write([]byte("exit\n"))
-
-	session.Wait()
-
-	//	stdin.Write([]byte("odroid\n"))
-	//	stdin.Write([]byte("hostname -f; exit\n"))
-	//session.Run("odroid")
-	//session.Run("hostname -f")
-
-	fmt.Println("Result: " + stdoutBuf.String())*/
