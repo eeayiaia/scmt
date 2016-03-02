@@ -5,10 +5,37 @@ import (
 
 	"superk/devices"
 
+  "path/filepath"
 	"strings"
 	"sync"
 	"time"
 )
+
+func execScriptOnAll(slaves []*devices.Slave, script string) {
+	chs := devices.RunScriptOnAllAsync(script)
+
+	var wg sync.WaitGroup
+	wg.Add(len(chs))
+
+	// Can be done async, but the output isn't sequential in that case
+	for i, ch := range chs {
+    go func(i int, ch chan string) {
+      for {
+        result, more := <-ch
+        if !more {
+          break
+        }
+
+        trimmed := strings.Trim(result, "\n")
+        fmt.Printf("%s@%s: %s\n", slaves[i].UserName, slaves[i].IpAddress, trimmed)
+      }
+
+      wg.Done()
+    } (i, ch)
+	}
+
+	wg.Wait()
+}
 
 func main() {
 	devices.Init()
@@ -45,29 +72,18 @@ func main() {
 		time.Sleep(10 * time.Millisecond)
 	}
 
-	// Execute `whoami` on the devices
-	script := "./device.init.d/00-base.sh"
-	chs := devices.RunScriptOnAllAsync(script)
+  // Find all device initialisation scripts
+  files, err := filepath.Glob("./device.init.d/*.sh")
+  if err != nil {
+    fmt.Println("Could not get device initialisation scripts ..", err)
+    return
+  }
 
-	var wg sync.WaitGroup
-	wg.Add(len(chs))
-
-	// Can be done async, but the output isn't sequential in that case
-	for i, ch := range chs {
-		fmt.Printf("####################################################################################################\n")
-		fmt.Printf("RUNNING %s ON %s@%s\n", script, slaves[i].UserName, slaves[i].IpAddress)
-		for {
-			result, more := <-ch
-			if !more {
-				break
-			}
-
-			fmt.Println("", strings.Trim(result, "\n"))
-		}
-		fmt.Printf("####################################################################################################\n")
-
-		wg.Done()
-	}
-
-	wg.Wait()
+  // Execute all files
+  for _, f := range files {
+    fmt.Println("##################################################")
+    fmt.Println("RUNNING ", f, " ON ALL CONNECTED DEVICES")
+    execScriptOnAll(slaves, f)
+    fmt.Println("##################################################")
+  }
 }
