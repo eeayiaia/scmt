@@ -20,7 +20,7 @@ apt-get install -y libcgi-fast-perl libapache2-mod-fcgid
 
 #Check that the zooming packages are installed and enabled
 
-CGI_CHECK=/usr/sbin/apachectl -M | grep -i fcgid_module
+CGI_CHECK=`/usr/sbin/apachectl -M | grep -i fcgid_module`
 
 #if no fcgid_module, try enabling it
 if [[ -z $CGI_CHECK ]]; then
@@ -36,6 +36,18 @@ ln -S /etc/munin/apache.conf /etc/apache2/conf-enabled/munin.conf
 
 #Set master node name
 sed -i 's/localhost\.localdomain/$MasterNodeName/g' /etc/munin/munin.conf
+
+#If apache version >= 2.4 change munin config to be compatible.
+
+apacheVersion=`apachectl -v | head -n 1 | cut -c24-26`
+if [ `echo "$apacheVersion >= 2.4" | bc -l` ]; then
+  echo "Current apache config with munin incompatible, fixing it."
+  sed -i '/Options None/d' /etc/munin/apache.conf
+  sed -i 's/Order allow,deny/Require all granted/g' /etc/munin/apache.conf
+  sed -i 's/Allow from localhost 127\.0\.0\.0\/8 ::1/Options FollowSymLinks SymLinksIfOwnerMatch/g' /etc/munin/apache.conf
+fi
+
+service apache2 restart
 
 #Get package including deps list url for debs
 #apt-get --print-uris --yes install apache2 | grep ^\' | cut -d\' -f2
