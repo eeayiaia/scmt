@@ -6,6 +6,7 @@ import (
 	"superk/devices"
 
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -45,10 +46,28 @@ func main() {
 	}
 
 	// Execute `whoami` on the devices
-	chs := devices.RunOnAll("whoami", true)
-	for _, ch := range chs {
-		result := <-ch
+	script := "./device.init.d/00-base.sh"
+	chs := devices.RunScriptOnAllAsync(script)
 
-		fmt.Println(strings.Trim(result, "\n"))
+	var wg sync.WaitGroup
+	wg.Add(len(chs))
+
+	// Can be done async, but the output isn't sequential in that case
+	for i, ch := range chs {
+		fmt.Printf("####################################################################################################\n")
+		fmt.Printf("RUNNING %s ON %s@%s\n", script, slaves[i].UserName, slaves[i].IpAddress)
+		for {
+			result, more := <-ch
+			if !more {
+				break
+			}
+
+			fmt.Println("", strings.Trim(result, "\n"))
+		}
+		fmt.Printf("####################################################################################################\n")
+
+		wg.Done()
 	}
+
+	wg.Wait()
 }

@@ -82,6 +82,7 @@ func Count() int {
 
 /*
 	Concurrently runs a query (bash) on all connected slaves
+		NOTE: this should *not* be used to run consecutive commands!
 */
 func RunOnAll(query string, sudo bool) []chan string {
 	chs := make([]chan string, 0)
@@ -113,4 +114,31 @@ func (s *Slave) RunInShell(query string, sudo bool) chan string {
 	}()
 
 	return ch
+}
+
+func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
+	rc, err := NewRemoteConnection(s)
+	if err != nil {
+		return nil, err
+	}
+
+	return rc.RunScript(scriptpath)
+}
+
+func RunScriptOnAllAsync(scriptpath string) []chan string {
+	chs := make([]chan string, 0)
+
+	devicesMutex.Lock()
+	defer devicesMutex.Unlock()
+
+	for _, slave := range devices {
+		ch, err := slave.RunScriptAsync(scriptpath)
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		chs = append(chs, ch)
+	}
+
+	return chs
 }
