@@ -27,3 +27,5 @@ ADD_TO_CONF="[$NODE_NAME]
 
 #write to conf file
 echo "$ADD_TO_CONF" >> /etc/munin/munin.conf
+
+service apache2 restart
