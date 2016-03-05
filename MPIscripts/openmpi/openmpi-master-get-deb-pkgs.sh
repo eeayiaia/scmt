@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Get script directoy
+# Get script directory
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
