@@ -8,10 +8,10 @@ package devices
 import (
 	"fmt"
 	"sync"
-    
-    "superk/heartbeat"
-    
-    "strings"
+
+	"superk/heartbeat"
+
+	"strings"
 )
 
 // A Slave devices (connected to the master)
@@ -24,9 +24,9 @@ type Slave struct {
 	Password string
 
 	lock *sync.Mutex // Lock before changing ..
-    
-  pingerControl chan bool // Pinger control, send a false in order to stop
-  Connected bool
+
+	pingerControl chan bool // Pinger control, send a false in order to stop
+	Connected     bool
 }
 
 var devices []*Slave
@@ -57,8 +57,8 @@ func Init() {
 func AddDevice(device *Slave) {
 	devicesMutex.Lock()
 
-  device.lock = &sync.Mutex{}
-  device.Connected = true
+	device.lock = &sync.Mutex{}
+	device.Connected = true
 
 	devices = append(devices, device)
 	devicesMutex.Unlock()
@@ -73,7 +73,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	slave := &Slave{
 		HardwareAddress: hardwareAddress,
 		IpAddress:       ipAddress,
-    Connected:       true,
+		Connected:       true,
 
 		lock: &sync.Mutex{},
 	}
@@ -114,8 +114,8 @@ func (s *Slave) RunInShellAsync(query string, sudo bool) chan string {
 }
 
 /*
-    Runs the script on a slave asyncronously, delivering feedback
-    from the remote in ch
+   Runs the script on a slave asyncronously, delivering feedback
+   from the remote in ch
 */
 func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
 	rc, err := NewRemoteConnection(s)
@@ -127,18 +127,18 @@ func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
 }
 
 /*
-    Starts the pinger service for a device/slave
+   Starts the pinger service for a device/slave
 */
 func (s *Slave) StartPinger() {
-    s.pingerControl = heartbeat.Pinger(s.IpAddress, handleDisconnect)
+	s.pingerControl = heartbeat.Pinger(s.IpAddress, handleDisconnect)
 }
 
 /*
-    Runs the script on all slaves asyncronously, delivering feedback
-    from the slaves in channels chs
+   Runs the script on all slaves asyncronously, delivering feedback
+   from the slaves in channels chs
 */
 func RunScriptOnAllAsync(scriptpath string) []chan string {
-  var chs []chan string
+	var chs []chan string
 
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
@@ -155,13 +155,12 @@ func RunScriptOnAllAsync(scriptpath string) []chan string {
 	return chs
 }
 
-
 /*
 	Concurrently runs a query (bash) on all connected slaves
 		NOTE: this should *not* be used to run consecutive commands!
 */
 func RunOnAllAsync(query string, sudo bool) []chan string {
-    var chs []chan string
+	var chs []chan string
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
 
@@ -174,22 +173,22 @@ func RunOnAllAsync(query string, sudo bool) []chan string {
 
 // Handle a disconnection of a device
 func handleDisconnect(address string) {
-  // Get the slave
-  devicesMutex.Lock()
-  defer devicesMutex.Unlock()
-  
-  for _, slave := range devices {
-    if strings.Compare(slave.IpAddress, address) == 0 {
-      // TODO: do something more here!
+	// Get the slave
+	devicesMutex.Lock()
+	defer devicesMutex.Unlock()
 
-      fmt.Println("[Devices]", slave.IpAddress, "was disconnected!")
+	for _, slave := range devices {
+		if strings.Compare(slave.IpAddress, address) == 0 {
+			// TODO: do something more here!
 
-      // Lock the device to change the connected status
-      slave.lock.Lock()
-      defer slave.lock.Unlock()
+			fmt.Println("[Devices]", slave.IpAddress, "was disconnected!")
 
-      slave.pingerControl <- false // disable pinging service for this device
-      slave.Connected = false
-    }
-  }
+			// Lock the device to change the connected status
+			slave.lock.Lock()
+			defer slave.lock.Unlock()
+
+			slave.pingerControl <- false // disable pinging service for this device
+			slave.Connected = false
+		}
+	}
 }

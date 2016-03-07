@@ -5,7 +5,7 @@ import (
 
 	"superk/devices"
 
-  "path/filepath"
+	"path/filepath"
 	"strings"
 	"sync"
 	"time"
@@ -19,19 +19,19 @@ func execScriptOnAll(slaves []*devices.Slave, script string) {
 
 	// Can be done async, but the output isn't sequential in that case
 	for i, ch := range chs {
-    go func(i int, ch chan string) {
-      for {
-        result, more := <-ch
-        if !more {
-          break
-        }
+		go func(i int, ch chan string) {
+			for {
+				result, more := <-ch
+				if !more {
+					break
+				}
 
-        trimmed := strings.Trim(result, "\n")
-        fmt.Printf("%s@%s: %s\n", slaves[i].UserName, slaves[i].IpAddress, trimmed)
-      }
+				trimmed := strings.Trim(result, "\n")
+				fmt.Printf("%s@%s: %s\n", slaves[i].UserName, slaves[i].IpAddress, trimmed)
+			}
 
-      wg.Done()
-    } (i, ch)
+			wg.Done()
+		}(i, ch)
 	}
 
 	wg.Wait()
@@ -72,22 +72,22 @@ func main() {
 		time.Sleep(10 * time.Millisecond)
 	}
 
-  for _, slave := range slaves {
-    slave.StartPinger()
-  }
+	for _, slave := range slaves {
+		slave.StartPinger()
+	}
 
-  // Find all device initialisation scripts
-  files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
-  if err != nil {
-    fmt.Println("Could not get device initialisation scripts ..", err)
-    return
-  }
+	// Find all device initialisation scripts
+	files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
+	if err != nil {
+		fmt.Println("Could not get device initialisation scripts ..", err)
+		return
+	}
 
-  // Execute all files
-  for _, f := range files {
-    fmt.Println("##################################################")
-    fmt.Println("RUNNING ", f, " ON ALL CONNECTED DEVICES")
-    execScriptOnAll(slaves, f)
-    fmt.Println("##################################################")
-  }
+	// Execute all files
+	for _, f := range files {
+		fmt.Println("##################################################")
+		fmt.Println("RUNNING ", f, " ON ALL CONNECTED DEVICES")
+		execScriptOnAll(slaves, f)
+		fmt.Println("##################################################")
+	}
 }

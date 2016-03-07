@@ -1,7 +1,7 @@
 package heartbeat
 
 import (
-  "fmt"
+	"fmt"
 	"os/exec"
 	"strings"
 	"time"
@@ -17,7 +17,7 @@ type handleDisconnect func(address string)
 func Ping(address string) bool {
 	pingCmd := "ping"
 
-  addr := filterAddress(address)
+	addr := filterAddress(address)
 	pingArgs := []string{"-c", "1", addr}
 
 	cmd := exec.Command(pingCmd, pingArgs...)
@@ -44,9 +44,9 @@ func Pinger(address string, fn handleDisconnect) chan bool {
 	go func(address string) {
 		for run {
 			status := Ping(address)
-      if !status {
-         fn(address)
-      }
+			if !status {
+				fn(address)
+			}
 
 			time.Sleep(time.Second * 2) // sleep 5 seconds
 		}
@@ -67,13 +67,13 @@ func Pinger(address string, fn handleDisconnect) chan bool {
 
 /* Remove port and spaces */
 func filterAddress(address string) string {
-  var addr string 
-  
-  addr = address
+	var addr string
 
-  if strings.Contains(addr, ":") {
-    addr = strings.Split(addr, ":")[0]
-  }
+	addr = address
 
-  return strings.TrimSpace(addr)
+	if strings.Contains(addr, ":") {
+		addr = strings.Split(addr, ":")[0]
+	}
+
+	return strings.TrimSpace(addr)
 }
