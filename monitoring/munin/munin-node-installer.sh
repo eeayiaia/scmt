@@ -2,7 +2,7 @@
 
 PKG_DIR="/tmp/munin-node/"
 
-PACKAGE="xxx.deb" #Should probably be an array where dependencies comes in order.
+PACKAGE="node.deb" #Should probably be an array where dependencies comes in order.
 
 if [[ $EUID -ne 0 ]]; then
 	echo "This installer must be run with root rights." 1>&2
