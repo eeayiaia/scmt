@@ -77,6 +77,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	return slave
 }
 
+// Return the count of currently connected devices
 func Count() int {
 	return len(devices)
 }

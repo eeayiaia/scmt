@@ -73,7 +73,7 @@ func main() {
 	}
 
   // Find all device initialisation scripts
-  files, err := filepath.Glob("./device.init.d/*.sh")
+  files, err := filepath.Glob(".scripts.d/device.init.d/*.sh")
   if err != nil {
     fmt.Println("Could not get device initialisation scripts ..", err)
     return
