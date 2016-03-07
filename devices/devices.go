@@ -83,22 +83,6 @@ func Count() int {
 }
 
 /*
-	Concurrently runs a query (bash) on all connected slaves
-		NOTE: this should *not* be used to run consecutive commands!
-*/
-func RunOnAll(query string, sudo bool) []chan string {
-    var chs []chan string
-	devicesMutex.Lock()
-	defer devicesMutex.Unlock()
-
-	for _, slave := range devices {
-		ch := slave.RunInShell(query, sudo)
-		chs = append(chs, ch)
-	}
-	return chs
-}
-
-/*
 	Runs a command in a remote shell on a specific slave
 		NOTE: this should *not* be used to run consecutive commands!
 */
@@ -149,5 +133,22 @@ func RunScriptOnAllAsync(scriptpath string) []chan string {
 		chs = append(chs, ch)
 	}
 
+	return chs
+}
+
+
+/*
+	Concurrently runs a query (bash) on all connected slaves
+		NOTE: this should *not* be used to run consecutive commands!
+*/
+func RunOnAllAsync(query string, sudo bool) []chan string {
+    var chs []chan string
+	devicesMutex.Lock()
+	defer devicesMutex.Unlock()
+
+	for _, slave := range devices {
+		ch := slave.RunInShell(query, sudo)
+		chs = append(chs, ch)
+	}
 	return chs
 }
