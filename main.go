@@ -72,6 +72,10 @@ func main() {
 		time.Sleep(10 * time.Millisecond)
 	}
 
+  for _, slave := range slaves {
+    slave.StartPinger()
+  }
+
   // Find all device initialisation scripts
   files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
   if err != nil {

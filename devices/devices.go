@@ -25,7 +25,8 @@ type Slave struct {
 
 	lock *sync.Mutex // Lock before changing ..
     
-    pingerControl chan bool // Pinger control, send a false in order to stop
+  pingerControl chan bool // Pinger control, send a false in order to stop
+  Connected bool
 }
 
 var devices []*Slave
@@ -55,6 +56,10 @@ func Init() {
 */
 func AddDevice(device *Slave) {
 	devicesMutex.Lock()
+
+  device.lock = &sync.Mutex{}
+  device.Connected = true
+
 	devices = append(devices, device)
 	devicesMutex.Unlock()
 }
@@ -68,6 +73,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	slave := &Slave{
 		HardwareAddress: hardwareAddress,
 		IpAddress:       ipAddress,
+    Connected:       true,
 
 		lock: &sync.Mutex{},
 	}
@@ -132,7 +138,7 @@ func (s *Slave) StartPinger() {
     from the slaves in channels chs
 */
 func RunScriptOnAllAsync(scriptpath string) []chan string {
-    var chs []chan string
+  var chs []chan string
 
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
@@ -168,15 +174,22 @@ func RunOnAllAsync(query string, sudo bool) []chan string {
 
 // Handle a disconnection of a device
 func handleDisconnect(address string) {
-    fmt.Println(address, "disconnected! WAT DO?!")
-    
-    // Get the slave
-    devicesMutex.Lock()
-    defer devicesMutex.Unlock()
-    
-    for _, slave := range devices {
-        if strings.Compare(slave.IpAddress, address) == 0 {
-            fmt.Println("found!")
-        }
+  // Get the slave
+  devicesMutex.Lock()
+  defer devicesMutex.Unlock()
+  
+  for _, slave := range devices {
+    if strings.Compare(slave.IpAddress, address) == 0 {
+      // TODO: do something more here!
+
+      fmt.Println("[Devices]", slave.IpAddress, "was disconnected!")
+
+      // Lock the device to change the connected status
+      slave.lock.Lock()
+      defer slave.lock.Unlock()
+
+      slave.pingerControl <- false // disable pinging service for this device
+      slave.Connected = false
     }
+  }
 }
