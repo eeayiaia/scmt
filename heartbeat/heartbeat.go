@@ -1,4 +1,4 @@
-package main
+package heartbeat
 
 import (
 	"fmt"
@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 )
+
+type handleDisconnect func(address string)
 
 /*
 	The heartbeat package is responsible to send ping messages to a certain
@@ -35,20 +37,20 @@ func Ping(address string) bool {
 /*
 	A continuous process that pings a certain address
 */
-func Pinger(address string) (chan bool, chan bool) {
-	ch := make(chan bool)
-	ch_control := make(chan bool)
+func Pinger(address string, fn handleDisconnect) chan bool {
+	chControl := make(chan bool)
 
 	var run bool
 
 	run = true
 	go func(address string) {
 		for run {
-			ch <- Ping(address)
+			status := Ping(address)
+            if !status {
+               fn(address)
+            }
 			time.Sleep(time.Second * 2) // sleep 5 seconds
 		}
-
-		fmt.Println("DONE!")
 	}(address)
 
 	go func() {
@@ -57,22 +59,9 @@ func Pinger(address string) (chan bool, chan bool) {
 				break
 			}
 
-			run = <-ch_control
+			run = <-chControl
 		}
 	}()
 
-	return ch, ch_control
-}
-
-func main() {
-	ch, control := Pinger("localhost")
-
-	for i := 0; i < 4; i++ {
-		status := <-ch
-		fmt.Println(status)
-	}
-
-	control <- false
-	time.Sleep(time.Second * 4)
-	fmt.Println("exit ..")
+	return chControl
 }

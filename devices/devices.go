@@ -8,6 +8,10 @@ package devices
 import (
 	"fmt"
 	"sync"
+    
+    "superk/heartbeat"
+    
+    "strings"
 )
 
 // A Slave devices (connected to the master)
@@ -20,6 +24,8 @@ type Slave struct {
 	Password string
 
 	lock *sync.Mutex // Lock before changing ..
+    
+    pingerControl chan bool // Pinger control, send a false in order to stop
 }
 
 var devices []*Slave
@@ -86,7 +92,7 @@ func Count() int {
 	Runs a command in a remote shell on a specific slave
 		NOTE: this should *not* be used to run consecutive commands!
 */
-func (s *Slave) RunInShell(query string, sudo bool) chan string {
+func (s *Slave) RunInShellAsync(query string, sudo bool) chan string {
 	ch := make(chan string)
 
 	go func() {
@@ -112,6 +118,13 @@ func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
 	}
 
 	return rc.RunScript(scriptpath)
+}
+
+/*
+    Starts the pinger service for a device/slave
+*/
+func (s *Slave) StartPinger() {
+    s.pingerControl = heartbeat.Pinger(s.IpAddress, handleDisconnect)
 }
 
 /*
@@ -147,8 +160,23 @@ func RunOnAllAsync(query string, sudo bool) []chan string {
 	defer devicesMutex.Unlock()
 
 	for _, slave := range devices {
-		ch := slave.RunInShell(query, sudo)
+		ch := slave.RunInShellAsync(query, sudo)
 		chs = append(chs, ch)
 	}
 	return chs
+}
+
+// Handle a disconnection of a device
+func handleDisconnect(address string) {
+    fmt.Println(address, "disconnected! WAT DO?!")
+    
+    // Get the slave
+    devicesMutex.Lock()
+    defer devicesMutex.Unlock()
+    
+    for _, slave := range devices {
+        if strings.Compare(slave.IpAddress, address) == 0 {
+            fmt.Println("found!")
+        }
+    }
 }
