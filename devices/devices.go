@@ -10,6 +10,7 @@ import (
 	"sync"
 )
 
+// A Slave devices (connected to the master)
 type Slave struct {
 	Hostname        string
 	HardwareAddress string
@@ -24,7 +25,7 @@ type Slave struct {
 var devices []*Slave
 var devicesMutex *sync.Mutex
 
-var initialized bool = false
+var initialized = false
 
 /*
   Initial service initialisation
@@ -85,8 +86,7 @@ func Count() int {
 		NOTE: this should *not* be used to run consecutive commands!
 */
 func RunOnAll(query string, sudo bool) []chan string {
-	chs := make([]chan string, 0)
-
+    var chs []chan string
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
 
@@ -116,6 +116,10 @@ func (s *Slave) RunInShell(query string, sudo bool) chan string {
 	return ch
 }
 
+/*
+    Runs the script on a slave asyncronously, delivering feedback
+    from the remote in ch
+*/
 func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
 	rc, err := NewRemoteConnection(s)
 	if err != nil {
@@ -125,8 +129,12 @@ func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
 	return rc.RunScript(scriptpath)
 }
 
+/*
+    Runs the script on all slaves asyncronously, delivering feedback
+    from the slaves in channels chs
+*/
 func RunScriptOnAllAsync(scriptpath string) []chan string {
-	chs := make([]chan string, 0)
+    var chs []chan string
 
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
