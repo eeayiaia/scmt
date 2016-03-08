@@ -2,7 +2,7 @@
 
 
 
-MasterNodeName="Epa"
+MasterNodeName=`hostname`
 
 if [[ $EUID -ne 0 ]]; then
 	echo "This installer must be run with root rights." 1>&2
