@@ -5,8 +5,12 @@ import (
 	"bytes"
 	"fmt"
 	"golang.org/x/crypto/ssh"
+	"io"
 	"os"
+	"path"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 type RemoteConnection struct {
@@ -59,6 +63,60 @@ func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 	}
 
 	return stdoutBuf.String()
+}
+
+func (conn *RemoteConnection) CopyFile(filepath string, destination string) error {
+	session, err := conn.Connection.NewSession()
+	if err != nil {
+		Log.Error("could not open a new session", err)
+		return err
+	}
+	defer session.Close()
+
+	f, err := os.Open(filepath)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	s, err := f.Stat()
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		var stdoutBuf bytes.Buffer
+		session.Stdout = &stdoutBuf
+
+		w, e := session.StdinPipe()
+		if e != nil {
+			Log.WithFields(log.Fields{
+				"filepath":    filepath,
+				"destination": destination,
+			}).Error("could not get stdin pipe!")
+		}
+
+		fileName := path.Base(filepath)
+		mode := s.Mode().Perm()
+		size := s.Size()
+
+		fmt.Fprintf(w, "C%#o %d %s\n", mode, size, fileName)
+		io.Copy(w, f)
+		fmt.Fprint(w, "\x00 \r\n")
+
+		Log.WithFields(log.Fields{
+			"target":      conn.Device.IpAddress,
+			"filepath":    filepath,
+			"destination": destination,
+			"size":        size,
+		}).Info("copied file")
+	}()
+
+	cmd := fmt.Sprintf("/usr/bin/scp -qtr %s", destination)
+	session.Run(cmd)
+
+	return nil
 }
 
 /* NOTE: entirely experimental at this moment .. */
@@ -121,15 +179,24 @@ func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) 
 	ch := make(chan string)
 
 	go func() {
-		lines, err := readScript(scriptpath)
+		filename := path.Base(scriptpath)
+		dest := fmt.Sprintf("/var/tmp/%s", filename)
+		err := conn.CopyFile(scriptpath, dest)
 		if err != nil {
-			Log.Error("could not open ", scriptpath, ": ", err)
+			Log.WithFields(log.Fields{
+				"script": scriptpath,
+				"dest":   dest,
+			}).Error("could not copy script to device")
 			return
 		}
 
 		session, err := conn.Connection.NewSession()
 		if err != nil {
-			Log.Error("could not open a new session towards ", conn.Device.IpAddress, ": ", err)
+			Log.WithFields(log.Fields{
+				"IP":  conn.Device.IpAddress,
+				"MAC": conn.Device.HardwareAddress,
+				"ERR": err,
+			}).Error("could not open session")
 			return
 		}
 
@@ -175,9 +242,10 @@ func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) 
 		stdin.Write([]byte(fmt.Sprintf("echo %s | sudo -S echo boo >/dev/null\n", conn.Device.Password)))
 		stdin.Write([]byte("while true; do sudo echo boo >/dev/null && sleep 10; done &")) // The '&' at the end creates a job
 
-		for _, line := range lines {
-			stdin.Write([]byte(line + "\n"))
-		}
+		/*		for _, line := range lines {
+				stdin.Write([]byte(line + "\n"))
+			}*/
+		stdin.Write([]byte("sudo sh " + dest + "\n"))
 
 		// Kill all jobs (if any) and exit
 		stdin.Write([]byte("kill $(jobs -p) && exit\n"))
@@ -189,20 +257,4 @@ func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) 
 	}()
 
 	return ch, nil
-}
-
-func readScript(scriptpath string) ([]string, error) {
-	file, err := os.Open(scriptpath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var lines []string
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		lines = append(lines, scanner.Text())
-	}
-
-	return lines, scanner.Err()
 }

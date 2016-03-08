@@ -9,6 +9,8 @@ import (
 	"strings"
 	"superk/heartbeat"
 	"sync"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // A Slave devices (connected to the master)
@@ -38,7 +40,7 @@ func Init() {
 	InitContextLogging()
 
 	if initialized {
-		Log.Warn("xevices already initialized!")
+		Log.Warn("devices already initialized!")
 		return
 	}
 
@@ -94,8 +96,26 @@ func Count() int {
 }
 
 /*
+	Copies a file to a slave
+*/
+func (s *Slave) CopyFile(file string, destination string) chan error {
+	ch := make(chan error)
+
+	go func() {
+		rc, err := NewRemoteConnection(s)
+		if err != nil {
+			ch <- err
+		}
+
+		result := rc.CopyFile(file, destination)
+		ch <- result
+	}()
+
+	return ch
+}
+
+/*
 	Runs a command in a remote shell on a specific slave
-		NOTE: this should *not* be used to run consecutive commands!
 */
 func (s *Slave) RunInShellAsync(query string, sudo bool) chan string {
 	ch := make(chan string)
@@ -178,9 +198,10 @@ func handleDisconnect(address string) {
 
 	for _, slave := range devices {
 		if strings.Compare(slave.IpAddress, address) == 0 {
-			// TODO: do something more here!
-
-			Log.Warn("[Devices]", slave.IpAddress, "was disconnected!")
+			Log.WithFields(log.Fields{
+				"IP":  slave.IpAddress,
+				"MAC": slave.HardwareAddress,
+			}).Warn("device disconnected")
 
 			// Lock the device to change the connected status
 			slave.lock.Lock()
