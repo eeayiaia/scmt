@@ -38,7 +38,7 @@ func NewRemoteConnection(device *Slave) (*RemoteConnection, error) {
 func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 	session, err := conn.Connection.NewSession()
 	if err != nil {
-		fmt.Println("[DeviceRemote] could not open a new session towards ", conn.Device.IpAddress, ": ", err)
+		Log.Error("could not open a new session towards ", conn.Device.IpAddress, ": ", err)
 		return err.Error()
 	}
 
@@ -54,7 +54,7 @@ func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 
 	e := session.Run(q)
 	if e != nil {
-		fmt.Println("[DeviceRemote] could not run command: ", e)
+		Log.Error(" could not run command: ", e)
 		return e.Error()
 	}
 
@@ -67,7 +67,7 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 
 	session, err := conn.Connection.NewSession()
 	if err != nil {
-		fmt.Println("[DeviceRemote] could not open a new session towards ", conn.Device.IpAddress, ": ", err)
+		Log.Error("could not open a new session towards ", conn.Device.IpAddress, ": ", err)
 		return nil, err
 	}
 
@@ -75,13 +75,13 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 
 	stdout, err := session.StdoutPipe()
 	if err != nil {
-		fmt.Println("[DeviceRemote] could not open remote stdout: ", err)
+		Log.Error("could not open remote stdout: ", err)
 		return nil, err
 	}
 
 	stdin, err := session.StdinPipe()
 	if err != nil {
-		fmt.Println("[DeviceRemote] could not open remote stdin: ", err)
+		Log.Error("[DeviceRemote] could not open remote stdin: ", err)
 		return nil, err
 	}
 
@@ -92,7 +92,6 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 
 			trimmedLine := strings.Trim(line, "\n ")
 
-			//			fmt.Println("Got line :'", trimmedLine, "'")
 			ch <- trimmedLine
 		}
 	}()
@@ -106,7 +105,7 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 
 	e := session.Shell()
 	if e != nil {
-		fmt.Println(e.Error())
+		Log.Error(e.Error())
 		return nil, e
 	}
 
@@ -124,19 +123,19 @@ func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) 
 	go func() {
 		lines, err := readScript(scriptpath)
 		if err != nil {
-			fmt.Println("[DeviceRemote] could not open ", scriptpath, ": ", err)
+			Log.Error("could not open ", scriptpath, ": ", err)
 			return
 		}
 
 		session, err := conn.Connection.NewSession()
 		if err != nil {
-			fmt.Println("[DeviceRemote] could not open a new session towards ", conn.Device.IpAddress, ": ", err)
+			Log.Error("could not open a new session towards ", conn.Device.IpAddress, ": ", err)
 			return
 		}
 
 		stdout, err := session.StdoutPipe()
 		if err != nil {
-			fmt.Println("[DeviceRemote] Error when creating stdout-pipe: ", err)
+			Log.Error("when creating stdout-pipe: ", err)
 			return
 		}
 
@@ -162,7 +161,7 @@ func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) 
 
 		stdin, err := session.StdinPipe()
 		if err != nil {
-			fmt.Println("[DeviceRemote] Error when creating stdin-pipe: ", err)
+			Log.Error("when creating stdin-pipe: ", err)
 			return
 		}
 

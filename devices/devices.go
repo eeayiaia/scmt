@@ -6,14 +6,9 @@ package devices
 */
 
 import (
-	"fmt"
-	"sync"
-
-	"superk/heartbeat"
-
 	"strings"
-
-	log "github.com/Sirupsen/logrus"
+	"superk/heartbeat"
+	"sync"
 )
 
 // A Slave devices (connected to the master)
@@ -40,12 +35,14 @@ var initialized = false
   Initial service initialisation
 */
 func Init() {
+	InitContextLogging()
+
 	if initialized {
-		log.Warn("[Devices] Devices already initialized!")
+		Log.Warn("xevices already initialized!")
 		return
 	}
 
-	log.Info("[Devices] Initialising ..")
+	Log.Info("Initialising ..")
 
 	devicesMutex = &sync.Mutex{}
 	devices = make([]*Slave, 0)
@@ -148,7 +145,7 @@ func RunScriptOnAllAsync(scriptpath string) []chan string {
 	for _, slave := range devices {
 		ch, err := slave.RunScriptAsync(scriptpath)
 		if err != nil {
-			fmt.Println(err)
+			Log.Error(err)
 		}
 
 		chs = append(chs, ch)
@@ -183,7 +180,7 @@ func handleDisconnect(address string) {
 		if strings.Compare(slave.IpAddress, address) == 0 {
 			// TODO: do something more here!
 
-			fmt.Println("[Devices]", slave.IpAddress, "was disconnected!")
+			Log.Warn("[Devices]", slave.IpAddress, "was disconnected!")
 
 			// Lock the device to change the connected status
 			slave.lock.Lock()

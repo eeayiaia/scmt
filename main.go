@@ -11,6 +11,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
 
 func execScriptOnAll(slaves []*devices.Slave, script string) {
@@ -39,12 +40,18 @@ func execScriptOnAll(slaves []*devices.Slave, script string) {
 	wg.Wait()
 }
 
+var Log *log.Entry
+
 func initLog() {
-	log.SetFormatter(&log.JSONFormatter{})
-	log.SetLevel(log.WarnLevel)
+	log.SetFormatter(new(prefixed.TextFormatter))
+	Log = log.WithFields(log.Fields{
+		"prefix": "main",
+	})
 }
 
 func main() {
+	InitLogging()
+
 	devices.Init()
 
 	slaves := make([]*devices.Slave, 2)
