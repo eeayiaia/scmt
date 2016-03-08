@@ -47,7 +47,7 @@ func Pinger(address string, fn handleDisconnect) chan bool {
 				fn(address)
 			}
 
-			time.Sleep(time.Second * 2) // sleep 5 seconds
+			time.Sleep(time.Second * 20)
 		}
 	}(address)
 
