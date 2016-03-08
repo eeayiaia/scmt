@@ -12,6 +12,8 @@ import (
 	"superk/heartbeat"
 
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 // A Slave devices (connected to the master)
@@ -39,11 +41,11 @@ var initialized = false
 */
 func Init() {
 	if initialized {
-		fmt.Println("[Devices] Devices already initialized!")
+		log.Warn("[Devices] Devices already initialized!")
 		return
 	}
 
-	fmt.Println("Devices initialising ..")
+	log.Info("[Devices] Initialising ..")
 
 	devicesMutex = &sync.Mutex{}
 	devices = make([]*Slave, 0)
