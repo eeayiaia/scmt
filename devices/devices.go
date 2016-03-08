@@ -10,6 +10,10 @@ import (
 	"superk/heartbeat"
 	"sync"
 
+	"fmt"
+	"path"
+	"path/filepath"
+
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -86,7 +90,39 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	//		- Hostname
 	//		- UserName & Password
 
+	// TODO: test username & password from file
+
 	AddDevice(slave)
+
+	// Setup and copy device init scripts
+	ch := slave.RunInShellAsync("mkdir -p $HOME/device.init.d/", false)
+	Log.Info(<-ch)
+
+	// Find all device initialisation scripts
+	files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
+	if err != nil {
+		Log.Fatal("Could not get device initialisation scripts ..", err)
+		return nil
+	}
+
+	// Copy all files asyncronously
+	for _, f := range files {
+		go func(f string) {
+			filename := path.Base(f)
+			dest := fmt.Sprintf("$HOME/device.init.d/%s", filename)
+
+			ch := slave.CopyFile(f, dest)
+			result := <-ch
+
+			if result != nil {
+				Log.WithFields(log.Fields{
+					"filename": filename,
+					"dest":     dest,
+					"result":   result,
+				}).Error("could not copy")
+			}
+		}(f)
+	}
 
 	return slave
 }
