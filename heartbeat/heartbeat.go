@@ -1,7 +1,6 @@
 package heartbeat
 
 import (
-	"fmt"
 	"os/exec"
 	"strings"
 	"time"
