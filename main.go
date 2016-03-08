@@ -9,6 +9,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
 )
 
 func execScriptOnAll(slaves []*devices.Slave, script string) {
@@ -35,6 +37,11 @@ func execScriptOnAll(slaves []*devices.Slave, script string) {
 	}
 
 	wg.Wait()
+}
+
+func initLog() {
+	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(log.WarnLevel)
 }
 
 func main() {
@@ -79,15 +86,13 @@ func main() {
 	// Find all device initialisation scripts
 	files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
 	if err != nil {
-		fmt.Println("Could not get device initialisation scripts ..", err)
+		log.Fatal("Could not get device initialisation scripts ..", err)
 		return
 	}
 
 	// Execute all files
 	for _, f := range files {
-		fmt.Println("##################################################")
-		fmt.Println("RUNNING ", f, " ON ALL CONNECTED DEVICES")
+		log.Info("RUNNING ", f, " ON ALL CONNECTED DEVICES")
 		execScriptOnAll(slaves, f)
-		fmt.Println("##################################################")
 	}
 }
