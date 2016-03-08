@@ -60,6 +60,7 @@ func AddDevice(device *Slave) {
 
 	device.lock = &sync.Mutex{}
 	device.Connected = true
+	device.StartPinger() // heartbeat monitor up
 
 	devices = append(devices, device)
 	devicesMutex.Unlock()
