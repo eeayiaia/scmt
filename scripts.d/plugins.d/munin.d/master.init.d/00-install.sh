@@ -9,9 +9,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit 100
 fi
 
-#Update
-apt-get update
-
 #Install dependencies
 apt-get install -y apache2 apache2-utils libapache2-mod-fcgid libcgi-fast-perl
 
