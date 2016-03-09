@@ -43,6 +43,7 @@ func ParseConfiguration(filepath string) *Configuration {
 
 		return nil
 	}
+	defer file.Close()
 
 	decoder := json.NewDecoder(file)
 	conf := &Configuration{}

@@ -42,7 +42,12 @@ func NewRemoteConnection(device *Slave) (*RemoteConnection, error) {
 func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 	session, err := conn.Connection.NewSession()
 	if err != nil {
-		Log.Error("could not open a new session towards ", conn.Device.IpAddress, ": ", err)
+		Log.WithFields(log.Fields{
+			"IP":    conn.Device.IpAddress,
+			"MAC":   conn.Device.HardwareAddress,
+			"error": err,
+		}).Error("could not open session")
+
 		return err.Error()
 	}
 
@@ -58,7 +63,12 @@ func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 
 	e := session.Run(q)
 	if e != nil {
-		Log.Error(" could not run command: ", e)
+		Log.WithFields(log.Fields{
+			"IP":    conn.Device.IpAddress,
+			"MAC":   conn.Device.HardwareAddress,
+			"error": e,
+		}).Error("could not run command")
+
 		return e.Error()
 	}
 
