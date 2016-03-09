@@ -6,10 +6,11 @@ package invoker
 */
 
 import (
-	"bytes"
 	"encoding/gob"
 	"fmt"
-	"log"
+
+	log "github.com/Sirupsen/logrus"
+
 	"net"
 )
 
@@ -18,6 +19,8 @@ const PORT string = "9000"
 
 const (
 	TYPE_ACK int = iota
+	TYPE_PING
+	TYPE_PONG
 )
 
 type Request struct {
@@ -31,6 +34,9 @@ type Answer struct {
 
 // Initialize the invoker backend
 func Init() {
+	InitContextLogging()
+
+	Log.Info("initialising")
 	go listener()
 }
 
@@ -40,7 +46,12 @@ func Init() {
 func SendRequest(Type int) {
 	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%s", PORT))
 	if err != nil {
-		log.Fatal("[Listener] connection error:", err)
+		Log.WithFields(log.Fields{
+			"error": err,
+			"port":  PORT,
+		}).Fatal("connection error")
+
+		return
 	}
 
 	defer conn.Close()
@@ -53,16 +64,20 @@ func SendRequest(Type int) {
 }
 
 func listener() {
-	ln, err := net.Listen("tcp", PORT)
+	ln, err := net.Listen("tcp", ":"+PORT)
 	if err != nil {
-		log.Fatal("[Listener] could not open socket on port 9000:", err)
+		Log.WithFields(log.Fields{
+			"port":  PORT,
+			"error": err,
+		}).Fatal("could not open socket")
+
 		return
 	}
 
 	for {
 		conn, err := ln.Accept() // blocking call
 		if err != nil {
-			log.Fatal("[Listener]", err)
+			Log.Fatal(err)
 			continue
 		}
 
@@ -76,18 +91,18 @@ func handleRequest(conn net.Conn) {
 	// TODO: add some sophisticated way to handle this
 	switch p.Type {
 	case TYPE_PING:
-		fmt.Printf("GOT PING!\n")
+		Log.Info("ping")
 	case TYPE_PONG:
-		fmt.Printf("GOT PONG!\n")
+		Log.Info("pong")
 	}
 }
 
-func sendRequest(r Request, conn net.Conn) {
+func sendRequest(r *Request, conn net.Conn) {
 	encoder := gob.NewEncoder(conn)
-	encoder.Encode(r)
+	encoder.Encode(*r)
 }
 
-func recvRequest(conn net.Conn) Request {
+func recvRequest(conn net.Conn) *Request {
 	dec := gob.NewDecoder(conn)
 
 	r := &Request{}
@@ -96,12 +111,12 @@ func recvRequest(conn net.Conn) Request {
 	return r
 }
 
-func sendAnswer(a Answer, conn net.Conn) {
+func sendAnswer(a *Answer, conn net.Conn) {
 	encoder := gob.NewEncoder(conn)
-	encoder.Encode(a)
+	encoder.Encode(*a)
 }
 
-func recvAnswer(conn net.Conn) Answer {
+func recvAnswer(conn net.Conn) *Answer {
 	dec := gob.NewDecoder(conn)
 
 	a := &Answer{}
