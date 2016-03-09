@@ -4,7 +4,7 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../script-utils/installer-utils.sh"
+. "$DIR/../../.script-utils/installer-utils.sh"
 . "$DIR/openmpi-package-list.sh"
 
 check_root
