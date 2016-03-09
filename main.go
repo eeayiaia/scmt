@@ -44,8 +44,8 @@ func main() {
 	InitLogging()
 	InitConfiguration()
 
-	devices.Init()
 	invoker.Init()
+	devices.Init()
 
 	slaves := make([]*devices.Slave, 2)
 
