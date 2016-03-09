@@ -20,7 +20,7 @@ type Configuration struct {
 	DatabasePassword string*/
 }
 
-const CONFIGURATIONPATH = "config.json"
+const CONFIGURATIONPATH = "scmt.json"
 
 // Global accessable conf
 var Conf *Configuration
