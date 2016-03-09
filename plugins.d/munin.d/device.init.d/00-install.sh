@@ -9,4 +9,4 @@ fi
 
 apt-get install -y munin-node
 
-echo "cidr_allow $master_IP/32" >> /etc/munin/muinin-node.conf
+echo "cidr_allow $master_IP/32" >> /etc/munin/munin-node.conf
