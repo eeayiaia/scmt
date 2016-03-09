@@ -11,6 +11,19 @@ function check_root(){
 	fi
 }
 
+# Backup file/directory with timestamp
+# Parameter 1: File/directory to backup
+function backup_file(){
+	BACKUP_FOLDER=~/.scmt-backup
+	DATE_STAMP=$(date "+%b_%d_%Y_%H:%M:%S")
+	BACKUP_FILE_NAME=$1
+	if [[ ! -d $BACKUP_FOLDER ]]; then
+		mkdir $BACKUP_FOLDER
+	fi
+
+	cp $BACKUP_FILE_NAME $BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
+}
+
 # Check if aptitude is installed; if not, install it
 # (aptitude is used to unconditionally download .deb packages to working
 # directory without installing)
