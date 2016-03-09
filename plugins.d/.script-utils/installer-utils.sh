@@ -16,12 +16,20 @@ function check_root(){
 function backup_file(){
 	BACKUP_FOLDER=~/.scmt-backup
 	DATE_STAMP=$(date "+%b_%d_%Y_%H:%M:%S")
-	BACKUP_FILE_NAME=$1
+	BACKUP_FILE=$1
+	BACKUP_FILE_NAME=$(basename $BACKUP_FILE)
+
 	if [[ ! -d $BACKUP_FOLDER ]]; then
 		mkdir $BACKUP_FOLDER
 	fi
 
-	cp $BACKUP_FILE_NAME $BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
+	if [[ -d $BACKUP_FILE ]]; then
+		cp -r $BACKUP_FILE $BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
+	elif [[ -f $BACKUP_FILE ]]; then
+		cp $BACKUP_FILE $BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
+	else
+		echo "Cannot backup $BACKUP_FILE: path is not file or directory" 1>&2
+	fi
 }
 
 # Check if aptitude is installed; if not, install it
