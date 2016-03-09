@@ -8,6 +8,7 @@ package devices
 import (
 	"strings"
 	"superk/heartbeat"
+	"superk/database"
 	"sync"
 
 	"fmt"
@@ -22,7 +23,7 @@ type Slave struct {
 	Hostname        string
 	HardwareAddress string
 	IpAddress       string
-
+	Port	string
 	UserName string
 	Password string
 
@@ -85,6 +86,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 
 		lock: &sync.Mutex{},
 	}
+	database.AddDevice(slave)
 
 	// TODO: do stuff like set a static ip-address and
 	//			 prepare the device
