@@ -41,6 +41,7 @@ func execScriptOnAll(slaves []*devices.Slave, script string) {
 
 func main() {
 	InitLogging()
+	InitConfiguration()
 
 	devices.Init()
 

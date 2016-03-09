@@ -1,0 +1,61 @@
+package main
+
+/*
+	Reads a configuration file with a certain set of elements
+	predefined
+*/
+
+import (
+	"encoding/json"
+	"os"
+
+	log "github.com/Sirupsen/logrus"
+)
+
+type Configuration struct {
+	Production bool
+
+	/*Database         string
+	DatabaseUser     string
+	DatabasePassword string*/
+}
+
+const CONFIGURATIONPATH = "config.json"
+
+// Global accessable conf
+var Conf *Configuration
+
+func InitConfiguration() {
+	Conf = ParseConfiguration(CONFIGURATIONPATH)
+
+	if Conf == nil {
+		panic("configuration unable to load")
+	}
+}
+
+func ParseConfiguration(filepath string) *Configuration {
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"file":  filepath,
+			"error": err,
+		}).Fatal("could not open configuration file")
+
+		return nil
+	}
+
+	decoder := json.NewDecoder(file)
+	conf := &Configuration{}
+
+	err = decoder.Decode(conf)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"file":  filepath,
+			"error": err,
+		}).Fatal("could not parse configuration")
+
+		return nil
+	}
+
+	return conf
+}
