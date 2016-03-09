@@ -36,7 +36,7 @@ type Answer struct {
 func Init() {
 	InitContextLogging()
 
-	Log.Info("initialising")
+	Log.Info("initialising ..")
 	go listener()
 }
 

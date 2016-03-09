@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"superk/devices"
+	"superk/invoker"
 
 	"path/filepath"
 	"strings"
@@ -44,6 +45,7 @@ func main() {
 	InitConfiguration()
 
 	devices.Init()
+	invoker.Init()
 
 	slaves := make([]*devices.Slave, 2)
 
