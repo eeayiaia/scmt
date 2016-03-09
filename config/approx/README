@@ -1,0 +1,19 @@
+Configuration files for approx in SuperK Cluster Management Toolkit
+
+approx.conf:
+	Configuration file to be used by approx. Make sure repositories listed match
+	what nodes require (and what is used in node-sources).
+
+	Default settings match Ubuntu 15.10 for Odroid XU4, will probably also work
+	for other Ubuntu devices but it is untested.
+	For more details, see ´man approx´ and ´man approx.conf´.
+
+node-sources:
+	What will be used as /etc/apt/sources-list on nodes. Set up sources to match
+	what is provided by approx.conf. E.g.
+
+	deb http://master:9999/ubuntu-node/ vivid main universe restricted
+	
+	Default settings match Ubuntu 15.10 for Odroid XU4.
+	For more details, see ´man approx´.
+

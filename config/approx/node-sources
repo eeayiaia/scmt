@@ -1,0 +1,18 @@
+deb http://master:9999/ubuntu-node/ vivid main universe restricted
+deb-src http://master:9999/ubuntu-node/ vivid main universe restricted
+
+deb http://master:9999/ubuntu-node/ vivid-updates main universe restricted
+deb-src http://master:9999/ubuntu-node/ vivid-updates main universe restricted
+
+deb http://master:9999/ubuntu-node/ vivid-backports main restricted
+deb-src http://master:9999/ubuntu-node/ vivid-backports main restricted
+
+deb http://master:9999/ubuntu-node/ vivid-security main restricted
+deb-src http://master:9999/ubuntu-node/ vivid-security main restricted
+deb http://master:9999/ubuntu-node/ vivid-security universe
+deb-src http://master:9999/ubuntu-node/ vivid-security universe
+deb http://master:9999/ubuntu-node/ vivid-security multiverse  
+deb-src http://master:9999/ubuntu-node/ vivid-security multiverse
+
+deb http://master:9999/odroid-node/ vivid main
+
