@@ -32,6 +32,16 @@ function backup_file(){
 	fi
 }
 
+# Creates a new user
+# Parameter 1: username
+# Parameter 2: password
+# Parameter 3: uid
+function create_user(){
+	echo "Creating user '$1' with uid '$3'"
+	adduser $1 --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password --uid $3
+	echo "$1:$2" | sudo chpasswd
+}
+
 # Check if aptitude is installed; if not, install it
 # (aptitude is used to unconditionally download .deb packages to working
 # directory without installing)
