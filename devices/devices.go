@@ -53,6 +53,8 @@ func Init() {
 	devicesMutex = &sync.Mutex{}
 	devices = make([]*Slave, 0)
 
+	RegisterInvokerHandlers()
+
 	initialized = true
 }
 

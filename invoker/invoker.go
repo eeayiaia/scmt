@@ -6,31 +6,41 @@ package invoker
 */
 
 import (
+	"bytes"
 	"encoding/gob"
 	"fmt"
+	"net"
+	"sync"
 
 	log "github.com/Sirupsen/logrus"
-
-	"net"
 )
 
 // Listening port
 const PORT string = "9000"
 
+// Packet types
 const (
-	TYPE_ACK int = iota
-	TYPE_PING
-	TYPE_PONG
+	TYPE_ACK        int = 0
+	TYPE_NEW_DEVICE int = 1
 )
 
-type Request struct {
+/*
+	Packets will be sent back-and-forth during the invokation-process
+*/
+type Packet struct {
 	Type int
+	Data string
 }
 
-type Answer struct {
+type PacketHandler func(*string)
+
+type Handler struct {
 	Type int
-	// TODO: add some answer-string-byte-stuff
+	Fn   PacketHandler
 }
+
+var handlers []*Handler
+var handlersMutex *sync.Mutex
 
 // Initialize the invoker backend
 func Init() {
@@ -38,12 +48,28 @@ func Init() {
 
 	Log.Info("initialising ..")
 	go listener()
+
+	// Make sure 'handlers' is not null
+	handlersMutex = &sync.Mutex{}
+	handlers = make([]*Handler, 0)
+}
+
+func RegisterHandler(Type int, fn PacketHandler) {
+	handler := &Handler{
+		Type: Type,
+		Fn:   fn,
+	}
+
+	handlersMutex.Lock()
+	defer handlersMutex.Unlock()
+
+	handlers = append(handlers, handler)
 }
 
 /*
 	Sends a request to the backend daemon
 */
-func SendRequest(Type int) {
+func SendPacket(Type int, data bytes.Buffer) {
 	conn, err := net.Dial("tcp", fmt.Sprintf("localhost:%s", PORT))
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -56,11 +82,12 @@ func SendRequest(Type int) {
 
 	defer conn.Close()
 
-	r := &Request{
+	r := Packet{
 		Type: Type,
+		Data: data.String(),
 	}
 
-	sendRequest(r, conn)
+	sendPacket(r, conn)
 }
 
 func listener() {
@@ -81,46 +108,54 @@ func listener() {
 			continue
 		}
 
-		go handleRequest(conn)
+		go handlePacket(conn)
 	}
 }
 
-func handleRequest(conn net.Conn) {
-	p := recvRequest(conn)
+func handlePacket(conn net.Conn) {
+	p := recvPacket(conn)
 
-	// TODO: add some sophisticated way to handle this
-	switch p.Type {
-	case TYPE_PING:
-		Log.Info("ping")
-	case TYPE_PONG:
-		Log.Info("pong")
+	// We don't want any changes right now!
+	handlersMutex.Lock()
+	defer handlersMutex.Unlock()
+
+	handled := false
+	for _, handler := range handlers {
+		if handler.Type == p.Type {
+			// Twice?
+			if handled {
+				Log.WithFields(log.Fields{
+					"type": p.Type,
+				}).Warn("packet has two handlers")
+			}
+
+			handler.Fn(&p.Data)
+			handled = true
+		} else {
+			Log.WithFields(log.Fields{
+				"type": handler.Type,
+			}).Warn("ignored handler")
+		}
+	}
+
+	// Unhandled packet?!
+	if !handled {
+		Log.WithFields(log.Fields{
+			"type": p.Type,
+		}).Warn("unhandled packet")
 	}
 }
 
-func sendRequest(r *Request, conn net.Conn) {
+func sendPacket(r Packet, conn net.Conn) {
 	encoder := gob.NewEncoder(conn)
-	encoder.Encode(*r)
+	encoder.Encode(r)
 }
 
-func recvRequest(conn net.Conn) *Request {
+func recvPacket(conn net.Conn) *Packet {
 	dec := gob.NewDecoder(conn)
 
-	r := &Request{}
-	dec.Decode(r)
+	var r Packet
+	dec.Decode(&r)
 
-	return r
-}
-
-func sendAnswer(a *Answer, conn net.Conn) {
-	encoder := gob.NewEncoder(conn)
-	encoder.Encode(*a)
-}
-
-func recvAnswer(conn net.Conn) *Answer {
-	dec := gob.NewDecoder(conn)
-
-	a := &Answer{}
-	dec.Decode(a)
-
-	return a
+	return &r
 }
