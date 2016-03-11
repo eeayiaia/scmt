@@ -23,7 +23,7 @@ data_source="data_source \"${2-my cluster}\" localhost\n"
 
 check_root
 
-apt-get install ganglia-monitor ganglia-monitor-python gmetad
+apt-get install apache2 ganglia-monitor ganglia-monitor-python gmetad
 
 
 INSTALL_SUCCESS=$?
@@ -34,5 +34,7 @@ if [[ $INSTALL_SUCCESS != 0 ]]; then
 fi
 
 python helpscript/regex.py "$cluster_attr" "$udp_send_channel_attr" "$data_source"
+
+ln -S /etc/ganglia-webfrontend/apache.conf /etc/apache2/conf-enabled/ganglia.conf
 
 service ganglia-monitor restart
