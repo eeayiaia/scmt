@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # Get script directory
 DIR="${BASH_SOURCE%/*}"
