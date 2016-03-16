@@ -23,7 +23,6 @@ with open('/etc/ganglia/gmond.conf', 'r+') as f:
   f.seek(0)
   data = replace("cluster", data, sys.argv[1])
   data = replace("udp\_send\_channel", data, sys.argv[2])
-  print data
   f.write(data)
   f.truncate()
   f.close()

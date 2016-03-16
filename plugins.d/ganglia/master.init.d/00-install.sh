@@ -7,10 +7,10 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/../../.script-utils/installer-utils.sh"
 
 cluster_attr="
-  name = ${2-my cluster}
-  owner = ${3-unspecified}
-  latlong = ${4-unspecified}
-  url = ${5-unspecified}
+  name = ${1-my cluster}
+  owner = ${2-unspecified}
+  latlong = ${3-unspecified}
+  url = ${4-unspecified}
 "
 
 udp_send_channel_attr="
@@ -19,11 +19,11 @@ udp_send_channel_attr="
   ttl = 1
 "
 
-data_source="data_source \"${2-my cluster}\" localhost\n"
+data_source="data_source \"${1-my cluster}\" localhost\n"
 
 check_root
 
-apt-get install apache2 rrdtool ganglia-monitor ganglia-monitor-python gmetad
+apt-get install -y apache2 rrdtool ganglia-monitor ganglia-monitor-python gmetad ganglia-webfrontend    
 
 
 INSTALL_SUCCESS=$?
