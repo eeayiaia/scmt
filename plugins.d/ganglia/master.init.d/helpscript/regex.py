@@ -2,6 +2,8 @@
 
 import re,sys
 
+print "Python regex replace called."
+
 #Replaces section in config file of style:
 #sectionName { 
 #    whatever
@@ -20,19 +22,21 @@ if len(sys.argv) != 4:
   exit(1)
 
 with open('/etc/ganglia/gmond.conf', 'r+') as f:
+  print "Editing gmond.conf..."
   data=f.read()
   f.seek(0)
   data = replace("cluster", data, sys.argv[1])
   data = replace("udp\_send\_channel", data, sys.argv[2])
-  print data
+  #print data
   f.write(data)
   f.truncate()
   f.close()
 
 with open('/etc/ganglia/gmetad.conf', 'r+') as f:
+  print "Editing gmetad.conf..."
   data=f.read()
   f.seek(0)
-  data = re.sub("data\_source \"my cluster\" localhost\n", sys.argv[3], data)
+  #data = re.sub("data\_source \"my cluster\" localhost\n", sys.argv[3], data)
   #print data
   f.write(data)
   f.truncate()
