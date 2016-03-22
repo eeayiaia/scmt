@@ -27,8 +27,10 @@ function backup_file(){
 	fi
 
 	if [[ -d $BACKUP_FILE ]]; then
+		echo "Backing up directory $BACKUP_FILE to $BACKUP_OUTPUT..."
 		cp -r $BACKUP_FILE $BACKUP_OUTPUT
 	elif [[ -f $BACKUP_FILE ]]; then
+		echo "Backing up file $BACKUP_FILE to $BACKUP_OUTPUT..."
 		cp $BACKUP_FILE $BACKUP_OUTPUT
 	else
 		echo "Cannot backup $BACKUP_FILE: path is not file or directory" 1>&2
