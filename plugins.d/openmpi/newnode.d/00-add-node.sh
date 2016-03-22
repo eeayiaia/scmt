@@ -6,7 +6,7 @@ NODE_NAME=$2
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh"
+. "$DIR/../../.script-utils/installer-utils.sh" || exit 1
 
 check_root
 

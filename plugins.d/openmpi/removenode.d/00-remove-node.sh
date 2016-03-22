@@ -6,7 +6,7 @@ NODE_NAME=$2
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh"
+. "$DIR/../../.script-utils/installer-utils.sh" || exit 1
 
 check_root
 
@@ -17,7 +17,7 @@ OPENMPI_HOSTFILE="/home/mpiuser/openmpi-hostfile"
 
 if [[ ! -f $OPENMPI_HOSTFILE ]]; then
 	echo "Error: '$OPENMPI_HOSTFILE' does not exist." 1&>2
-	exit 1
+	exit 2
 else
 	backup_file $OPENMPI_HOSTFILE
 fi
