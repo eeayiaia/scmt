@@ -5,8 +5,22 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"strings"
     log "github.com/Sirupsen/logrus"
-    "superk/devices"
+    "sync"
 )
+
+type Slave struct {
+	Hostname        string
+	HardwareAddress string
+	IpAddress       string
+	Port	string
+	UserName string
+	Password string
+
+	lock *sync.Mutex // Lock before changing ..
+
+	pingerControl chan bool // Pinger control, send a false in order to stop
+	Connected     bool
+}
 
 
 //User:password@/database
@@ -23,7 +37,7 @@ func connectDB() *sql.DB{
 	
 }
 
-func AddDevice(device devices.Slave) {
+func AddDevice(device Slave) {
 	db := connectDB()
 	if (db == nil){
 		return
@@ -38,7 +52,7 @@ func AddDevice(device devices.Slave) {
 		return
 	}
 
-	result, err := stmt.Exec(strings.Replace(device.HardwareAddress , ":", "", -1), device.IpAddress, device.Port, device.Hostname, device.UserName, device.Password)
+	_, err = stmt.Exec(strings.Replace(device.HardwareAddress , ":", "", -1), device.IpAddress, device.Port, device.Hostname, device.UserName, device.Password)
 	if(err != nil){
 		Log.WithFields(log.Fields{
 			"error": err,
@@ -48,7 +62,7 @@ func AddDevice(device devices.Slave) {
 	Log.WithFields(log.Fields{
 		"mac": device.HardwareAddress,
 	}).Info("added device")
-	result.Close()
+	
 }
 
 func DeleteDevice(HWAddr string) {
@@ -90,14 +104,14 @@ func DeleteDevice(HWAddr string) {
 	}
 }
 
-func GetDeviceInfo(HWaddr string) *devices.Slave {
+func GetDevice(HWaddr string) *Slave {
 	db := connectDB()
 	if(db == nil){
 		return nil
 	}
 	defer db.Close()
 
-	stmt, err := db.Prepare("SELECT hname, INET_NTOA(ip), port, username, password FROM devices WHERE HWaddr=?")
+	stmt, err := db.Prepare("SELECT HWaddr, hname, INET_NTOA(ip), port, username, password FROM devices WHERE HWaddr=?")
 	if(err != nil){
 		Log.WithFields(log.Fields{
 			"error": err,
@@ -105,8 +119,8 @@ func GetDeviceInfo(HWaddr string) *devices.Slave {
 		return nil
 	}
 
-	var device devices.Slave
-	err = stmt.QueryRow(strings.Replace(HWaddr, ":", "", -1)).Scan(&device.Hostname, &device.IpAddress, &device.Port, &device.UserName, &device.Password)
+	var device Slave
+	err = stmt.QueryRow(strings.Replace(HWaddr, ":", "", -1)).Scan(&device.HardwareAddress, &device.Hostname, &device.IpAddress, &device.Port, &device.UserName, &device.Password)
 	switch {
 	case err == sql.ErrNoRows:
 		Log.WithFields(log.Fields{
@@ -126,14 +140,14 @@ func GetDeviceInfo(HWaddr string) *devices.Slave {
 	}
 }
 
-func GetAllDevices() []*devices.Slave{
+func GetAllDevices() []*Slave{
     db := connectDB()
 	if(db == nil){
 		return nil
 	}
 	defer db.Close()
     
-    rows, err := db.Query("SELECT hname, INET_NTOA(ip), port, username, password FROM devices")
+    rows, err := db.Query("SELECT HWaddr, hname, INET_NTOA(ip), port, username, password FROM devices")
     if(err != nil){
     	Log.WithFields(log.Fields{
     		"error": err,
@@ -141,10 +155,10 @@ func GetAllDevices() []*devices.Slave{
     	return nil
     }
     defer rows.Close()
-    var ds []*devices.Slave
+    var ds []*Slave
     for rows.Next(){
-        device := &devices.Slave{}
-        rows.Scan(&device.Hostname, &device.IpAddress , &device.Port, &device.UserName, &device.Password)
+        device := &Slave{}
+        rows.Scan(&device.HardwareAddress, &device.Hostname, &device.IpAddress , &device.Port, &device.UserName, &device.Password)
         ds = append(ds, device)
     }
    	Log.Info("Returned all devices in database")
@@ -155,3 +169,4 @@ func GetAllDevices() []*devices.Slave{
 func insertColon(s string) string {
 	return strings.Join([]string{s[0:2], s[2:4], s[4:6], s[6:8], s[8:10], s[10:12]}, ":")
 }
+	
