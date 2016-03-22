@@ -42,6 +42,21 @@ function backup_file(){
 # Parameter 2: password
 # Parameter 3: uid
 function create_user(){
+	if [[ ! $1 ]]; then
+		echo "Failed to create user: no username was provided."
+		exit 1;
+	fi
+
+	if [[ ! $2 ]]; then
+		echo "Failed to create user: no password was provided."
+		exit 1;
+	fi
+
+	if [[ ! $3 ]]; then
+		echo "Failed to create user: no UID was provided."
+		exit 1;
+	fi
+
 	echo "Creating user '$1' with uid '$3'"
 	adduser $1 --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password --uid $3
 	echo "$1:$2" | sudo chpasswd
