@@ -13,20 +13,23 @@ function check_root(){
 
 # Backup file/directory with timestamp
 # Parameter 1: File/directory to backup
+# Output: BACKUP_OUTPUT will contain path to backup file/directory
 function backup_file(){
 	BACKUP_FOLDER=~/.scmt-backup
 	DATE_STAMP=$(date "+%b_%d_%Y_%H:%M:%S")
 	BACKUP_FILE=$1
 	BACKUP_FILE_NAME=$(basename $BACKUP_FILE)
 
+	BACKUP_OUTPUT=$BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
+
 	if [[ ! -d $BACKUP_FOLDER ]]; then
 		mkdir $BACKUP_FOLDER
 	fi
 
 	if [[ -d $BACKUP_FILE ]]; then
-		cp -r $BACKUP_FILE $BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
+		cp -r $BACKUP_FILE $BACKUP_OUTPUT
 	elif [[ -f $BACKUP_FILE ]]; then
-		cp $BACKUP_FILE $BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
+		cp $BACKUP_FILE $BACKUP_OUTPUT
 	else
 		echo "Cannot backup $BACKUP_FILE: path is not file or directory" 1>&2
 	fi
