@@ -1,12 +1,16 @@
 #!/bin/bash
 
+#Note: Parameter 1 is send interval.
+#If not given $send_metadata_interval default value is used.
+
 # Get script directory
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 . "$DIR/../../.script-utils/installer-utils.sh"
 
-send_metadata_interval=30
+#Default send interval is 5 minutes
+send_metadata_interval=${1-300}
 
 globals_attr="
   daemonize = yes
@@ -30,10 +34,10 @@ globals_attr="
 "
 
 cluster_attr="
-  name = ${1-my cluster}
-  owner = ${2-unspecified}
-  latlong = ${3-unspecified}
-  url = ${4-unspecified}
+  name = my cluster
+  owner = unspecified
+  latlong = unspecified
+  url = unspecified
 "
 #Assumes accessible them ip for eth0 is accessible for master.
 #Change to localhost possible?
@@ -65,6 +69,9 @@ if [[ $INSTALL_SUCCESS != 0 ]]; then
     exit 1
 fi
 
+#Resolves library include problems for ganglia
+ln -s /usr/lib/ganglia/* /usr/lib/
+
 python helpscript/regex.py "gmond" "globals" "$globals_attr"
 python helpscript/regex.py "gmond" "cluster" "$cluster_attr"
 python helpscript/regex.py "gmond" "udp_send_channel" "$udp_send_channel"
@@ -74,4 +81,6 @@ python helpscript/regex.py "gmetad" "$data_source"
 
 ln -s -f /etc/ganglia-webfrontend/apache.conf /etc/apache2/conf-enabled/ganglia.conf
 
-service ganglia-monitor apache2 gmetad restart
+service ganglia-monitor restart
+service apache2 restart
+service gmetad restart
