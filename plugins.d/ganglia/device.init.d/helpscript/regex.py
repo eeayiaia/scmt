@@ -3,6 +3,7 @@
 import re,sys
 
 #Replaces section in config file of style:
+#sudo ln -s /usr/lib/ganglia/* /usr/lib/
 #sectionName { 
 #    whatever
 #     ....
