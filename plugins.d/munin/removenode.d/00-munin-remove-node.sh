@@ -17,11 +17,3 @@ if [ -z $IP_ADDRESS ]; then
 fi
 
 python helpscript/removenode.py "$IP_ADDRESS"
-
-#format what to add in the conf file
-ADD_TO_CONF="[$NODE_NAME]
-	address $IP_ADDRESS
-	use_node_name yes"
-
-#write to conf file
-echo "$ADD_TO_CONF" >> /etc/munin/munin.conf
