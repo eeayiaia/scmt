@@ -6,18 +6,44 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 . "$DIR/../../.script-utils/installer-utils.sh"
 
-cluster_attr="
-  name = ${2-my cluster}
-  owner = ${3-unspecified}
-  latlong = ${4-unspecified}
-  url = ${5-unspecified}
+#Default send interval is 5 minutes
+send_metadata_interval=${1-300}
+
+globals_attr="
+  daemonize = yes
+  setuid = yes
+  user = nobody
+  debug_level = 0
+  max_udp_msg_len = 1472
+  mute = no
+  deaf = yes
+  allow_extra_data = yes
+  host_dmax = 86400 /*secs. Expires (removes from web interface) hosts in 1 day$
+  host_tmax = 20 /*secs */
+  cleanup_threshold = 300 /*secs */
+  gexec = no
+  # By default gmond will use reverse DNS resolution when displaying your hostn$
+  # Uncommeting following value will override that value.
+  # override_hostname = \"mywebserver.domain.com\"
+  # If you are not using multicast this value should be set to something other $
+  # Otherwise if you restart aggregator gmond you will get empty graphs. 60 sec$
+  send_metadata_interval = $send_metadata_interval /*secs */
 "
 
+cluster_attr="
+  name = my cluster
+  owner = unspecified
+  latlong = unspecified
+  url = unspecified
+"
+#Assumes accessible them ip for eth0 is accessible for master.
+#Change to localhost possible?
 udp_send_channel_attr="
   host =  $(awk '/^[[:space:]]*($|#)/{next} /master/{print $1; exit}' /etc/hosts)
   port = 8649
   ttl = 1
 "
+
 
 check_root
 
@@ -31,8 +57,10 @@ if [[ $INSTALL_SUCCESS != 0 ]]; then
 fi
 
 
-python helpscript/regex.py "$cluster_attr" "$udp_send_channel_attr"
+ln -s /usr/lib/ganglia/* /usr/lib/
+
+python helpscript/regex.py "gmond" "globals" "$globals_attr"
+python helpscript/regex.py "gmond" "cluster" "$cluster_attr"
+python helpscript/regex.py "gmond" "udp_send_channel" "$udp_send_channel"
 
 service ganglia-monitor restart
-
-#sed -i 's/clustr{/new-word/g' /etc/ganglia/gmond.conf
