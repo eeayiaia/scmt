@@ -7,6 +7,6 @@ if [[ $EUID -ne 0 ]]; then
 	exit 100
 fi
 
-apt-get install -y munin-node
+apt-get install -y --force-yes munin-node
 
 echo "cidr_allow $master_IP/32" >> /etc/munin/munin-node.conf
