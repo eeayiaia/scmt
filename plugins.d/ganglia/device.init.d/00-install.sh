@@ -31,15 +31,14 @@ globals_attr="
 "
 
 cluster_attr="
-  name = my cluster
+  name = \"my cluster\"
   owner = unspecified
   latlong = unspecified
   url = unspecified
 "
-#Assumes accessible them ip for eth0 is accessible for master.
-#Change to localhost possible?
+#Assumes master hostname is in /etc/hosts
 udp_send_channel_attr="
-  host =  $(awk '/^[[:space:]]*($|#)/{next} /master/{print $1; exit}' /etc/hosts)
+  host = $(awk '/^[[:space:]]*($|#)/{next} /master/{print $1; exit}' /etc/hosts)
   port = 8649
   ttl = 1
 "
@@ -47,7 +46,7 @@ udp_send_channel_attr="
 
 check_root
 
-apt-get install -y ganglia-monitor
+apt-get install -y --force-yes ganglia-monitor
 
 INSTALL_SUCCESS=$?
 
@@ -61,6 +60,6 @@ ln -s /usr/lib/ganglia/* /usr/lib/
 
 python helpscript/regex.py "gmond" "globals" "$globals_attr"
 python helpscript/regex.py "gmond" "cluster" "$cluster_attr"
-python helpscript/regex.py "gmond" "udp_send_channel" "$udp_send_channel"
+python helpscript/regex.py "gmond" "udp_send_channel" "$udp_send_channel_attr"
 
 service ganglia-monitor restart
