@@ -59,8 +59,22 @@ data_source="data_source \"${1-my cluster}\" localhost\n"
 
 check_root
 
-apt-get install -y apache2 rrdtool ganglia-monitor ganglia-monitor-python gmetad ganglia-webfrontend    
+apt-get install debconf-utils
 
+apt-get install -y apache2 rrdtool ganglia-monitor ganglia-monitor-python gmetad
+
+INSTALL_SUCCESS=$?
+
+if [[ $INSTALL_SUCCESS != 0 ]]; then
+    echo "Failed to install ganglia master." >&2
+    exit 1
+fi
+
+debconf-set-selections <<< "ganglia-webfrontend ganglia-webfrontend/restart   boolean true"
+debconf-set-selections <<< "ganglia-webfrontend ganglia-webfrontend/webserver boolean false"
+
+#Install ganglia-webfrontend without interactive choices
+DEBIAN_FRONTEND=noninteractive aptitude install -y -q ganglia-webfrontend
 
 INSTALL_SUCCESS=$?
 
