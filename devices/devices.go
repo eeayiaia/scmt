@@ -6,8 +6,8 @@ package devices
 */
 
 import (
+	"github.com/eeayiaia/scmt/database"
 	"strings"
-	"superk/database"
 	"sync"
 
 	"errors"

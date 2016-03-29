@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"superk/database"
-	"superk/devices"
-	"superk/invoker"
+	"github.com/eeayiaia/scmt/database"
+	"github.com/eeayiaia/scmt/devices"
+	"github.com/eeayiaia/scmt/invoker"
 
 	"path/filepath"
 	"strings"

@@ -3,7 +3,7 @@ package devices
 import (
 	"bytes"
 	log "github.com/Sirupsen/logrus"
-	"superk/invoker"
+	"github.com/eeayiaia/scmt/invoker"
 )
 
 func RegisterInvokerHandlers() {

@@ -6,11 +6,11 @@ package devices
 
 import (
 	"fmt"
+	"github.com/eeayiaia/scmt/database"
+	"github.com/eeayiaia/scmt/heartbeat"
 	"path"
 	"path/filepath"
 	"strings"
-	"superk/database"
-	"superk/heartbeat"
 	"sync"
 
 	"database/sql"
