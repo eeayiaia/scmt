@@ -208,3 +208,65 @@ func (slave *Slave) Load(HWaddr string) {
 		break
 	}
 }
+
+func (slave *Slave) RunInitScripts() error {
+	// Setup and copy device init scripts
+	ch := slave.RunInShellAsync("mkdir -p $HOME/device.init.d/", false)
+	Log.Info(<-ch)
+
+	// Find all device initialisation scripts
+	files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
+	if err != nil {
+		Log.Fatal("Could not get device initialisation scripts ..", err)
+		return err
+	}
+
+	for _, f := range files {
+		filename := path.Base(f)
+		dest := fmt.Sprintf("$HOME/device.init.d/%s", filename)
+
+		ch := slave.CopyFile(f, dest)
+		result := <-ch
+
+		if result != nil {
+			Log.WithFields(log.Fields{
+				"filename": filename,
+				"dest":     dest,
+				"result":   result,
+			}).Error("could not copy")
+		}
+	}
+
+	return nil
+}
+
+func (slave *Slave) RunNewNodeScripts() error {
+	// Setup and copy device init scripts
+	ch := slave.RunInShellAsync("mkdir -p $HOME/device.newnode.d/", false)
+	Log.Info(<-ch)
+
+	// Find all device initialisation scripts
+	files, err := filepath.Glob("./scripts.d/device.newnode.d/*.sh")
+	if err != nil {
+		Log.Fatal("Could not get device initialisation scripts ..", err)
+		return err
+	}
+
+	for _, f := range files {
+		filename := path.Base(f)
+		dest := fmt.Sprintf("$HOME/device.newnode.d/%s", filename)
+
+		ch := slave.CopyFile(f, dest)
+		result := <-ch
+
+		if result != nil {
+			Log.WithFields(log.Fields{
+				"filename": filename,
+				"dest":     dest,
+				"result":   result,
+			}).Error("could not copy")
+		}
+	}
+
+	return nil
+}
