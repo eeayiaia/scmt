@@ -184,6 +184,8 @@ func handleDisconnect(address string) {
 
 			slave.pingerControl <- false // disable pinging service for this device
 			slave.Connected = false
+
+			slave.RunRemoveNodeScripts()
 		}
 	}
 }
