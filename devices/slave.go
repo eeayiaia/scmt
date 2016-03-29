@@ -87,8 +87,8 @@ func (s *Slave) StartPinger() {
 }
 
 func (slave *Slave) Store() {
-	slave.Lock()
-	defer slave.Unlock()
+	slave.lock.Lock()
+	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
 	if err != nil {
@@ -122,8 +122,8 @@ func (slave *Slave) Store() {
 }
 
 func (slave *Slave) Delete() {
-	slave.Lock()
-	defer slave.Unlock()
+	slave.lock.Lock()
+	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
 	if err != nil {
@@ -169,8 +169,8 @@ func (slave *Slave) Delete() {
 }
 
 func (slave *Slave) Load(HWaddr string) {
-	slave.Lock()
-	defer slave.Unlock()
+	slave.lock.Lock()
+	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
 	if err != nil {

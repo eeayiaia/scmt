@@ -10,6 +10,8 @@ import (
 	"superk/database"
 	"sync"
 
+	"errors"
+
 	"fmt"
 	"path"
 	"path/filepath"
@@ -36,7 +38,17 @@ func Init() {
 	Log.Info("Initialising ..")
 
 	devicesMutex = &sync.Mutex{}
-	devices = make([]*Slave, 0)
+
+	// Load previously stored devices, but unconnected
+	var err error
+	devices, err = getAllStoredDevices()
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Error("Could not load stored devices, continuing anyways!")
+
+		devices = make([]*Slave, 0)
+	}
 
 	RegisterInvokerHandlers()
 
@@ -57,19 +69,46 @@ func AddDevice(device *Slave) {
 	devicesMutex.Unlock()
 }
 
+func GetDevice(hardwareAddress string) (*Slave, error) {
+	devicesMutex.Lock()
+	defer devicesMutex.Unlock()
+
+	for _, slave := range devices {
+		if strings.Compare(slave.HardwareAddress, hardwareAddress) == 0 {
+			return slave, nil
+		}
+	}
+
+	return nil, errors.New("Could not find device " + hardwareAddress)
+}
+
 /*
 	Register a new device
 		NOTE: this is different from 'adding' due to the fact that
 		we create the device itself
 */
 func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
-	slave := &Slave{
-		HardwareAddress: hardwareAddress,
-		IpAddress:       ipAddress,
-		Connected:       true,
+	var slave *Slave
 
-		lock: &sync.Mutex{},
+	slave, err := GetDevice(hardwareAddress)
+	if err != nil {
+		slave = &Slave{
+			HardwareAddress: hardwareAddress,
+			IpAddress:       ipAddress,
+		}
+
+		Log.WithFields(log.Fields{
+			"mac": hardwareAddress,
+			"ip":  ipAddress,
+		}).Info("new device connected")
+
+		err = runInitScripts(slave) // only run init-scripts on a completely new device
+		if err != nil {
+			return nil // abort mission, I say!
+		}
 	}
+	AddDevice(slave)
+	runNewNodeScripts(slave)
 
 	// TODO: do stuff like set a static ip-address and
 	//			 prepare the device
@@ -79,8 +118,10 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 
 	// TODO: test username & password from file
 
-	AddDevice(slave)
+	return slave
+}
 
+func runInitScripts(slave *Slave) error {
 	// Setup and copy device init scripts
 	ch := slave.RunInShellAsync("mkdir -p $HOME/device.init.d/", false)
 	Log.Info(<-ch)
@@ -89,29 +130,57 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
 	if err != nil {
 		Log.Fatal("Could not get device initialisation scripts ..", err)
-		return nil
+		return err
 	}
 
-	// Copy all files asyncronously
 	for _, f := range files {
-		go func(f string) {
-			filename := path.Base(f)
-			dest := fmt.Sprintf("$HOME/device.init.d/%s", filename)
+		filename := path.Base(f)
+		dest := fmt.Sprintf("$HOME/device.init.d/%s", filename)
 
-			ch := slave.CopyFile(f, dest)
-			result := <-ch
+		ch := slave.CopyFile(f, dest)
+		result := <-ch
 
-			if result != nil {
-				Log.WithFields(log.Fields{
-					"filename": filename,
-					"dest":     dest,
-					"result":   result,
-				}).Error("could not copy")
-			}
-		}(f)
+		if result != nil {
+			Log.WithFields(log.Fields{
+				"filename": filename,
+				"dest":     dest,
+				"result":   result,
+			}).Error("could not copy")
+		}
 	}
 
-	return slave
+	return nil
+}
+
+func runNewNodeScripts(slave *Slave) error {
+	// Setup and copy device init scripts
+	ch := slave.RunInShellAsync("mkdir -p $HOME/device.newnode.d/", false)
+	Log.Info(<-ch)
+
+	// Find all device initialisation scripts
+	files, err := filepath.Glob("./scripts.d/device.newnode.d/*.sh")
+	if err != nil {
+		Log.Fatal("Could not get device initialisation scripts ..", err)
+		return err
+	}
+
+	for _, f := range files {
+		filename := path.Base(f)
+		dest := fmt.Sprintf("$HOME/device.newnode.d/%s", filename)
+
+		ch := slave.CopyFile(f, dest)
+		result := <-ch
+
+		if result != nil {
+			Log.WithFields(log.Fields{
+				"filename": filename,
+				"dest":     dest,
+				"result":   result,
+			}).Error("could not copy")
+		}
+	}
+
+	return nil
 }
 
 // Return the count of currently connected devices
