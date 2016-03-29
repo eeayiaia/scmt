@@ -14,7 +14,7 @@ There is two ways to setup the repository using golang. Either by [cloning the r
 #### Cloning into the environment
 ```bash
 $> cd $GOPATH
-$> git clone git@github.com:eeayiaia/scmt.git src/scmt
+$> git clone git@github.com:eeayiaia/scmt.git src/github.com/eeyiaia/scmt
 ```
 
 go to [building](#Building) in order to build the project.
@@ -29,22 +29,23 @@ $HOME/git
 The repository will be placed in `$HOME/git/scmt`.
 
 ```bash
-$> ln -sf $HOME/git/scmt $GOPATH/src/scmt
+$> ln -sf $HOME/git/scmt $GOPATH/src/github.com/eeyiaia/scmt
 ```
 
-will create a hard link from `$HOME/git/scmt` to `$GOPATH/src/scmt`.
+will create a hard link from `$HOME/git/scmt` to `$GOPATH/src/github.com/eeyiaia/scmt`.
 
 ### Building
 You can build the code from any path, because the golang compiler will always try to look for your code in your `$GOPATH`. 
 
 ```bash
-go build scmt
+$> cd $HOME/github.com/eeyiaia/scmt   # or $HOME/git/scmt if you prefer
+$> go build
 ```
 
 will produce a binary in your current working directory!
 
 ```bash
-go install scmt
+go install github.com/eeayiaia/scmt
 ```
 
 will produce a binary in your `$GOPATH/bin` directory.
