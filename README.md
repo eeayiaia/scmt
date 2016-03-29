@@ -1,5 +1,7 @@
 # SCMT
 
+[![Build Status](https://travis-ci.org/eeayiaia/scmt.svg?branch=master)](https://travis-ci.org/eeayiaia/scmt)
+
 This is the git repository for the bachelor thesis "Design and development of single-board supercomputers" given at Chalmers University of Technology 2016
 
 ## Setting up golang env
