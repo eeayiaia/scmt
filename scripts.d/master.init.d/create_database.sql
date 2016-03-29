@@ -1,6 +1,5 @@
-CREATE DATABASE cluster;
+CREATE DATABASE IF NOT EXISTS cluster;
 USE cluster;
-CREATE TABLE devices (hwaddr CHAR(12) KEY, ip INT UNSIGNED NOT NULL, port INT UNSIGNED, hname varchar(30) NOT NULL, username VARCHAR(20) NOT NULL, password VARCHAR(20)NOT NULL);
-CREATE USER 'master'@'localhost' IDENTIFIED BY 'badpassword';
-GRANT ALL PRIVILEGES ON cluster . * TO master@localhost;
+CREATE TABLE IF NOT EXISTS devices (hwaddr CHAR(12) KEY, ip INT UNSIGNED NOT NULL, port INT UNSIGNED, hname varchar(30) NOT NULL, username VARCHAR(20) NOT NULL, password VARCHAR(20)NOT NULL);
+GRANT ALL PRIVILEGES ON cluster . * TO master@localhost IDENTIFIED BY 'badpassword';
 FLUSH PRIVILEGES;
