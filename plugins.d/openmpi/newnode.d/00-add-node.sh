@@ -23,5 +23,6 @@ else
 fi
 
 # TODO: number of slots should not be hardcoded
-echo "$NODE_NAME	slots=4" >> $OPENMPI_HOSTFILE
+NUM_PROCS=$(nproc)
+echo "$NODE_NAME	slots=$NUM_PROCS" >> $OPENMPI_HOSTFILE
 
