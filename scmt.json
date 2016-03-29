@@ -3,5 +3,7 @@
 
   "database": "cluster",
   "databaseuser": "master",
-  "databasepassword": "badpassword"
+  "databasepassword": "badpassword",
+
+  "pidfile": "self.pid"
 }
