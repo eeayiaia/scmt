@@ -12,10 +12,6 @@ import (
 
 	"errors"
 
-	"fmt"
-	"path"
-	"path/filepath"
-
 	log "github.com/Sirupsen/logrus"
 )
 

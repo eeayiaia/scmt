@@ -5,6 +5,9 @@ package devices
 */
 
 import (
+	"fmt"
+	"path"
+	"path/filepath"
 	"strings"
 	"superk/database"
 	"superk/heartbeat"

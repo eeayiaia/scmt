@@ -1,3 +1,7 @@
 {
-  "production": false
+  "production": false,
+
+  "database": "cluster",
+  "databaseuser": "master",
+  "databasepassword": "badpassword"
 }

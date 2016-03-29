@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"superk/database"
 	"superk/devices"
 	"superk/invoker"
 
@@ -43,6 +44,8 @@ func execScriptOnAll(slaves []*devices.Slave, script string) {
 func main() {
 	InitLogging()
 	InitConfiguration()
+
+	database.Init(Conf.Database, Conf.DatabaseUser, Conf.DatabasePassword)
 
 	invoker.Init()
 	devices.Init()

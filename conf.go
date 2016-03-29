@@ -15,9 +15,9 @@ import (
 type Configuration struct {
 	Production bool
 
-	/*Database         string
+	Database         string
 	DatabaseUser     string
-	DatabasePassword string*/
+	DatabasePassword string
 }
 
 const CONFIGURATIONPATH = "scmt.json"
