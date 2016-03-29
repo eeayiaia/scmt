@@ -87,6 +87,9 @@ func (s *Slave) StartPinger() {
 }
 
 func (slave *Slave) Store() {
+	slave.Lock()
+	defer slave.Unlock()
+
 	db, err := database.NewConnection()
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -119,6 +122,9 @@ func (slave *Slave) Store() {
 }
 
 func (slave *Slave) Delete() {
+	slave.Lock()
+	defer slave.Unlock()
+
 	db, err := database.NewConnection()
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -163,6 +169,9 @@ func (slave *Slave) Delete() {
 }
 
 func (slave *Slave) Load(HWaddr string) {
+	slave.Lock()
+	defer slave.Unlock()
+
 	db, err := database.NewConnection()
 	if err != nil {
 		Log.WithFields(log.Fields{
