@@ -7,7 +7,6 @@ package devices
 
 import (
 	"strings"
-	"superk/heartbeat"
 	"superk/database"
 	"sync"
 
@@ -17,21 +16,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 )
-
-// A Slave devices (connected to the master)
-type Slave struct {
-	Hostname        string
-	HardwareAddress string
-	IpAddress       string
-	Port	string
-	UserName string
-	Password string
-
-	lock *sync.Mutex // Lock before changing ..
-
-	pingerControl chan bool // Pinger control, send a false in order to stop
-	Connected     bool
-}
 
 var devices []*Slave
 var devicesMutex *sync.Mutex
@@ -86,7 +70,6 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 
 		lock: &sync.Mutex{},
 	}
-	database.AddDevice(slave)
 
 	// TODO: do stuff like set a static ip-address and
 	//			 prepare the device
@@ -137,60 +120,19 @@ func Count() int {
 }
 
 /*
-	Copies a file to a slave
+	Concurrently runs a query (bash) on all connected slaves
+		NOTE: this should *not* be used to run consecutive commands!
 */
-func (s *Slave) CopyFile(file string, destination string) chan error {
-	ch := make(chan error)
+func RunOnAllAsync(query string, sudo bool) []chan string {
+	var chs []chan string
+	devicesMutex.Lock()
+	defer devicesMutex.Unlock()
 
-	go func() {
-		rc, err := NewRemoteConnection(s)
-		if err != nil {
-			ch <- err
-		}
-
-		result := rc.CopyFile(file, destination)
-		ch <- result
-	}()
-
-	return ch
-}
-
-/*
-	Runs a command in a remote shell on a specific slave
-*/
-func (s *Slave) RunInShellAsync(query string, sudo bool) chan string {
-	ch := make(chan string)
-
-	go func() {
-		rc, err := NewRemoteConnection(s)
-		if err != nil {
-			ch <- "error: " + err.Error()
-		}
-
-		ch <- rc.RunInShell(query, sudo)
-	}()
-
-	return ch
-}
-
-/*
-   Runs the script on a slave asyncronously, delivering feedback
-   from the remote in ch
-*/
-func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
-	rc, err := NewRemoteConnection(s)
-	if err != nil {
-		return nil, err
+	for _, slave := range devices {
+		ch := slave.RunInShellAsync(query, sudo)
+		chs = append(chs, ch)
 	}
-
-	return rc.RunScript(scriptpath)
-}
-
-/*
-   Starts the pinger service for a device/slave
-*/
-func (s *Slave) StartPinger() {
-	s.pingerControl = heartbeat.Pinger(s.IpAddress, handleDisconnect)
+	return chs
 }
 
 /*
@@ -215,22 +157,6 @@ func RunScriptOnAllAsync(scriptpath string) []chan string {
 	return chs
 }
 
-/*
-	Concurrently runs a query (bash) on all connected slaves
-		NOTE: this should *not* be used to run consecutive commands!
-*/
-func RunOnAllAsync(query string, sudo bool) []chan string {
-	var chs []chan string
-	devicesMutex.Lock()
-	defer devicesMutex.Unlock()
-
-	for _, slave := range devices {
-		ch := slave.RunInShellAsync(query, sudo)
-		chs = append(chs, ch)
-	}
-	return chs
-}
-
 // Handle a disconnection of a device
 func handleDisconnect(address string) {
 	// Get the slave
@@ -252,4 +178,36 @@ func handleDisconnect(address string) {
 			slave.Connected = false
 		}
 	}
+}
+
+func getAllStoredDevices() ([]*Slave, error) {
+	db, err := database.NewConnection()
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Could not connect to database")
+		return nil, err
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT HWaddr, hname, INET_NTOA(ip), port, username, password FROM devices")
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Could not execute sql query")
+		return nil, err
+	}
+	defer rows.Close()
+
+	var ds []*Slave
+	for rows.Next() {
+		slave := &Slave{
+			Connected: false, // have no idea really ..
+			lock:      &sync.Mutex{},
+		}
+		rows.Scan(&slave.HardwareAddress, &slave.Hostname, &slave.IpAddress, &slave.Port, &slave.UserName, &slave.Password)
+		ds = append(ds, slave)
+	}
+
+	return ds, nil
 }
