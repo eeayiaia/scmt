@@ -25,6 +25,9 @@ ADD_TO_CONF="[$NODE_NAME]
 	address $IP_ADDRESS
 	use_node_name yes"
 
+#Backup config file
+backup_file /etc/munin/munin.conf
+
 #write to conf file
 echo "$ADD_TO_CONF" >> /etc/munin/munin.conf
 

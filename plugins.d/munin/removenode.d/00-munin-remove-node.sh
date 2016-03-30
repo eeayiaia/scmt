@@ -16,4 +16,7 @@ if [ -z $IP_ADDRESS ]; then
 	exit 2
 fi
 
+#Backup config file
+backup_file /etc/munin/munin.conf
+
 python helpscript/removenode.py "$IP_ADDRESS"

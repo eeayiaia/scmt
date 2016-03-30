@@ -31,6 +31,9 @@ apt-get install -y munin
 #Add symbol link in conf-enabled for munin apache config.
 ln -S /etc/munin/apache.conf /etc/apache2/conf-enabled/munin.conf
 
+#Backup config file
+backup_file /etc/munin/munin.conf
+
 #Set master node name
 sed -i 's/localhost\.localdomain/$MasterNodeName/g' /etc/munin/munin.conf
 

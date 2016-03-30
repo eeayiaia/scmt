@@ -9,6 +9,10 @@ fi
 
 apt-get install -y --force-yes munin-node
 
+
+#Backup config file
+backup_file /etc/munin/munin-node.conf
+
 echo "cidr_allow $master_IP/32" >> /etc/munin/munin-node.conf
 
 service munin-node restart
