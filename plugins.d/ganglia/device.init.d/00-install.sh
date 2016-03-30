@@ -58,6 +58,9 @@ fi
 
 ln -s /usr/lib/ganglia/* /usr/lib/
 
+#Backup config file
+backup_file /etc/ganglia/gmond.conf
+
 python helpscript/regex.py "gmond" "globals" "$globals_attr"
 python helpscript/regex.py "gmond" "cluster" "$cluster_attr"
 python helpscript/regex.py "gmond" "udp_send_channel" "$udp_send_channel_attr"

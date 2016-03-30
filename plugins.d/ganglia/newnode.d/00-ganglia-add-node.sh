@@ -10,4 +10,7 @@ check_root
 
 nodeIP=$1
 
+#Backup config file
+backup_file /etc/ganglia/gmetad.conf
+
 sed -i "/^data_source/ s/$/ $nodeIP/" /etc/ganglia/gmetad.conf

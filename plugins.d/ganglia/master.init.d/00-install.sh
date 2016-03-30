@@ -86,6 +86,11 @@ fi
 #Resolves library include problems for ganglia
 ln -s /usr/lib/ganglia/* /usr/lib/
 
+
+#Backup config files:
+backup_file /etc/ganglia/gmond.conf
+backup_file /etc/ganglia/gmetad.conf
+
 python helpscript/regex.py "gmond" "globals" "$globals_attr"
 python helpscript/regex.py "gmond" "cluster" "$cluster_attr"
 python helpscript/regex.py "gmond" "udp_send_channel" "$udp_send_channel"

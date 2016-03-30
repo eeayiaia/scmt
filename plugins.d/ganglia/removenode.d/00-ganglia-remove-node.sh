@@ -6,8 +6,13 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 . "$DIR/../../.script-utils/installer-utils.sh"
 
-#check_root
+check_root
 
 nodeIP=$1
+
+
+#Backup config file
+backup_file /etc/ganglia/gmetad.conf
+
 
 python helpscript/regex.py $nodeIP
