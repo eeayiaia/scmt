@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS devices (hwaddr CHAR(12) KEY, ip INT UNSIGNED NOT NUL
 CREATE TABLE IF NOT EXISTS plugins (
     name VARCHAR(30) PRIMARY KEY
 );
-CREATE TABLE IF NOT EXISTS installedOn (
+CREATE TABLE IF NOT EXISTS pluginsInstalledOn (
     hwaddr CHAR(12) NOT NULL,
     plugin VARCHAR(30) NOT NULL,
     FOREIGN KEY (hwaddr) REFERENCES devices(hwaddr),
