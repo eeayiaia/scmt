@@ -304,3 +304,51 @@ func (slave *Slave) RunRemoveNodeScripts() error {
 
 	return nil
 }
+
+/*func (slave *Slave) TransferPlugin(plugin string) {
+
+}*/
+
+/*func (slave *Slave) RunPluginInstaller(plugin string) error {
+
+	return nil
+}*/
+
+func(slave *Slave) PluginIsInstalled(pluginName string) (bool, error) {
+	slave.lock.Lock()
+	defer slave.lock.Unlock()
+
+	db, err := database.NewConnection()
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Could not connect to database")
+		return false, err
+	}
+	defer db.Close()
+
+	var hwaddr, plugin string
+
+	err = db.QueryRow("SELECT hwaddr, plugin FROM pluginsInstalledOn WHERE hwaddr=? AND plugin=?",
+		strings.Replace(slave.HardwareAddress, ":", "", -1), pluginName).Scan(&hwaddr, &plugin)
+
+	switch {
+	case err == sql.ErrNoRows:
+		Log.WithFields(log.Fields{
+			"MAC": slave.HardwareAddress,
+			"plugin" : pluginName,
+		}).Info("Not installed")
+		return false, nil
+	case err != nil:
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Could not execute sql query")
+		return false, err
+	default:
+		Log.WithFields(log.Fields{
+			"MAC": slave.HardwareAddress,
+			"plugin" : pluginName,
+		}).Info("Installed")
+		return true, nil
+	}
+}
