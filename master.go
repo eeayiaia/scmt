@@ -26,12 +26,6 @@ func InstallPlugin(pluginName string) error {
 
 func PluginInDB(pluginName string) (bool, error) {
     db, err := database.NewConnection()
-    if err != nil {
-        Log.WithFields(log.Fields{
-            "error": err,
-        }).Fatal("Could not connect to database")
-        return false, err
-    }
     defer db.Close()
 
     var nrOfRows int
@@ -109,12 +103,6 @@ func DisablePlugin(pluginName string) error {
 */
 func negatePluginDB(pluginName string) (bool, error) {
     db, err := database.NewConnection()
-    if err != nil {
-        Log.WithFields(log.Fields{
-            "error": err,
-        }).Fatal("Could not connect to database")
-        return false, err
-    }
     defer db.Close()
 
     stmt, err := db.Prepare("UPDATE plugins SET enabled=IF (enabled, 0, 1) WHERE name=(?)")
@@ -147,12 +135,6 @@ func negatePluginDB(pluginName string) (bool, error) {
 */
 func PluginIsInstalled(pluginName string) (bool,error) {
     db, err := database.NewConnection()
-    if err != nil {
-        Log.WithFields(log.Fields{
-            "error": err,
-        }).Fatal("Could not connect to database")
-        return false, err
-    }
     defer db.Close()
 
     var nrOfRows int
@@ -190,12 +172,6 @@ func PluginIsInstalled(pluginName string) (bool,error) {
 
 func PluginIsEnabled(pluginName string) (bool,error) {
     db, err := database.NewConnection()
-    if err != nil {
-        Log.WithFields(log.Fields{
-            "error": err,
-        }).Fatal("Could not connect to database")
-        return false, err
-    }
     defer db.Close()
 
     var nrOfRows int

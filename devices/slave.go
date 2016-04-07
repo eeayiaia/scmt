@@ -94,12 +94,6 @@ func (slave *Slave) Store() {
 	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
-	if err != nil {
-		Log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Could not connect to database")
-		return
-	}
 	defer db.Close()
 
 	//INET_ATON is to convert ip to int (array-TO-number)
@@ -129,12 +123,6 @@ func (slave *Slave) Delete() {
 	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
-	if err != nil {
-		Log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Could not connect to database")
-		return
-	}
 	defer db.Close()
 
 	stmt, err := db.Prepare("DELETE FROM devices WHERE hwaddr=?")
@@ -176,12 +164,6 @@ func (slave *Slave) Load(HWaddr string) {
 	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
-	if err != nil {
-		Log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Could not connect to database")
-		return
-	}
 	defer db.Close()
 
 	stmt, err := db.Prepare("SELECT HWaddr, hname, INET_NTOA(ip), port, username, password FROM devices WHERE HWaddr=?")
@@ -324,12 +306,6 @@ func(slave *Slave) PluginIsInstalled(pluginName string) (bool, error) {
 	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
-	if err != nil {
-		Log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Could not connect to database")
-		return false, err
-	}
 	defer db.Close()
 
 	var hwaddr, plugin string

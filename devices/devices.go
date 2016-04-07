@@ -188,12 +188,6 @@ func handleDisconnect(address string) {
 
 func getAllStoredDevices() ([]*Slave, error) {
 	db, err := database.NewConnection()
-	if err != nil {
-		Log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Could not connect to database")
-		return nil, err
-	}
 	defer db.Close()
 
 	rows, err := db.Query("SELECT HWaddr, hname, INET_NTOA(ip), port, username, password FROM devices")
