@@ -1,4 +1,4 @@
-package main
+package master
 
 import (
     //"fmt"
@@ -58,8 +58,31 @@ func PluginInDB(pluginName string) (bool, error) {
 }
 
 func EnablePlugin(pluginName string) error {
-    /*Enable plugin in database*/
-    return nil
+    if res,_ := PluginInDB(pluginName); !res {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Warn("Unavailable plugin in database.")
+        return errors.New("Unavailable plugin in database: " + pluginName)
+    }
+
+    if res, _ := PluginIsEnabled(pluginName); res {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Info("Plugin already enabled")
+        return nil
+    }
+
+    if _, err := negatePluginDB(pluginName); err!=nil {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Warn("Failed to enable plugin")
+        return errors.New("Failed to enable plugin: " + pluginName)
+    } else {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Info("Enabled plugin")
+        return nil
+    }
 }
 
 
@@ -71,19 +94,14 @@ func DisablePlugin(pluginName string) error {
         return errors.New("Unavailable plugin in database: " + pluginName)
     }
 
-
-    res, _ := PluginIsEnabled(pluginName)
-
-    if !res {
+    if res, _ := PluginIsEnabled(pluginName); !res {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
         }).Info("Plugin already disabled")
         return nil
     }
 
-    _, err := negatePluginDB(pluginName)
-
-    if err!=nil {
+    if _, err := negatePluginDB(pluginName); err!=nil {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
         }).Warn("Failed to disable plugin")
