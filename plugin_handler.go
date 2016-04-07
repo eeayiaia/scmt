@@ -18,6 +18,65 @@ func Init() {
 
 }
 
+/*
+    Todo: handle devices and master with plugin installed on.
+*/
+
+func RemovePlugin(pluginName string) error {
+    db, _ := database.NewConnection()
+    defer db.Close()
+
+    stmt, err := db.Prepare("DELETE FROM plugins WHERE name=(?)")
+    if err!=nil {
+        Log.WithFields(log.Fields{
+            "error": err,
+        }).Fatal("Could not prepare sql query")
+        return err
+    }
+
+    res, err := stmt.Exec(pluginName)
+    nrOfRows, _ := res.RowsAffected();
+    if err!=nil || nrOfRows != 1{
+        Log.WithFields(log.Fields{
+            "error": err,
+            "plugin": pluginName,
+        }).Warn("Could not remove plugin from database.")
+        return errors.New("Could not remove plugin from database:" + pluginName)
+    } else {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Info("Plugin removed from database")
+        return nil
+    }
+}
+
+func AddPlugin(pluginName string) error {
+    db, _ := database.NewConnection()
+    defer db.Close()
+
+    stmt, err := db.Prepare("INSERT INTO plugins (name) VALUES (?)")
+    if err!=nil {
+        Log.WithFields(log.Fields{
+            "error": err,
+        }).Fatal("Could not prepare sql query")
+        return err
+    }
+
+    _, err = stmt.Exec(pluginName)
+    if err!=nil {
+        Log.WithFields(log.Fields{
+            "error": err,
+            "plugin": pluginName,
+        }).Warn("Could not add plugin to database.")
+        return errors.New("Could not add plugin to database:" + pluginName)
+    } else {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Info("Plugin added to database")
+        return nil
+    }
+}
+
 func PluginInDB(pluginName string) (bool, error) {
     db, err := database.NewConnection()
     defer db.Close()

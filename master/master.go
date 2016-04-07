@@ -2,7 +2,8 @@ package master
 
 import (
     //"fmt"
-    "github.com/eeayiaia/scmt/database"
+    "github.com/eeayiaia/scmt/database" 
+    "errors"
     log "github.com/Sirupsen/logrus"
 )
 
@@ -16,6 +17,50 @@ func InstallPlugin(pluginName string) error {
     return nil
 }
 
+
+func SetPluginInstalled(pluginName string) error {
+    //Todo resolve dependency conflict
+    /*tf, _ := PluginInDB(pluginName)
+    if tf {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Warn("Plugin not available on master.")
+        return errors.New("Plugin not available on master:" + pluginName)
+    }*/
+
+    tf, _ := PluginIsInstalled(pluginName)
+    if tf {
+        Log.WithFields(log.Fields{
+            "plugin" : pluginName,
+        }).Warn("Plugin already set to installed on master")
+        return errors.New("Plugin already set to installed on master" + pluginName)
+    }
+
+    db, err := database.NewConnection()
+    defer db.Close()
+
+    stmt, err := db.Prepare("UPDATE plugins SET installedOnMaster=1 WHERE name=(?)")
+    if err!=nil {
+        Log.WithFields(log.Fields{
+            "error": err,
+        }).Fatal("Could not prepare sql query")
+        return err
+    }
+
+    _, err = stmt.Exec(pluginName)
+
+    if err!=nil {
+        Log.WithFields(log.Fields{
+            "error": err,
+        }).Fatal("Could execute sql query")
+        return err
+    }
+
+    Log.WithFields(log.Fields{
+            "plugin": pluginName,
+        }).Info("Plugin set to be installed on master")
+    return nil
+}
 /*
     Returns true if plugin is installed.
 */
@@ -35,19 +80,19 @@ func PluginIsInstalled(pluginName string) (bool,error) {
         }).Fatal("Could not execute sql query")
         return false, err
     case nrOfRows==1:
-        Log.WithFields(log.Fields{
+        /*Log.WithFields(log.Fields{
             "plugin" : pluginName,
-        }).Info("Installed on master")
+        }).Info("Installed on master")*/
         return true, nil
     case nrOfRows==0:
-        Log.WithFields(log.Fields{
+        /*Log.WithFields(log.Fields{
             "plugin" : pluginName,
-        }).Info("Not installed on master")
+        }).Info("Not installed on master")*/
         return false, nil
     default:
-        Log.WithFields(log.Fields{
+        /*Log.WithFields(log.Fields{
             "error": err,
-        }).Fatal("Unexpected result in sql query")
+        }).Fatal("Unexpected result in sql query")*/
         return false, err
     }
 }
