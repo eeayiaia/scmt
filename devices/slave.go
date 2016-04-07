@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"os"
 
 	"database/sql"
 	log "github.com/Sirupsen/logrus"
@@ -291,14 +292,51 @@ func (slave *Slave) RunRemoveNodeScripts() error {
 
 }*/
 
-/*func (slave *Slave) RunPluginInstaller(plugin string) error {
-
+func (slave *Slave) RunPluginInstaller(plugin string) error {
+	plugin = strings.ToLower(plugin)
+	isInstalled, err := slave.PluginIsInstalled(plugin)
+	if err != nil {
+		return err //TODO: Should I log this? its already logged in PluginIsInstalled..
+	}
+	if isInstalled {
+		return nil //TODO: Same here..with the logging
+	}
+	slave.InstallPlugin(plugin)
+	//TODO: add plugin to database
 	return nil
-}*/
+}
 
 
-func (slave *Slave) InstallPlugin(pluginName string) {
+func (slave *Slave) InstallPlugin(pluginName string) error{
+	pluginName = strings.ToLower(strings.Trim(pluginName, " "))
+	pluginDir := os.Getenv("PATH_TO_ROOT") + "/plugins.d/" + pluginName + "/device.init.d/" //TODO:replace path to root with actual project root?
+	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh") //get info from all files in plugin/device.init.d directory
 
+	if err != nil {
+		Log.WithFields(log.Fields{
+		"MAC": slave.HardwareAddress,
+		"plugin" : pluginName,
+		}).Error("Error in reading plugin directory")
+		return err
+	}
+
+	rc, err := NewRemoteConnection(slave)
+
+	if err != nil {
+		return err
+	}
+
+	for i := range scriptsToRun {
+		//TODO: is this how I run a script remotely on a node? does it wait until finished before return?
+		ch, err := rc.RunScript(scriptsToRun[i])
+		//...or is this how?
+		//rc.RunInShell(scriptsToRun[i], true)
+		if err != nil {
+			return err
+		}
+		Log.Info(<-ch)
+	}
+	return nil
 }
 
 func(slave *Slave) PluginIsInstalled(pluginName string) (bool, error) {
