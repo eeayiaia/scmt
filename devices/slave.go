@@ -301,7 +301,10 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 	if isInstalled {
 		return nil //TODO: Same here..with the logging
 	}
-	slave.InstallPlugin(plugin)
+	err = slave.InstallPlugin(plugin)
+	if err != nil {
+		return err
+	}
 	//TODO: add plugin to database
 	return nil
 }
@@ -320,20 +323,12 @@ func (slave *Slave) InstallPlugin(pluginName string) error{
 		return err
 	}
 
-	rc, err := NewRemoteConnection(slave)
-
-	if err != nil {
-		return err
-	}
-
-	for i := range scriptsToRun {
-		//TODO: is this how I run a script remotely on a node? does it wait until finished before return?
-		ch, err := rc.RunScript(scriptsToRun[i])
-		//...or is this how?
-		//rc.RunInShell(scriptsToRun[i], true)
+	for _, scriptPath := range scriptsToRun {
+		ch, err := slave.RunScriptAsync(scriptPath)
 		if err != nil {
 			return err
 		}
+		//TODO: check possible panic when using <-ch
 		Log.Info(<-ch)
 	}
 	return nil
