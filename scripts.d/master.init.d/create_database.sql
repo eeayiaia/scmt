@@ -3,9 +3,10 @@ USE cluster;
 CREATE TABLE IF NOT EXISTS devices (hwaddr CHAR(12) KEY, ip INT UNSIGNED NOT NULL, port INT UNSIGNED, hname varchar(30) NOT NULL, username VARCHAR(20) NOT NULL, password VARCHAR(20)NOT NULL);
 CREATE TABLE IF NOT EXISTS plugins (
     name VARCHAR(30) PRIMARY KEY,
-    enabled BOOLEAN NOT NULL DEFAULT 0
+    enabled BOOLEAN NOT NULL DEFAULT 0,
+    installedOnMaster BOOLEAN NOT NULL DEFAULT 0
 );
-CREATE TABLE IF NOT EXISTS pluginsInstalledOn (
+CREATE TABLE IF NOT EXISTS installedPlugins_slave (
     hwaddr CHAR(12) NOT NULL,
     plugin VARCHAR(30) NOT NULL,
     FOREIGN KEY (hwaddr) REFERENCES devices(hwaddr),

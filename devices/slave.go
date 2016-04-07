@@ -314,6 +314,11 @@ func (slave *Slave) RunRemoveNodeScripts() error {
 	return nil
 }*/
 
+
+func (slave *Slave) InstallPlugin(pluginName string) {
+
+}
+
 func(slave *Slave) PluginIsInstalled(pluginName string) (bool, error) {
 	slave.lock.Lock()
 	defer slave.lock.Unlock()
@@ -329,7 +334,7 @@ func(slave *Slave) PluginIsInstalled(pluginName string) (bool, error) {
 
 	var hwaddr, plugin string
 
-	err = db.QueryRow("SELECT hwaddr, plugin FROM pluginsInstalledOn WHERE hwaddr=? AND plugin=?",
+	err = db.QueryRow("SELECT hwaddr, plugin FROM installedPlugins_slave WHERE hwaddr=? AND plugin=?",
 		strings.Replace(slave.HardwareAddress, ":", "", -1), pluginName).Scan(&hwaddr, &plugin)
 
 	switch {
