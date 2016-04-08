@@ -1,8 +1,7 @@
-package main
+package database
 
 import (
     //"fmt"
-    "github.com/eeayiaia/scmt/database"
     "errors"
     log "github.com/Sirupsen/logrus"
 )
@@ -13,17 +12,12 @@ import (
     the master or any slave specificly.
 */
 
-
-func Init() {
-
-}
-
 /*
     Todo: handle devices and master with plugin installed on.
 */
 
 func RemovePlugin(pluginName string) error {
-    db, _ := database.NewConnection()
+    db, _ := NewConnection()
     defer db.Close()
 
     stmt, err := db.Prepare("DELETE FROM plugins WHERE name=(?)")
@@ -51,7 +45,7 @@ func RemovePlugin(pluginName string) error {
 }
 
 func AddPlugin(pluginName string) error {
-    db, _ := database.NewConnection()
+    db, _ := NewConnection()
     defer db.Close()
 
     stmt, err := db.Prepare("INSERT INTO plugins (name) VALUES (?)")
@@ -78,7 +72,7 @@ func AddPlugin(pluginName string) error {
 }
 
 func PluginInDB(pluginName string) (bool, error) {
-    db, err := database.NewConnection()
+    db, err := NewConnection()
     defer db.Close()
 
     var nrOfRows int
@@ -173,7 +167,7 @@ func DisablePlugin(pluginName string) error {
     False otherwise
 */
 func negatePluginDB(pluginName string) (bool, error) {
-    db, err := database.NewConnection()
+    db, err := NewConnection()
     defer db.Close()
 
     stmt, err := db.Prepare("UPDATE plugins SET enabled=IF (enabled, 0, 1) WHERE name=(?)")
@@ -206,7 +200,7 @@ func negatePluginDB(pluginName string) (bool, error) {
 */
 
 func PluginIsEnabled(pluginName string) (bool,error) {
-    db, err := database.NewConnection()
+    db, err := NewConnection()
     defer db.Close()
 
     var nrOfRows int
