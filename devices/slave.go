@@ -13,7 +13,7 @@ import (
 	"strings"
 	"sync"
 	"os"
-
+	"errors"
 	"database/sql"
 	log "github.com/Sirupsen/logrus"
 )
@@ -292,43 +292,70 @@ func (slave *Slave) RunRemoveNodeScripts() error {
 
 }*/
 
-func (slave *Slave) AddPluginToDb(plugin string) error {
+func (slave *Slave) SetPluginInstalled(plugin string) {
 	slave.lock.Lock()
 	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
 	defer db.Close()
 
-	stmt, err := db.Prepare("INSERT INTO installedPlugins_slave WHERE hwaddr = ? AND plugin = ?")
+	stmt, err := db.Prepare("INSERT INTO installedPlugins_slave (hwaddr, plugin) VALUES ((?),(?))")
+	defer stmt.Close()
 	if err != nil {
-		return err
+        Log.WithFields(log.Fields{
+            "error": err,
+        }).Fatal("Could not prepare sql query")
 	}
 	_, err = stmt.Exec(slave.HardwareAddress, plugin)
 	if err != nil {
-		Log.Error("Could not add plugin as installed to database")
-		return err
+        Log.WithFields(log.Fields{
+            "error": err,
+        }).Fatal("Could not execute sql query")
 	}
-	stmt.Close()
-	return nil
 }
 
 func (slave *Slave) RunPluginInstaller(plugin string) error {
 	plugin = strings.ToLower(plugin)
-	isInstalled, err := slave.PluginIsInstalled(plugin)
-	if err != nil {
-		return err 
+
+	isInDB, _ := database.PluginInDB(plugin)
+	if !isInDB {
+		Log.WithFields(log.Fields{
+            "plugin" : plugin,
+        }).Warn("Plugin not in database")
+		return errors.New("Plugin not in database: " + plugin)
 	}
+
+	isInstalled := slave.PluginIsInstalled(plugin)
 	if isInstalled {
-		return nil 
+		Log.WithFields(log.Fields{
+			"MAC": slave.HardwareAddress,
+			"plugin" : plugin,
+		}).Info("Plugin already installed")
+		return errors.New("Plugin already installed: " + plugin)
 	}
-	err = slave.InstallPlugin(plugin)
+
+	isEnabled := database.PluginIsEnabled(plugin)
+	if !isEnabled {
+		Log.WithFields(log.Fields{
+            "plugin" : plugin,
+        }).Warn("Plugin not enabled")
+        return errors.New("Plugin not enabled: " + plugin)
+	}
+
+	/*err := slave.InstallPlugin(plugin)
 	if err != nil {
-		return err
-	}
-	err = slave.AddPluginToDb(plugin)
-	if err != nil {
-		return err
-	}
+		Log.WithFields(log.Fields{
+            "plugin" : plugin,
+        }).Warn("Failed with installation")
+        return errors.New("Failed with installation of: " + plugin)
+	}*/
+
+	slave.SetPluginInstalled(plugin)
+
+	Log.WithFields(log.Fields{
+            "plugin" : plugin,
+    }).Info("Successfully installed")
+
 	return nil
 }
 
@@ -360,7 +387,7 @@ func (slave *Slave) InstallPlugin(pluginName string) error{
 	return nil
 }
 
-func(slave *Slave) PluginIsInstalled(pluginName string) (bool, error) {
+func(slave *Slave) PluginIsInstalled(pluginName string) bool {
 	slave.lock.Lock()
 	defer slave.lock.Unlock()
 
@@ -374,21 +401,13 @@ func(slave *Slave) PluginIsInstalled(pluginName string) (bool, error) {
 
 	switch {
 	case err == sql.ErrNoRows:
-		Log.WithFields(log.Fields{
-			"MAC": slave.HardwareAddress,
-			"plugin" : pluginName,
-		}).Info("Not installed")
-		return false, nil
+		return false
 	case err != nil:
 		Log.WithFields(log.Fields{
 			"error": err,
 		}).Fatal("Could not execute sql query")
-		return false, err
+		return false
 	default:
-		Log.WithFields(log.Fields{
-			"MAC": slave.HardwareAddress,
-			"plugin" : pluginName,
-		}).Info("Installed")
-		return true, nil
+		return true
 	}
 }

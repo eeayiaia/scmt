@@ -1,7 +1,7 @@
 package database
 
 import (
-    //"fmt"
+    "strings"
     "errors"
     log "github.com/Sirupsen/logrus"
 )
@@ -17,6 +17,8 @@ import (
 */
 
 func RemovePlugin(pluginName string) error {
+    pluginName = strings.ToLower(pluginName)
+
     db, _ := NewConnection()
     defer db.Close()
 
@@ -45,6 +47,8 @@ func RemovePlugin(pluginName string) error {
 }
 
 func AddPlugin(pluginName string) error {
+    pluginName = strings.ToLower(pluginName)
+
     db, _ := NewConnection()
     defer db.Close()
 
@@ -72,6 +76,8 @@ func AddPlugin(pluginName string) error {
 }
 
 func PluginInDB(pluginName string) (bool, error) {
+    pluginName = strings.ToLower(pluginName)
+
     db, err := NewConnection()
     defer db.Close()
 
@@ -105,6 +111,8 @@ func PluginInDB(pluginName string) (bool, error) {
 }
 
 func EnablePlugin(pluginName string) error {
+    pluginName = strings.ToLower(pluginName)
+
     if res,_ := PluginInDB(pluginName); !res {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
@@ -112,7 +120,7 @@ func EnablePlugin(pluginName string) error {
         return errors.New("Unavailable plugin in database: " + pluginName)
     }
 
-    if res, _ := PluginIsEnabled(pluginName); res {
+    if res := PluginIsEnabled(pluginName); res {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
         }).Info("Plugin already enabled")
@@ -134,6 +142,8 @@ func EnablePlugin(pluginName string) error {
 
 
 func DisablePlugin(pluginName string) error {
+    pluginName = strings.ToLower(pluginName)
+
     if res,_ := PluginInDB(pluginName); !res {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
@@ -141,7 +151,7 @@ func DisablePlugin(pluginName string) error {
         return errors.New("Unavailable plugin in database: " + pluginName)
     }
 
-    if res, _ := PluginIsEnabled(pluginName); !res {
+    if res := PluginIsEnabled(pluginName); !res {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
         }).Info("Plugin already disabled")
@@ -167,6 +177,8 @@ func DisablePlugin(pluginName string) error {
     False otherwise
 */
 func negatePluginDB(pluginName string) (bool, error) {
+    pluginName = strings.ToLower(pluginName)
+
     db, err := NewConnection()
     defer db.Close()
 
@@ -199,7 +211,9 @@ func negatePluginDB(pluginName string) (bool, error) {
     Returns true if plugin is enabled.
 */
 
-func PluginIsEnabled(pluginName string) (bool,error) {
+func PluginIsEnabled(pluginName string) bool {
+    pluginName = strings.ToLower(pluginName)
+
     db, err := NewConnection()
     defer db.Close()
 
@@ -213,21 +227,21 @@ func PluginIsEnabled(pluginName string) (bool,error) {
         Log.WithFields(log.Fields{
             "error": err,
         }).Fatal("Could not execute sql query")
-        return false, err
+        return false
     case nrOfRows==1:
         /*Log.WithFields(log.Fields{
             "plugin" : pluginName,
         }).Info("Enabled on master")*/
-        return true, nil
+        return true
     case nrOfRows==0:
         /*Log.WithFields(log.Fields{
             "plugin" : pluginName,
         }).Info("Not enabled on master")*/
-        return false, nil
+        return false
     default:
         Log.WithFields(log.Fields{
             "error": err,
         }).Fatal("Unexpected result in sql query")
-        return false, err
+        return false
     }
 }

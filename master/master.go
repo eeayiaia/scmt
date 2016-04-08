@@ -1,7 +1,7 @@
 package master
 
 import (
-    //"fmt"
+    "strings"
     "github.com/eeayiaia/scmt/database" 
     "errors"
     log "github.com/Sirupsen/logrus"
@@ -19,6 +19,8 @@ func InstallPlugin(pluginName string) error {
 
 
 func SetPluginInstalled(pluginName string) error {
+    pluginName = strings.ToLower(pluginName)
+
     tf, _ := database.PluginInDB(pluginName)
     if !tf {
         Log.WithFields(log.Fields{
@@ -64,6 +66,8 @@ func SetPluginInstalled(pluginName string) error {
     Returns true if plugin is installed on master.
 */
 func PluginIsInstalled(pluginName string) (bool,error) {
+    pluginName = strings.ToLower(pluginName)
+
     db, err := database.NewConnection()
     defer db.Close()
 
