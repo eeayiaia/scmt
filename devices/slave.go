@@ -351,8 +351,11 @@ func (slave *Slave) InstallPlugin(pluginName string) error{
 		if err != nil {
 			return err
 		}
-		//TODO: check possible panic when using <-ch
-		Log.Info(<-ch)
+		for {
+			result, more := <- ch
+			if !more { break }
+			Log.Info(result)
+		}
 	}
 	return nil
 }
