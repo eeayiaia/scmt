@@ -19,16 +19,15 @@ func InstallPlugin(pluginName string) error {
 
 
 func SetPluginInstalled(pluginName string) error {
-    //Todo resolve dependency conflict
-    /*tf, _ := PluginInDB(pluginName)
-    if tf {
+    tf, _ := database.PluginInDB(pluginName)
+    if !tf {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
         }).Warn("Plugin not available on master.")
         return errors.New("Plugin not available on master:" + pluginName)
-    }*/
+    }
 
-    tf, _ := PluginIsInstalled(pluginName)
+    tf, _ = PluginIsInstalled(pluginName)
     if tf {
         Log.WithFields(log.Fields{
             "plugin" : pluginName,
@@ -62,7 +61,7 @@ func SetPluginInstalled(pluginName string) error {
     return nil
 }
 /*
-    Returns true if plugin is installed.
+    Returns true if plugin is installed on master.
 */
 func PluginIsInstalled(pluginName string) (bool,error) {
     db, err := database.NewConnection()
