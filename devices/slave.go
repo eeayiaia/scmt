@@ -292,20 +292,43 @@ func (slave *Slave) RunRemoveNodeScripts() error {
 
 }*/
 
+func (slave *Slave) AddPluginToDb(plugin string) error {
+	slave.lock.Lock()
+	defer slave.lock.Unlock()
+
+	db, err := database.NewConnection()
+	defer db.Close()
+
+	stmt, err := db.Prepare("INSERT INTO installedPlugins_slave WHERE hwaddr = ? AND plugin = ?")
+	if err != nil {
+		return err
+	}
+	_, err = stmt.Exec(slave.HardwareAddress, plugin)
+	if err != nil {
+		Log.Error("Could not add plugin as installed to database")
+		return err
+	}
+	stmt.Close()
+	return nil
+}
+
 func (slave *Slave) RunPluginInstaller(plugin string) error {
 	plugin = strings.ToLower(plugin)
 	isInstalled, err := slave.PluginIsInstalled(plugin)
 	if err != nil {
-		return err //TODO: Should I log this? its already logged in PluginIsInstalled..
+		return err 
 	}
 	if isInstalled {
-		return nil //TODO: Same here..with the logging
+		return nil 
 	}
 	err = slave.InstallPlugin(plugin)
 	if err != nil {
 		return err
 	}
-	//TODO: add plugin to database
+	err = slave.AddPluginToDb(plugin)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
