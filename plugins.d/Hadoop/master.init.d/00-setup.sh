@@ -48,13 +48,18 @@ echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/hduser/.bashrc
 
 
 #Add nodes to hadoop system
-echo "" >> /ect/hosts
-echo "10.46.0.101			hadoop-master" >> /etc/hosts
-echo "10.46.0.102			hadoop-slave-1" >> /etc/hosts
-echo "10.46.0.103			hadoop-slave-2" >> /etc/hosts
+#echo "" >> /ect/hosts
+#echo "10.46.0.101			hadoop-master" >> /etc/hosts
+#echo "10.46.0.102			hadoop-slave-1" >> /etc/hosts
+#echo "10.46.0.103			hadoop-slave-2" >> /etc/hosts
 
 #Configure Hadoop
-cd /opt/hadoop/hadoop/
+
+#First we need to set the java home directory in hadoop
+cd /usr/local/hadoop/conf/hadoop-env.sh
+sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java-1.7.0-openjdk-armhf/bin/}' /usr/local/hadoop/conf/hadoop-env.sh
+
+
 
 
 
