@@ -22,5 +22,5 @@ else
 		backup_file $MPICH_HOSTFILE
 fi
 
-echo "$NODE_NAME		slots=4" >> $MPICH_HOSTFILE
+echo "$NODE_NAME:4" >> $MPICH_HOSTFILE
 

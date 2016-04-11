@@ -1,6 +1,6 @@
 #!/bin/bash
 
-MPICHUSER_UID=999
+MPIUSER_UID=999
 
 # Script directory
 
@@ -26,25 +26,25 @@ if [[ $INSTALL_SUCCESS != 0 ]]; then
 fi
 
 #Create user
-echo "Setting up mpichuser"
+echo "Setting up mpiuser"
 
 #Check id the user exists
-MPICHUSER_UID_CURRENT=$(id -i mpichuser)
-MPICHUSER_EXISTS=$?
+MPIUSER_UID_CURRENT=$(id -i mpichuser)
+MPIUSER_EXISTS=$?
 
-if [[ $MPICHIUSER_EXISTS != 0 ]]; then
+if [[ $MPIUSER_EXISTS != 0 ]]; then
 		#no user called mpichuser
-		create_user mpichuser mpich $MPICHUSER_UID
+		create_user mpichuser mpich $MPIUSER_UID
 		ADDUSER_SUCCESS=$?
 
 		if [[ ADDUSER_SUCCESS != 0 ]]; then
-				echo "Failed to create mpichuser. Is there another user with uid $MPICHUSER_UID?" >&2
+				echo "Failed to create mpichuser. Is there another user with uid $MPIUSER_UID?" >&2
 				exit 2
 		fi
 
 		#setup NFS
 		backup_file /ect/exports
-		grep -q -F '/home/mpichuser' /ect/exports || echo "/home/mpichuser *(rw,sync,no_subtreee_check)" >> /ect/exports
+		grep -q -F '/home/mpiuser' /ect/exports || echo "/home/mpiuser *(rw,sync,no_subtreee_check)" >> /ect/exports
 
 		service nfs-kernel-service restart
 
@@ -53,8 +53,8 @@ if [[ $MPICHIUSER_EXISTS != 0 ]]; then
 
 else
 
-		if [[ $MPICHUSER_UID_CURRENT != $MPICHUSER_UID ]]; then
-				echo "Error: mpichuser exitst but does not have uid $MPICHUSER." >&2
+		if [[ $MPIUSER_UID_CURRENT != $MPIUSER_UID ]]; then
+				echo "Error: mpiuser exitst but does not have uid $MPIUSER." >&2
 				exit 3
 		fi
 	

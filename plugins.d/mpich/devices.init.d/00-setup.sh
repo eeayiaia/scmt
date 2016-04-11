@@ -1,6 +1,6 @@
 #!/bin/bash
  
-MPICHUSER_UID=999
+MPIUSER_UID=999
 
 # Script directory
 
@@ -11,12 +11,12 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 check_root
 
 #If user exists
-MPICHUSER_UID_CURRENT=$(id -u mpichuser)
-MPICHUSER_EXISTS=$? 
+MPIUSER_UID_CURRENT=$(id -u mpiuser)
+MPIUSER_EXISTS=$? 
 
-if [[ $MPICHUSER_EXISTS != 0 ]]; then 
+if [[ $MPIUSER_EXISTS != 0 ]]; then 
 
-		create_user mpichuser mpich $MPICHUSER_UID
+		create_user mpichuser mpich $MPIUSER_UID
 		ADDUSER_SUCCESS=$?
 
 		if [[ $ADDUSER_SUCCESS != 0 ]]; then
@@ -34,8 +34,8 @@ if [[ $MPICHUSER_EXISTS != 0 ]]; then
 
 else
 
-		if [[ $MPICHUSR_UID_CURRENT != $MPICHUSER_UID ]]; then
-				echo "Error: mpichuser exists but does not have the uid $MPICHUSER_UID." >&2
+		if [[ $MPIUSR_UID_CURRENT != $MPIUSER_UID ]]; then
+				echo "Error: mpichuser exists but does not have the uid $MPIUSER_UID." >&2
 				exit 3
 		fi
 
