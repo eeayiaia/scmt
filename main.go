@@ -42,8 +42,8 @@ func execScriptOnAll(slaves []*devices.Slave, script string) {
 }
 
 func main() {
-	InitLogging()
 	InitConfiguration()
+	InitLogging()
 
 	database.Init(Conf.Database, Conf.DatabaseUser, Conf.DatabasePassword)
 

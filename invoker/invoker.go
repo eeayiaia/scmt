@@ -40,10 +40,16 @@ type Handler struct {
 }
 
 var handlers []*Handler
+var initialized bool = false
 var handlersMutex *sync.Mutex
 
 // Initialize the invoker backend
 func Init() {
+	if initialized {
+		Log.Warn("Tried to initialize more than once!")
+		return
+	}
+
 	InitContextLogging()
 
 	Log.Info("initialising ..")
@@ -52,9 +58,16 @@ func Init() {
 	// Make sure 'handlers' is not null
 	handlersMutex = &sync.Mutex{}
 	handlers = make([]*Handler, 0)
+
+	initialized = true
 }
 
 func RegisterHandler(Type int, fn PacketHandler) {
+	if !initialized {
+		Log.Warn("RegisterHandler called without first initializing the invoker!")
+		Init()
+	}
+
 	handler := &Handler{
 		Type: Type,
 		Fn:   fn,
