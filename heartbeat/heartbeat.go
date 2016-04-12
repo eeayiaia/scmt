@@ -45,7 +45,6 @@ func Pinger(address string, fn handleDisconnect) chan bool {
 		for run {
 			status := Ping(address)
 			if !status {
-				fmt.Println("WILL CALL IT!")
 				fn(address)
 			}
 
