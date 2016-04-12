@@ -62,6 +62,3 @@ fi
 
 echo "Finished installing MPICH."
 
-
-
-

@@ -1,8 +1,6 @@
 #!/bin/bash
 
-NODE_IP=$1
-NODE_NAME=$2
-
+# Input: NODE_IP, NODENAME
 
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
@@ -11,7 +9,7 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_root
 
-echo "MPICH: removing node with hostname '$NODE_NAME' and IP '$NODE_IP'"
+echo "MPICH: removing node with hostname '$NODENAME' and IP '$NODE_IP'"
 
 MPICH_HOSTFILE="/home/mpichuser/mpich_hostfile"
 
@@ -22,5 +20,5 @@ else
 		backup_file $MPICH_HOSTFILE
 fi
 
-sed -i ".bak" '/'$NODE_NAME'/d' $MPICH_HOSTFILE
+sed -i ".bak" '/'$NODENAME'/d' $MPICH_HOSTFILE
 

@@ -1,8 +1,6 @@
 #!/bin/bash
 
-NODE_IP=$1
-NODE_NAME=$2
-
+# Input: NODE_IP, NODENAME
 
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
@@ -11,7 +9,7 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_root
 
-echo "MPICH: adding node with hostname '$NODE_NAME' and IP 'NODE_IP'"
+echo "MPICH: adding node with hostname '$NODENAME' and IP 'NODE_IP'"
 
 MPICH_HOSTFILE="/home/mpich-hostfile"
 
@@ -22,5 +20,5 @@ else
 		backup_file $MPICH_HOSTFILE
 fi
 
-echo "$NODE_NAME:4" >> $MPICH_HOSTFILE
+echo "$NODENAME:4" >> $MPICH_HOSTFILE
 
