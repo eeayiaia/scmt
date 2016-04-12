@@ -4,8 +4,8 @@ package cli
 import (
 	"fmt"
 	"github.com/codegangsta/cli"
-	"github.com/eeayiaia/scmt/invoker"
-	"bytes"
+	//"github.com/eeayiaia/scmt/invoker"
+	//"bytes"
 )
 
 /* add plugin, remove plugin, enable/disable plugin, list nodes (status), list plugins (status), status of
@@ -19,8 +19,7 @@ var commands []cli.Command = []cli.Command {
 		Usage:       "scmt install-plugin <plugin name>",
 		UsageText:   "Installs the plugin listed in plugins.d",
 		Description: "",
-		ArgsUsage:   "<plugin name> as first argument followed by nodes to install on, " + 
-						"if no nodes are listed the plugin is installed on every node",
+		ArgsUsage:   "<plugin name> as first argument followed by nodes to install on, if no nodes are listed the plugin is installed on every node",
 		Category:    "Plugin",
 		Action:      func(c *cli.Context) { installPlugin(c) },
 	},
@@ -30,8 +29,7 @@ var commands []cli.Command = []cli.Command {
 		Usage:       "scmt uninstall-plugin <plugin name>",
 		UsageText:   "Uninstalls the plugin listed in plugins.d",
 		Description: "",
-		ArgsUsage:   "<plugin name> as first argument followed by nodes to uninstall from," + 
-						" if no nodes are listed the plugin is uninstalled on every node",
+		ArgsUsage:   "<plugin name> as first argument followed by nodes to uninstall from, if no nodes are listed the plugin is uninstalled on every node",
 		Category:    "Plugin",
 		Action:      func(c *cli.Context) { uninstallPlugin(c) },
 	},
@@ -53,8 +51,8 @@ func getCommands() []cli.Command {
 
 func installPlugin(c *cli.Context) {
 	//TODO: handle installation of plugins on specific nodes only, examine
-	buffer := bytes.NewBufferString(c.Args().First())
-	invoker.SendPacket(invoker.TYPE_INSTALL_PLUGIN, *buffer)
+	/*buffer := bytes.NewBufferString(c.Args().First())
+	invoker.SendPacket(invoker.TYPE_INSTALL_PLUGIN, *buffer)*/
 	fmt.Println("installing plugin " + c.Args().First() + " :Not implemented")
 }
 
