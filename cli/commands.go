@@ -12,27 +12,27 @@ specific node, ..?
 
 var Commands []cli.Command = []cli.Command {
   	{
-  		Name:			"welcome",
-  		Aliases:		[]string{"w"},
-  		Usage:			"",
-  		UsageText:		"",
+  		Name:			"install-plugin",
+  		Aliases:		[]string{""},
+  		Usage:			"scmt install-plugin <plugin name>",
+  		UsageText:		"Installs the plugin listed in plugins.d",
   		Description:	"",
-  		ArgsUsage:		"",
-  		Category:		"",
-  		Action:			func (c *cli.Context) { fmt.Println("Welcome to scmt")},
+  		ArgsUsage:		"<plugin name> as first argument followed by nodes to install on, if no nodes are listed
+  						the plugin is installed on every node",
+  		Category:		"Plugin",
+  		Action:			func (c *cli.Context) { installPlugin(c) },
 
   	},
   	{
-  		Name:			"add",
-  		Aliases:		[]string{"Install, INSTALL"},
-  		Usage:			"",
-  		UsageText:		"",
+  		Name:			"uninstall-plugin",
+  		Aliases:		[]string{""},
+  		Usage:			"scmt uninstall-plugin <plugin name>",
+  		UsageText:		"Uninstalls the plugin listed in plugins.d",
   		Description:	"",
-  		ArgsUsage:		"",
-  		Category:		"",
-  		Action:			func (c *cli.Context) {
-							installPlugin(c)
-						},
+  		ArgsUsage:		"<plugin name> as first argument followed by nodes to uninstall from, if no nodes are listed
+  						the plugin is uninstalled on every node",
+  		Category:		"Plugin",
+  		Action:			func (c *cli.Context) { uninstallPlugin(c) },
 	},
 
 }
@@ -43,7 +43,10 @@ func getCommands() []cli.Command {
 
 func installPlugin(c *cli.Context) {
 	fmt.Println("installing plugin " + c.Args().First() + " :Not implemented")
-	return
+}
+
+func uninstallPlugin(c *cli.Context) {
+	fmt.Println("uninstalling plugin " + c.Args().First() + " :Not implemented")
 }
 
 
