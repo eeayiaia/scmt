@@ -3,7 +3,6 @@ package heartbeat
 import (
 	"strings"
 	"testing"
-	"time"
 )
 
 // Test filterAddress function to properly filter the address
