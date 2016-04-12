@@ -22,6 +22,7 @@ const PORT string = "9000"
 const (
 	TYPE_ACK        int = 0
 	TYPE_NEW_DEVICE int = 1
+	TYPE_INSTALL_PLUGIN int = 2
 )
 
 /*
