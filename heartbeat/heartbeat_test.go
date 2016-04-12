@@ -31,7 +31,7 @@ func TestPinger(t *testing.T) {
 
 	timeout := make(chan bool, 1)
 	go func() {
-		time.Sleep(5 * time.Second)
+		time.Sleep(1 * time.Second)
 		timeout <- true
 	}()
 
