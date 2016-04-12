@@ -53,6 +53,22 @@ func (s *Slave) CopyFile(file string, destination string) chan error {
 }
 
 /*
+	Copies a folder to a slave
+    Example: s.CopyFolder("/home/xxxx/SuperK/", "/tmp/") will copy SuperK to /tmp/SuperK
+*/
+func (s *Slave) CopyFolder(filepath string, destination string) error {
+    rc, err := NewRemoteConnection(s)
+    if err != nil {
+        return err
+    }
+
+    result := rc.CopyFolder(filepath, destination)
+    return result
+}
+
+
+
+/*
 	Runs a command in a remote shell on a specific slave
 */
 func (s *Slave) RunInShellAsync(query string, sudo bool) chan string {
@@ -342,13 +358,13 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
         return errors.New("Plugin not enabled: " + plugin)
 	}
 
-	/*err := slave.InstallPlugin(plugin)
+	err := slave.InstallPlugin(plugin)
 	if err != nil {
 		Log.WithFields(log.Fields{
             "plugin" : plugin,
         }).Warn("Failed with installation")
         return errors.New("Failed with installation of: " + plugin)
-	}*/
+	}
 
 	slave.SetPluginInstalled(plugin)
 
