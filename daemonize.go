@@ -64,7 +64,6 @@ func Daemonize(childMain postChild, termHandler daemon.SignalHandlerFunc) {
 
 	// Don't restart it if its running!
 	if isDaemonized() {
-		log.Warn("tried to start daemon but already running!")
 		return
 	}
 
