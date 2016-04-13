@@ -83,19 +83,10 @@ func PluginIsInstalled(pluginName string) (bool,error) {
         }).Fatal("Could not execute sql query")
         return false, err
     case nrOfRows==1:
-        /*Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Installed on master")*/
         return true, nil
     case nrOfRows==0:
-        /*Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Not installed on master")*/
         return false, nil
     default:
-        /*Log.WithFields(log.Fields{
-            "error": err,
-        }).Fatal("Unexpected result in sql query")*/
         return false, err
     }
 }

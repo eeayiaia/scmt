@@ -38,12 +38,12 @@ func RemovePlugin(pluginName string) error {
             "plugin": pluginName,
         }).Warn("Could not remove plugin from database.")
         return errors.New("Could not remove plugin from database:" + pluginName)
-    } else {
-        Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Plugin removed from database")
-        return nil
     }
+    
+    Log.WithFields(log.Fields{
+        "plugin" : pluginName,
+    }).Info("Plugin removed from database")
+    return nil
 }
 
 func AddPlugin(pluginName string) error {
@@ -67,12 +67,12 @@ func AddPlugin(pluginName string) error {
             "plugin": pluginName,
         }).Warn("Could not add plugin to database.")
         return errors.New("Could not add plugin to database:" + pluginName)
-    } else {
-        Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Plugin added to database")
-        return nil
     }
+    
+    Log.WithFields(log.Fields{
+        "plugin" : pluginName,
+    }).Info("Plugin added to database")
+    return nil
 }
 
 func PluginInDB(pluginName string) (bool, error) {
@@ -93,14 +93,8 @@ func PluginInDB(pluginName string) (bool, error) {
         }).Fatal("Could not execute sql query")
         return false, err
     case nrOfRows==1:
-        /*Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Available in database")*/
         return true, nil
     case nrOfRows==0:
-        /*Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Not available in database")*/
         return false, nil
     default:
         Log.WithFields(log.Fields{
@@ -132,12 +126,13 @@ func EnablePlugin(pluginName string) error {
             "plugin" : pluginName,
         }).Warn("Failed to enable plugin")
         return errors.New("Failed to enable plugin: " + pluginName)
-    } else {
-        Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Enabled plugin")
-        return nil
     }
+    
+    Log.WithFields(log.Fields{
+        "plugin" : pluginName,
+    }).Info("Enabled plugin")
+    return nil
+    
 }
 
 
@@ -163,12 +158,12 @@ func DisablePlugin(pluginName string) error {
             "plugin" : pluginName,
         }).Warn("Failed to disable plugin")
         return errors.New("Failed to disable plugin: " + pluginName)
-    } else {
-        Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Disabled plugin")
-        return nil
     }
+    
+    Log.WithFields(log.Fields{
+        "plugin" : pluginName,
+    }).Info("Disabled plugin")
+    return nil
 }
 
 /*
@@ -202,9 +197,9 @@ func negatePluginDB(pluginName string) (bool, error) {
 
     if nrOfRows==1 {
         return true, nil
-    } else {
-        return false, nil
     }
+    
+    return false, nil
 }
 
 /*
@@ -229,14 +224,8 @@ func PluginIsEnabled(pluginName string) bool {
         }).Fatal("Could not execute sql query")
         return false
     case nrOfRows==1:
-        /*Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Enabled on master")*/
         return true
     case nrOfRows==0:
-        /*Log.WithFields(log.Fields{
-            "plugin" : pluginName,
-        }).Info("Not enabled on master")*/
         return false
     default:
         Log.WithFields(log.Fields{
