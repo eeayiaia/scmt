@@ -10,6 +10,17 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_root
 
+# Install OpenMPI
+echo "Installing OpenMPI"
+write_line
+apt-get install openmpi-bin libopenmpi-dev --assume-yes
+INSTALL_SUCCESS=$?
+
+if [[ $INSTALL_SUCCESS != 0 ]]; then
+	echo "Failed to install OpenMPI. Is approx configured correctly?" >&2
+	exit 1
+fi
+
 # Check if mpiuser already exists
 MPIUSER_UID_CURRENT=$(id -u mpiuser)
 MPIUSER_EXISTS=$?

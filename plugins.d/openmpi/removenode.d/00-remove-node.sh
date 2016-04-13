@@ -13,14 +13,15 @@ check_root
 echo "OpenMPI: removing node with hostname '$NODENAME' and IP '$NODE_IP'"
 
 # Remove node from machine-file
-OPENMPI_HOSTFILE="/home/mpiuser/openmpi-hostfile"
+OPENMPI_MACHINEFILE="/home/mpiuser/openmpi-machinefile"
 
-if [[ ! -f $OPENMPI_HOSTFILE ]]; then
-	echo "Error: '$OPENMPI_HOSTFILE' does not exist." 1&>2
+if [[ ! -f $OPENMPI_MACHINEFILE ]]; then
+	echo "Error: '$OPENMPI_MACHINEFILE' does not exist." 1&>2
 	exit 2
-else
-	backup_file $OPENMPI_HOSTFILE
+#else
+#	Might be excessive to backup machinefile for each removed node
+#	backup_file $OPENMPI_MACHINEFILE
 fi
 
-sed -i".bak" '/'$NODENAME'/d' $OPENMPI_HOSTFILE
+sed -i".bak" '/'$NODENAME'/d' $OPENMPI_MACHINEFILE
 

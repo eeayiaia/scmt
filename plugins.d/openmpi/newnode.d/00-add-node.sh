@@ -13,16 +13,17 @@ check_root
 echo "OpenMPI: adding node with hostname '$NODENAME' and IP '$NODE_IP'"
 
 # Add new node to machine-file
-OPENMPI_HOSTFILE="/home/mpiuser/openmpi-hostfile"
+OPENMPI_MACHINEFILE="/home/mpiuser/openmpi-machinefile"
 
-if [[ ! -f $OPENMPI_HOSTFILE ]]; then
-	touch $OPENMPI_HOSTFILE
-	chown mpiuser:mpiuser $OPENMPI_HOSTFILE
-else
-	backup_file $OPENMPI_HOSTFILE
+if [[ ! -f $OPENMPI_MACHINEFILE ]]; then
+	touch $OPENMPI_MACHINEFILE
+	chown mpiuser:mpiuser $OPENMPI_MACHINEFILE
+#else
+#   Might be excessive to backup machinefile for each new node.
+#	backup_file $OPENMPI_MACHINEFILE
 fi
 
 # TODO: number of slots should not be hardcoded
 NUM_PROCS=$(nproc)
-echo "$NODENAME	slots=$NUM_PROCS" >> $OPENMPI_HOSTFILE
+echo "$NODENAME	slots=$NUM_PROCS" >> $OPENMPI_MACHINEFILE
 
