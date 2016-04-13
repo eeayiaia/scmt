@@ -20,8 +20,8 @@ const PORT string = "9000"
 
 // Packet types
 const (
-	TYPE_ACK        int = 0
-	TYPE_NEW_DEVICE int = 1
+	TYPE_ACK            int = 0
+	TYPE_NEW_DEVICE     int = 1
 	TYPE_INSTALL_PLUGIN int = 2
 )
 
@@ -33,7 +33,7 @@ type Packet struct {
 	Data string
 }
 
-type PacketHandler func(*string)
+type PacketHandler func(bytes.Buffer)
 
 type Handler struct {
 	Type int
@@ -143,7 +143,10 @@ func handlePacket(conn net.Conn) {
 				}).Warn("packet has two handlers")
 			}
 
-			handler.Fn(&p.Data)
+			var buf bytes.Buffer
+			buf.WriteString(p.Data)
+
+			handler.Fn(buf)
 			handled = true
 		} else {
 			Log.WithFields(log.Fields{

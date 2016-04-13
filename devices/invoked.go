@@ -14,10 +14,7 @@ func RegisterInvokerHandlers() {
 	Handle invoker.TYPE_NEW_DEVICE
 		data: mac + ip seperated by spaces
 */
-func handleNewDevice(raw *string) {
-	var rawData bytes.Buffer
-	rawData.Write([]byte(*raw))
-
+func handleNewDevice(rawData bytes.Buffer) {
 	mac, err := rawData.ReadString(' ')
 	if err != nil {
 		Log.WithFields(log.Fields{
