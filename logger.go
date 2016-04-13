@@ -2,7 +2,7 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	//	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
 	logrus_syslog "github.com/Sirupsen/logrus/hooks/syslog"
 	"log/syslog"
@@ -27,15 +27,12 @@ func InitLogging() {
 
 	// The daemon should log to a file
 	if isDaemon() {
-		log.Info("IS DAEMON!!")
-
-		f, err := os.OpenFile(Conf.LogFile, os.O_WRONLY|os.O_CREATE, 0755)
+		f, err := os.OpenFile(Conf.LogFile, os.O_WRONLY|os.O_CREATE, 0640)
 		if err != nil {
 			log.Fatal("Could not create logfile?!")
 			fmt.Println("Could not create logfile?!")
 		}
 		// Default to the prefixed formatter
-		log.SetFormatter(new(prefixed.TextFormatter))
 		log.SetOutput(f)
 	}
 

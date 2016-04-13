@@ -1,17 +1,28 @@
 package main
 
 import (
-	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/sevlyar/go-daemon"
-	"io/ioutil"
 	"os"
-	"strconv"
+	"syscall"
 )
 
 type postChild func()
 
 var context *daemon.Context
+var ErrStop error = daemon.ErrStop
+var isdaemon bool = false
+
+func InitContext() {
+	context = &daemon.Context{
+		PidFileName: Conf.PidFile,
+		PidFilePerm: 0644,
+		//		LogFileName: Conf.LogFile,
+		//		LogFilePerm: 0640,
+		WorkDir: "./",
+		Umask:   027,
+	}
+}
 
 func isDaemonized() bool {
 	if context == nil {
@@ -23,34 +34,33 @@ func isDaemonized() bool {
 }
 
 func isDaemon() bool {
-	pidBytes, err := ioutil.ReadFile(Conf.PidFile)
-	if err != nil {
-		log.Warn("could not open pidfile!")
-		return false
-	}
-
-	pid, err := strconv.Atoi(string(pidBytes))
-	if err != nil {
-		log.WithFields(log.Fields{
-			"pid": string(pidBytes),
-		}).Warn("could not parse pid")
-		return false
-	}
-
-	log.Info(fmt.Sprintf("currentpid: %d, readpid: %d", os.Getpid(), pid))
-
-	return os.Getpid() == pid
+	return isdaemon
 }
 
-func Daemonize(childMain postChild) {
-	context = &daemon.Context{
-		PidFileName: Conf.PidFile,
-		PidFilePerm: 0644,
-		LogFileName: Conf.LogFile,
-		LogFilePerm: 0640,
-		WorkDir:     "./",
-		Umask:       027,
+func StopDaemon() {
+	if context == nil {
+		log.Warn("no context defined!")
+		return
 	}
+
+	d, err := context.Search()
+	if err != nil {
+		log.WithFields(log.Fields{
+			"error": err,
+		}).Error("could not stop daemon")
+		return
+	}
+
+	if d == nil {
+		log.Warn("tried to stop daemon, but not found")
+	}
+
+	d.Signal(syscall.SIGQUIT)
+}
+
+func Daemonize(childMain postChild, termHandler daemon.SignalHandlerFunc) {
+	daemon.SetSigHandler(termHandler, syscall.SIGTERM)
+	daemon.SetSigHandler(termHandler, syscall.SIGQUIT)
 
 	// Don't restart it if its running!
 	if isDaemonized() {
@@ -67,13 +77,20 @@ func Daemonize(childMain postChild) {
 	}
 
 	if child != nil {
+		isdaemon = false
 		return
 	} else {
 		defer context.Release()
+		isdaemon = true
 
-		fmt.Println("IN CHILD NOAW!")
+		go childMain()
 
-		childMain()
+		err = daemon.ServeSignals()
+		if err != nil {
+			log.WithFields(log.Fields{
+				"error": err,
+			}).Fatal("error occured")
+		}
 
 		os.Exit(0)
 	}

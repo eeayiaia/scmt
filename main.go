@@ -7,8 +7,21 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 
+	"os"
 	"time"
 )
+
+var terminate chan bool
+
+func termHandler(sig os.Signal) error {
+	log.Info("terminating ..")
+	terminate <- true
+
+	// Clean-up ..
+	// TODO: delete pidfile
+
+	return ErrStop
+}
 
 func background() {
 	InitConfiguration()
@@ -18,20 +31,25 @@ func background() {
 	invoker.Init()
 	devices.Init()
 
+	terminate = make(chan bool, 1)
 	log.Info("Daemon started!")
 
+	// Wait to terminate
 	for {
-		// Do nothin!
-		log.Info("dondon")
-		time.Sleep(5 * time.Second)
+		r := <-terminate
+		if r {
+			break
+		}
 	}
 }
 
 func main() {
+	InitContext()
+
 	InitConfiguration()
 	InitLogging()
 
-	//Daemonize(background)
+	Daemonize(background, termHandler)
 
 	log.Info("TODO: add CLI here!")
 }
