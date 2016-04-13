@@ -89,6 +89,8 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	slave, err := GetDevice(hardwareAddress)
 	if err != nil {
 		slave = &Slave{
+			UserName:        "odroid",
+			Password:        "odroid",
 			HardwareAddress: hardwareAddress,
 			IpAddress:       ipAddress,
 		}
@@ -106,14 +108,6 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	}
 	AddDevice(slave)
 	slave.RunNewNodeScripts()
-
-	// TODO: do stuff like set a static ip-address and
-	//			 prepare the device
-	//	Init:
-	//		- Hostname
-	//		- UserName & Password
-
-	// TODO: test username & password from file
 
 	return slave
 }
