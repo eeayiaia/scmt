@@ -148,10 +148,6 @@ func handlePacket(conn net.Conn) {
 
 			handler.Fn(buf)
 			handled = true
-		} else {
-			Log.WithFields(log.Fields{
-				"type": handler.Type,
-			}).Warn("ignored handler")
 		}
 	}
 
