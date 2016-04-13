@@ -2,63 +2,76 @@
 
 MPIUSER_UID=999
 
-# Script directory
-
+# Get script directory
+DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh"
+. "$DIR/../../.script-utils/installer-utils.sh" || exit 1
 
 check_root
 
 echo "Installing MPICH"
 write_line
-echo""
+echo ""
 
-apt-get install mpich2
+apt-get install mpich2 libmpich2-dev --assume-yes
 INSTALL_SUCCESS=$?
 
-echo""
+echo ""
 write_line
 
 if [[ $INSTALL_SUCCESS != 0 ]]; then
-		echo "Failed to install MPICH." >&2
-		exit 1
+	echo "Failed to install MPICH." >&2
+	exit 1
 fi
 
-#Create user
+# Create mpiuser
 echo "Setting up mpiuser"
 
-#Check id the user exists
-MPIUSER_UID_CURRENT=$(id -i mpichuser)
+# Check if mpiuser exists
+MPIUSER_UID_CURRENT=$(id -u mpiuser)
 MPIUSER_EXISTS=$?
 
 if [[ $MPIUSER_EXISTS != 0 ]]; then
-		#no user called mpichuser
-		create_user mpichuser mpich $MPIUSER_UID
-		ADDUSER_SUCCESS=$?
+	# No user called mpiuser
+	create_user mpiuser mpi $MPIUSER_UID
+	ADDUSER_SUCCESS=$?
 
-		if [[ ADDUSER_SUCCESS != 0 ]]; then
-				echo "Failed to create mpichuser. Is there another user with uid $MPIUSER_UID?" >&2
-				exit 2
-		fi
+	if [[ $ADDUSER_SUCCESS != 0 ]]; then
+		echo "Failed to create mpiuser. Is there another user with uid $MPIUSER_UID?" >&2
+		exit 2
+	fi
 
-		#setup NFS
-		backup_file /ect/exports
-		grep -q -F '/home/mpiuser' /ect/exports || echo "/home/mpiuser *(rw,sync,no_subtreee_check)" >> /ect/exports
+	# Set up NFS sharing of mpiuser's home directory
+	backup_file /etc/exports
+	grep -q -F '/home/mpiuser' /etc/exports || echo "/home/mpiuser *(rw,sync,no_subtree_check)" >> /etc/exports
 
-		service nfs-kernel-service restart
+	service nfs-kernel-service restart
 
-		#	passwordless
-		su mpichuser -c 'ssh-keygen -N "" -f ~/.ssh/id_rsa && ssh-copy-id localhost;exit'
-
+	# Allow passwordless ssh between mpiusers
+	if [[ ! -f /home/mpiuser/.ssh/id_rsa ]]; then
+		su mpiuser -c 'ssh-keygen -N "" -f ~/.ssh/id_rsa && ssh-copy-id localhost;exit'
+	fi
 else
-
-		if [[ $MPIUSER_UID_CURRENT != $MPIUSER_UID ]]; then
-				echo "Error: mpiuser exitst but does not have uid $MPIUSER." >&2
-				exit 3
-		fi
-	
+	if [[ $MPIUSER_UID_CURRENT != $MPIUSER_UID ]]; then
+		echo "Error: mpiuser exists but does not have uid $MPIUSER_UID." >&2
+		exit 3
+	fi
 fi
+
+# Copy helper scripts
+cp $DIR/../../../config/mpich/run-with-mpich.sh /home/mpiuser/
+cp $DIR/../../../config/mpich/compile-with-mpich.sh /home/mpiuser/
+
+chown mpiuser:mpiuser /home/mpiuser/run-with-mpich.sh
+chown mpiuser:mpiuser /home/mpiuser/compile-with-mpich.sh
+
+chmod +x /home/mpiuser/run-with-mpich.sh
+chmod +x /home/mpiuser/compile-with-mpich.sh
+
+# Copy example MPI program
+cp $DIR/../../../config/mpich/mpi-hello-world.c /home/mpiuser/
+chown mpiuser:mpiuser /home/mpiuser/mpi-hello-world.c
 
 echo "Finished installing MPICH."
 

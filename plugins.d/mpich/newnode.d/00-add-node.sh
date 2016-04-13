@@ -9,16 +9,16 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_root
 
-echo "MPICH: adding node with hostname '$NODENAME' and IP 'NODE_IP'"
+echo "MPICH: adding node with hostname '$NODENAME' and IP '$NODE_IP'"
 
-MPICH_HOSTFILE="/home/mpich-hostfile"
+MPICH_MACHINEFILE="/home/mpiuser/mpich-machinefile"
 
-if [[ ! -f $MPICH_HOSTFILE ]]; then
-		touch $MPICH_HOSTFILE
-		chown mpich:mpichuser $MPICHUSER_HOSTFILE
+if [[ ! -f $MPICH_MACHINEFILE ]]; then
+		touch $MPICH_MACHINEFILE
+		chown mpiuser:mpiuser $MPICH_MACHINEFILE
 else
-		backup_file $MPICH_HOSTFILE
+		backup_file $MPICH_MACHINEFILE
 fi
 
-echo "$NODENAME:4" >> $MPICH_HOSTFILE
+echo "$NODENAME:4" >> $MPICH_MACHINEFILE
 
