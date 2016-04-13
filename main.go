@@ -8,7 +8,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	"os"
-	"time"
 )
 
 var terminate chan bool
