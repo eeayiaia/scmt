@@ -18,6 +18,12 @@ func termHandler(sig os.Signal) error {
 
 	// Clean-up ..
 	// TODO: delete pidfile
+	err := os.Remove(Conf.PidFile)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"pidfile": Conf.PidFile,
+		}).Warn("could not remove pidfile")
+	}
 
 	return ErrStop
 }
@@ -43,10 +49,9 @@ func background() {
 }
 
 func main() {
-	InitContext()
-
 	InitConfiguration()
 	InitLogging()
+	InitContext()
 
 	Daemonize(background, termHandler)
 

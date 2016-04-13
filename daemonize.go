@@ -17,10 +17,10 @@ func InitContext() {
 	context = &daemon.Context{
 		PidFileName: Conf.PidFile,
 		PidFilePerm: 0644,
-		//		LogFileName: Conf.LogFile,
-		//		LogFilePerm: 0640,
-		WorkDir: "./",
-		Umask:   027,
+		LogFileName: Conf.LogFile,
+		LogFilePerm: 0640,
+		WorkDir:     "./",
+		Umask:       027,
 	}
 }
 

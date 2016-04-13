@@ -6,9 +6,6 @@ import (
 
 	logrus_syslog "github.com/Sirupsen/logrus/hooks/syslog"
 	"log/syslog"
-
-	"fmt"
-	"os"
 )
 
 func InitLogging() {
@@ -23,17 +20,6 @@ func InitLogging() {
 		} else {
 			log.AddHook(hook)
 		}
-	}
-
-	// The daemon should log to a file
-	if isDaemon() {
-		f, err := os.OpenFile(Conf.LogFile, os.O_WRONLY|os.O_CREATE, 0640)
-		if err != nil {
-			log.Fatal("Could not create logfile?!")
-			fmt.Println("Could not create logfile?!")
-		}
-		// Default to the prefixed formatter
-		log.SetOutput(f)
 	}
 
 	log.Info("Initialised logging")
