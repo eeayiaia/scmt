@@ -1,97 +1,54 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
 
-	"path/filepath"
-	"strings"
-	"sync"
-	"time"
-
 	log "github.com/Sirupsen/logrus"
+
+	"os"
 )
 
-func execScriptOnAll(slaves []*devices.Slave, script string) {
-	chs := devices.RunScriptOnAllAsync(script)
+var terminate chan bool
 
-	var wg sync.WaitGroup
-	wg.Add(len(chs))
+func termHandler(sig os.Signal) error {
+	log.Info("terminating ..")
+	terminate <- true
 
-	// Can be done async, but the output isn't sequential in that case
-	for i, ch := range chs {
-		go func(i int, ch chan string) {
-			for {
-				result, more := <-ch
-				if !more {
-					break
-				}
+	// Clean-up ..
+	// TODO: delete pidfile
 
-				trimmed := strings.Trim(result, "\n")
-				fmt.Printf("%s@%s: %s\n", slaves[i].UserName, slaves[i].IpAddress, trimmed)
-			}
-
-			wg.Done()
-		}(i, ch)
-	}
-
-	wg.Wait()
+	return ErrStop
 }
 
-func main() {
+func background() {
 	InitConfiguration()
 	InitLogging()
-
 	database.Init(Conf.Database, Conf.DatabaseUser, Conf.DatabasePassword)
 
 	invoker.Init()
 	devices.Init()
 
-	slaves := make([]*devices.Slave, 2)
+	terminate = make(chan bool, 1)
+	log.Info("Daemon started!")
 
-	slaves[0] = &devices.Slave{
-		Hostname:        "",
-		HardwareAddress: "",
-		IpAddress:       "129.16.22.6:2222",
-
-		UserName: "hw",
-		Password: "galenanka3",
+	// Wait to terminate
+	for {
+		r := <-terminate
+		if r {
+			break
+		}
 	}
+}
 
-	slaves[1] = &devices.Slave{
-		Hostname:        "",
-		HardwareAddress: "",
-		IpAddress:       "129.16.22.6:2222",
+func main() {
+	InitContext()
 
-		UserName: "selund",
-		Password: "galenanka1",
-	}
+	InitConfiguration()
+	InitLogging()
 
-	// Add the devices to the device list async
-	for i, slave := range slaves {
-		go func(i int, slave *devices.Slave) {
-			devices.AddDevice(slave)
-		}(i, slave)
-	}
+	Daemonize(background, termHandler)
 
-	// Wait for the devices to be async added
-	for devices.Count() < 2 {
-		time.Sleep(10 * time.Millisecond)
-	}
-
-	// Find all device initialisation scripts
-	files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
-	if err != nil {
-		log.Fatal("Could not get device initialisation scripts ..", err)
-		return
-	}
-
-	// Execute all files
-	for _, f := range files {
-		log.Info("RUNNING ", f, " ON ALL CONNECTED DEVICES")
-		execScriptOnAll(slaves, f)
-	}
+	log.Info("TODO: add CLI here!")
 }

@@ -5,5 +5,6 @@
   "databaseuser": "master",
   "databasepassword": "badpassword",
 
-  "pidfile": "self.pid"
+  "pidfile": "scmt.pid",
+  "logfile": "scmt.log"
 }

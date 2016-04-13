@@ -4,11 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"golang.org/x/crypto/ssh"
 	"io"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
+
+	"golang.org/x/crypto/ssh"
 
 	log "github.com/Sirupsen/logrus"
 )
@@ -73,6 +75,78 @@ func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 	}
 
 	return stdoutBuf.String()
+}
+
+/*
+	Copies a folder to a remote NewRemoteConnection
+    Example: CopyFolder("/home/xxxx/SuperK/", "/tmp/") will copy SuperK to /tmp/SuperK
+*/
+func (conn *RemoteConnection) CopyFolder(folderpath string, destination string) error {
+	session, err := conn.Connection.NewSession()
+	if err != nil {
+		Log.Error("could not open a new session", err)
+		return err
+	}
+	defer session.Close()
+
+	f, err := os.Open(folderpath)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	if err != nil {
+		return err
+	}
+
+	Log.WithFields(log.Fields{
+		"target":      conn.Device.IpAddress,
+		"folderpath":  folderpath,
+		"destination": destination,
+	}).Info("copied file")
+
+	if folderpath[len(folderpath)-1] == '/' {
+		folderpath = folderpath[:len(folderpath)-1]
+	}
+
+	path, foldername := path.Split(folderpath)
+	fmt.Println(path)
+
+	tmpPath := fmt.Sprintf("/tmp/%s.tar.gz", foldername)
+	cmd := exec.Command("/bin/tar", "-C", path, "-zcf", tmpPath, foldername)
+
+	Log.WithFields(log.Fields{
+		"target":  conn.Device.IpAddress,
+		"command": cmd,
+	}).Info("Running command")
+
+	if err := cmd.Run(); err != nil {
+		Log.WithFields(log.Fields{
+			"target":  conn.Device.IpAddress,
+			"command": cmd,
+			"error":   err,
+		}).Fatal("Failed to run command")
+	}
+
+	err = conn.CopyFile(tmpPath, tmpPath)
+
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"target":  conn.Device.IpAddress,
+			"command": cmd,
+			"error":   err,
+		}).Warn("Failed to copy file")
+		return err
+	}
+
+	shellCMD := fmt.Sprintf("/bin/tar -xf %s -C %s", tmpPath, destination)
+	conn.RunInShell(shellCMD, true)
+
+	shellCMD = "rm " + tmpPath
+	conn.RunInShell(shellCMD, false)
+
+	return nil
 }
 
 func (conn *RemoteConnection) CopyFile(filepath string, destination string) error {

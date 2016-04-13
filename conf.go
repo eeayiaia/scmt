@@ -20,6 +20,7 @@ type Configuration struct {
 	DatabasePassword string
 
 	PidFile string
+	LogFile string
 }
 
 const CONFIGURATIONPATH = "scmt.json"

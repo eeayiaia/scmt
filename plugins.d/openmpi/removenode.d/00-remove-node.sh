@@ -1,6 +1,6 @@
 #!/bin/bash
-NODE_IP=$1
-NODE_NAME=$2
+
+# Inputs: NODE_IP, NODENAME
 
 # Get script directory
 DIR="${BASH_SOURCE%/*}"
@@ -10,7 +10,7 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_root
 
-echo "OpenMPI: removing node with hostname '$NODE_NAME' and IP '$NODE_IP'"
+echo "OpenMPI: removing node with hostname '$NODENAME' and IP '$NODE_IP'"
 
 # Remove node from machine-file
 OPENMPI_HOSTFILE="/home/mpiuser/openmpi-hostfile"
@@ -22,5 +22,5 @@ else
 	backup_file $OPENMPI_HOSTFILE
 fi
 
-sed -i".bak" '/'$NODE_NAME'/d' $OPENMPI_HOSTFILE
+sed -i".bak" '/'$NODENAME'/d' $OPENMPI_HOSTFILE
 

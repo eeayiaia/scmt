@@ -1,6 +1,6 @@
 #!/bin/bash
-NODE_IP=$1
-NODE_NAME=$2
+
+# Inputs: NODE_IP, NODENAME
 
 # Get script directory
 DIR="${BASH_SOURCE%/*}"
@@ -10,7 +10,7 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_root
 
-echo "OpenMPI: adding node with hostname '$NODE_NAME' and IP '$NODE_IP'"
+echo "OpenMPI: adding node with hostname '$NODENAME' and IP '$NODE_IP'"
 
 # Add new node to machine-file
 OPENMPI_HOSTFILE="/home/mpiuser/openmpi-hostfile"
@@ -24,5 +24,5 @@ fi
 
 # TODO: number of slots should not be hardcoded
 NUM_PROCS=$(nproc)
-echo "$NODE_NAME	slots=$NUM_PROCS" >> $OPENMPI_HOSTFILE
+echo "$NODENAME	slots=$NUM_PROCS" >> $OPENMPI_HOSTFILE
 
