@@ -1,11 +1,9 @@
 #!/bin/sh
 
-echo "------------------------------------------------------------"
-echo "STUB BASH SCRIPT FOR BASE DEVICE/NODE INITIALISATION."
-echo "------------------------------------------------------------"
+# Supplied environment variables:
+#   HOSTNAME
+#   NODE_IP
+#   NODE_MAC
 
-USER=`whoami`
-echo "You are $USER"
-
-ROOT=`sudo whoami`
-echo "Root is $ROOT"
+# Set correct hostname
+echo $HOSTNAME > /etc/hostname
