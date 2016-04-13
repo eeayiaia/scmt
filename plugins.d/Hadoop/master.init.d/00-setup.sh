@@ -36,9 +36,10 @@ sudo adduser --ingroup hadoop hduser
 
 
 #Installing Hadoop below...
-sudo add-apt-repository ppa:hadoop-ubuntu/stable
-sudo apt-get update && sudo apt-get upgrade
-sudo apt-get install hadoop
+sudo wget http://www.motorlogy.com/apache/hadoop/common/current/hadoop-2.3.0.tar.gz
+tar xfz hadoop-2.3.0.tar.gz
+mv hadoop-2.3.0 /usr/local/hadoop
+
 
 #Update .bashrc
 echo "#Set Hadoop-releated enviroment variables" >> /home/hduser/.bashrc
@@ -56,8 +57,10 @@ echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/hduser/.bashrc
 #Configure Hadoop
 
 #First we need to set the java home directory in hadoop
-cd /usr/local/hadoop/conf/hadoop-env.sh
-sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java-1.7.0-openjdk-armhf/bin/}' /usr/local/hadoop/conf/hadoop-env.sh
+
+sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java-7-openjdk-armf/jre/bin/java}' ~/usr/local/hadoop/conf/hadoop-env.sh
+
+/usr/lib/jvm/java-7-openjdk-armf/jre/bin/java
 
 
 

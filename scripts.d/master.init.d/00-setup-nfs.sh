@@ -13,7 +13,7 @@
 #Installing NFS
 echo "Installing NFS"
 
-apt-get install nfs-kernel-server
+sudo apt-get install nfs-kernel-server
 INSTALL_SUCCESS=$?
 
 echo ""
@@ -25,13 +25,26 @@ if [[ $INSTALL_SUCCESS != 0]]; then
 fi
 
 #Filesystem that is to be exported needs to exist
-#mkdir...  filesys goes here
+sudo mkdir /var/nfs
 
-#Need to mount filesys with permission 777
-#mount --bind /local_filesys /export_filesys
+#set ownership
+sudo chown nobody:nogroup /var/nfs
 
-#Need to write filesys into fstab else needs to be written every boot
-echo "/local_filesys		/remote_filesys		none		bind		0		0" >> /ect/fstab
+#Adding clients to the list that we will share with
+echo "/var/nfs		10.46.0.101(rw)" >> /etc/exports
+echo "/var/nfs		10.46.0.102(rw)" >> /etc/exports
+echo "/var/nfs		10.46.0.103(rw)" >> /etc/exports
+
+#Create the nfs table
+sudo exportfs -a
+
+#Start the service
+sudo service nfs-kernel-server start
+
+
+
+
+
 
 
 
