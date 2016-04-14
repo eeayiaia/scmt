@@ -5,24 +5,19 @@ import (
     "errors"
     "os/exec"
     "github.com/eeayiaia/scmt/database"
+    "github.com/eeayiaia/scmt/devices"
     log "github.com/Sirupsen/logrus"
 )
 
 var initialized = false
+/*
+    RegisterInvokerHandlers requires quite a lot of other packages to be initialized, is this good to have in init?
+    Also should we initialize devices from here?
+*/
 
 func Init() {
-    
-	if initialized {
-		Log.Warn("devices already initialized!")
-		return
-	}
-
-	Log.Info("Initialising ..")
-    
     InitContextLogging()
     RegisterInvokerHandlers()
-    
-    initialized = true
 }
 
 func InstallPlugin(pluginName string) error {
@@ -107,9 +102,14 @@ func PluginIsInstalled(pluginName string) (bool,error) {
 
 
 /*
-    Sets environment variables for given CMD
+    Sets environment variables for given CMD and slave on master
 */
 
-func pluginEnv(command *exec.Cmd) error {
+func PluginEnvMaster(command *exec.Cmd, device devices.Slave) error {
+    var env = make([]string,4)
+    env = append(env, "NODE_IP=" + device.IpAddress)
+    env = append(env, "NODENAME=" + device.Hostname)
+    env = append(env, "CLUSTERNAME=" + "SCMT") // TODO: this should be read from a config?
+    command.Env = env
     return nil    
 }
