@@ -259,6 +259,9 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 	return ch, nil
 }
 
+/*
+    Todo; Add parameter for environment variable
+*/
 func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) {
 	ch := make(chan string)
 

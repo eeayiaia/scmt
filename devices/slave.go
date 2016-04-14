@@ -5,17 +5,18 @@ package devices
 */
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/heartbeat"
+	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
-	"os"
-	"errors"
-	"database/sql"
-	log "github.com/Sirupsen/logrus"
 )
 
 // A Slave devices (connected to the master)
@@ -57,16 +58,14 @@ func (s *Slave) CopyFile(file string, destination string) chan error {
     Example: s.CopyFolder("/home/xxxx/SuperK/", "/tmp/") will copy SuperK to /tmp/SuperK
 */
 func (s *Slave) CopyFolder(filepath string, destination string) error {
-    rc, err := NewRemoteConnection(s)
-    if err != nil {
-        return err
-    }
+	rc, err := NewRemoteConnection(s)
+	if err != nil {
+		return err
+	}
 
-    result := rc.CopyFolder(filepath, destination)
-    return result
+	result := rc.CopyFolder(filepath, destination)
+	return result
 }
-
-
 
 /*
 	Runs a command in a remote shell on a specific slave
@@ -318,15 +317,15 @@ func (slave *Slave) SetPluginInstalled(plugin string) {
 	stmt, err := db.Prepare("INSERT INTO installedPlugins_slave (hwaddr, plugin) VALUES ((?),(?))")
 	defer stmt.Close()
 	if err != nil {
-        Log.WithFields(log.Fields{
-            "error": err,
-        }).Fatal("Could not prepare sql query")
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Could not prepare sql query")
 	}
 	_, err = stmt.Exec(slave.HardwareAddress, plugin)
 	if err != nil {
-        Log.WithFields(log.Fields{
-            "error": err,
-        }).Fatal("Could not execute sql query")
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Could not execute sql query")
 	}
 }
 
@@ -336,16 +335,16 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 	isInDB, _ := database.PluginInDB(plugin)
 	if !isInDB {
 		Log.WithFields(log.Fields{
-            "plugin" : plugin,
-        }).Warn("Plugin not in database")
+			"plugin": plugin,
+		}).Warn("Plugin not in database")
 		return errors.New("Plugin not in database: " + plugin)
 	}
 
 	isInstalled := slave.PluginIsInstalled(plugin)
 	if isInstalled {
 		Log.WithFields(log.Fields{
-			"MAC": slave.HardwareAddress,
-			"plugin" : plugin,
+			"MAC":    slave.HardwareAddress,
+			"plugin": plugin,
 		}).Info("Plugin already installed")
 		return errors.New("Plugin already installed: " + plugin)
 	}
@@ -353,38 +352,37 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 	isEnabled := database.PluginIsEnabled(plugin)
 	if !isEnabled {
 		Log.WithFields(log.Fields{
-            "plugin" : plugin,
-        }).Warn("Plugin not enabled")
-        return errors.New("Plugin not enabled: " + plugin)
+			"plugin": plugin,
+		}).Warn("Plugin not enabled")
+		return errors.New("Plugin not enabled: " + plugin)
 	}
 
 	err := slave.InstallPlugin(plugin)
 	if err != nil {
 		Log.WithFields(log.Fields{
-            "plugin" : plugin,
-        }).Warn("Failed with installation")
-        return errors.New("Failed with installation of: " + plugin)
+			"plugin": plugin,
+		}).Warn("Failed with installation")
+		return errors.New("Failed with installation of: " + plugin)
 	}
 
 	slave.SetPluginInstalled(plugin)
 
 	Log.WithFields(log.Fields{
-            "plugin" : plugin,
-    }).Info("Successfully installed")
+		"plugin": plugin,
+	}).Info("Successfully installed")
 
 	return nil
 }
 
-
-func (slave *Slave) InstallPlugin(pluginName string) error{
+func (slave *Slave) InstallPlugin(pluginName string) error {
 	pluginName = strings.ToLower(strings.Trim(pluginName, " "))
 	pluginDir := os.Getenv("PATH_TO_ROOT") + "/plugins.d/" + pluginName + "/device.init.d/" //TODO:replace path to root with actual project root?
-	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh") //get info from all files in plugin/device.init.d directory
+	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh")                                  //get info from all files in plugin/device.init.d directory
 
 	if err != nil {
 		Log.WithFields(log.Fields{
-		"MAC": slave.HardwareAddress,
-		"plugin" : pluginName,
+			"MAC":    slave.HardwareAddress,
+			"plugin": pluginName,
 		}).Error("Error in reading plugin directory")
 		return err
 	}
@@ -395,15 +393,17 @@ func (slave *Slave) InstallPlugin(pluginName string) error{
 			return err
 		}
 		for {
-			result, more := <- ch
-			if !more { break }
+			result, more := <-ch
+			if !more {
+				break
+			}
 			Log.Info(result)
 		}
 	}
 	return nil
 }
 
-func(slave *Slave) PluginIsInstalled(pluginName string) bool {
+func (slave *Slave) PluginIsInstalled(pluginName string) bool {
 	slave.lock.Lock()
 	defer slave.lock.Unlock()
 
@@ -426,4 +426,46 @@ func(slave *Slave) PluginIsInstalled(pluginName string) bool {
 	default:
 		return true
 	}
+}
+
+/*
+   Returns an array with environment variables for scripts running on slaves
+*/
+func PluginEnvSlave() []string {
+	var env = make([]string, 2)
+
+	masterIP, err := getMasterIP()
+
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Failed to get master IP from /etc/hosts")
+
+	}
+
+	env = append(env, "MASTER_IP="+masterIP)
+	env = append(env, "CLUSTERNAME="+"SCMT") // TODO: this should be read from a config?
+
+	return env
+}
+
+/*
+   Parses IP address for master from /etc/hosts
+   Todo: Validate that second part of line actually is in correct IP format.
+*/
+func getMasterIP() (string, error) {
+	content, err := ioutil.ReadFile("/etc/hosts")
+	if err != nil {
+		return "", errors.New("Failed to read /etc/hosts ")
+	}
+	lines := strings.Split(string(content), "\n")
+
+	for _, line := range lines {
+		splitted := strings.Fields(line)
+		if len(splitted) >= 2 && splitted[0] == "master" {
+			return splitted[1], nil
+
+		}
+	}
+	return "", errors.New("Failed to get master IP ")
 }
