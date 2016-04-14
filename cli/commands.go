@@ -12,6 +12,8 @@ import (
 specific node, ..?
 */
 
+type ActionFunction func(*cli.Context)
+
 var commands []cli.Command = []cli.Command {
 	{
 		Name:        "install-plugin",
@@ -47,6 +49,22 @@ var commands []cli.Command = []cli.Command {
 
 func getCommands() []cli.Command {
 	return commands
+}
+
+func AddCommandShort(name string, af ActionFunction) {
+	AddCommand(name, []string{""}, "No usage set", "No usage text set", "No args usage description", "", af)
+}
+
+func AddCommand(name string, aliases []string, usage string, usageText string, argsUsage string, cat string, af ActionFunction){
+	commands = append(commands, cli.Command {
+			Name:        name,
+			Aliases:     aliases,
+			Usage:       usage,
+			UsageText:   usageText,
+			ArgsUsage:   argsUsage,
+			Category:    cat,
+			Action:      af,
+		})
 }
 
 func installPlugin(c *cli.Context) {
