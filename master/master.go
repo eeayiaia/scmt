@@ -16,8 +16,14 @@ var initialized = false
 */
 
 func Init() {
+    if initialized {
+        Log.Warn("master already initialized!")
+        return
+    }
     InitContextLogging()
     RegisterInvokerHandlers()
+    
+    initialized = true
 }
 
 func InstallPlugin(pluginName string) error {
