@@ -2,14 +2,27 @@ package master
 
 import (
     "strings"
-    "github.com/eeayiaia/scmt/database" 
     "errors"
+    "os/exec"
+    "github.com/eeayiaia/scmt/database"
     log "github.com/Sirupsen/logrus"
 )
 
+var initialized = false
+
 func Init() {
+    
+	if initialized {
+		Log.Warn("devices already initialized!")
+		return
+	}
+
+	Log.Info("Initialising ..")
+    
     InitContextLogging()
-    Log.Info("initialising ..")
+    RegisterInvokerHandlers()
+    
+    initialized = true
 }
 
 func InstallPlugin(pluginName string) error {
@@ -62,6 +75,7 @@ func SetPluginInstalled(pluginName string) error {
         }).Info("Plugin set to be installed on master")
     return nil
 }
+
 /*
     Returns true if plugin is installed on master.
 */
@@ -89,4 +103,13 @@ func PluginIsInstalled(pluginName string) (bool,error) {
     default:
         return false, err
     }
+}
+
+
+/*
+    Sets environment variables for given CMD
+*/
+
+func pluginEnv(command *exec.Cmd) error {
+    return nil    
 }

@@ -46,7 +46,7 @@ func Init() {
 		devices = make([]*Slave, 0)
 	}
 
-	RegisterInvokerHandlers()
+	//RegisterInvokerHandlers()
 
 	initialized = true
 }
