@@ -94,7 +94,7 @@ func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
 		return nil, err
 	}
 
-	return rc.RunScript(scriptpath,PluginEnvSlave())
+	return rc.RunScript(scriptpath, pluginEnvSlave())
 }
 
 /*
@@ -306,7 +306,7 @@ func (slave *Slave) RunRemoveNodeScripts() error {
 
 }*/
 
-func (slave *Slave) SetPluginInstalled(plugin string) {
+func (slave *Slave) setPluginInstalled(plugin string) {
 
 	db, err := database.NewConnection()
 	defer db.Close()
@@ -327,9 +327,9 @@ func (slave *Slave) SetPluginInstalled(plugin string) {
 }
 
 func (slave *Slave) RunPluginInstaller(plugin string) error {
-    slave.lock.Lock()
+	slave.lock.Lock()
 	defer slave.lock.Unlock()
-    
+
 	plugin = strings.ToLower(plugin)
 
 	isInDB, _ := database.PluginInDB(plugin)
@@ -340,7 +340,7 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 		return errors.New("Plugin not in database: " + plugin)
 	}
 
-	isInstalled := slave.PluginIsInstalled(plugin)
+	isInstalled := slave.pluginIsInstalled(plugin)
 	if isInstalled {
 		Log.WithFields(log.Fields{
 			"MAC":    slave.HardwareAddress,
@@ -357,7 +357,7 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 		return errors.New("Plugin not enabled: " + plugin)
 	}
 
-	err := slave.InstallPlugin(plugin)
+	err := slave.installPlugin(plugin)
 	if err != nil {
 		Log.WithFields(log.Fields{
 			"plugin": plugin,
@@ -365,7 +365,7 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 		return errors.New("Failed with installation of: " + plugin)
 	}
 
-	slave.SetPluginInstalled(plugin)
+	slave.setPluginInstalled(plugin)
 
 	Log.WithFields(log.Fields{
 		"plugin": plugin,
@@ -377,10 +377,10 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 /*
    This function must be called with slave.lock.Lock() set.
 */
-func (slave *Slave) InstallPlugin(pluginName string) error {
+func (slave *Slave) installPlugin(pluginName string) error {
 	pluginName = strings.ToLower(strings.Trim(pluginName, " "))
 	pluginDir := "./plugins.d/" + pluginName + "/device.init.d/"
-    
+
 	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh")
 
 	if err != nil {
@@ -390,10 +390,10 @@ func (slave *Slave) InstallPlugin(pluginName string) error {
 		}).Error("Error in reading plugin directory")
 		return err
 	}
-    
-    err = slave.CopyFolder(pluginDir, "/tmp/")
-   
-   	if err != nil {
+
+	err = slave.CopyFolder(pluginDir, "/tmp/")
+
+	if err != nil {
 		Log.WithFields(log.Fields{
 			"MAC":    slave.HardwareAddress,
 			"plugin": pluginName,
@@ -402,18 +402,18 @@ func (slave *Slave) InstallPlugin(pluginName string) error {
 	}
 
 	for _, scriptPath := range scriptsToRun {
-		ch, err := slave.RunScriptAsync("/tmp/"+"/device.init.d/" + path.Base(scriptPath))
+		ch, err := slave.RunScriptAsync("/tmp/" + "/device.init.d/" + path.Base(scriptPath))
 		if err != nil {
 			return err
 		}
-		for result := range ch{
+		for result := range ch {
 			Log.Info(result)
 		}
 	}
 	return nil
 }
 
-func (slave *Slave) PluginIsInstalled(pluginName string) bool {
+func (slave *Slave) pluginIsInstalled(pluginName string) bool {
 
 	db, err := database.NewConnection()
 	defer db.Close()
@@ -439,13 +439,13 @@ func (slave *Slave) PluginIsInstalled(pluginName string) bool {
 /*
    Returns an array with environment variables for scripts running on slaves
 */
-func PluginEnvSlave() map[string]string {
-    env := make(map[string]string)
-    
-    masterIP, err := getMasterIP()
+func pluginEnvSlave() map[string]string {
+	env := make(map[string]string)
 
-    if err != nil {
-        Log.WithFields(log.Fields{
+	masterIP, err := getMasterIP()
+
+	if err != nil {
+		Log.WithFields(log.Fields{
 			"error": err,
 		}).Fatal("Failed to get master IP from /etc/hosts")
 
