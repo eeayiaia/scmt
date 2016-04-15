@@ -402,7 +402,6 @@ func (slave *Slave) InstallPlugin(pluginName string) error {
 	}
 
 	for _, scriptPath := range scriptsToRun {
-        fmt.Println("Running: " + scriptPath)
 		ch, err := slave.RunScriptAsync("/tmp/"+"/device.init.d/" + path.Base(scriptPath))
 		if err != nil {
 			return err

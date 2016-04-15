@@ -260,7 +260,7 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 }
 
 /*
-    Note: This function no longer transfer given file, it only runs given script.
+   Note: This function no longer transfer given file, it only runs given script.
 */
 func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string) (chan string, error) {
 	ch := make(chan string)
@@ -286,13 +286,7 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 			}).Error("could not open session")
 			return
 		}
-        
-        if env!=nil {
-            for k,v := range env {
-                session.Setenv(k,v)
-            }
-        }
-        
+
 		stdout, err := session.StdoutPipe()
 		if err != nil {
 			Log.Error("when creating stdout-pipe: ", err)
@@ -338,7 +332,15 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 		/*		for _, line := range lines {
 				stdin.Write([]byte(line + "\n"))
 			}*/
-		stdin.Write([]byte("sudo sh " + scriptpath + "\n"))
+
+		exportStmts := ""
+		if env != nil {
+			for k, v := range env {
+				exportStmts += "export " + k + "=" + v + ";"
+			}
+		}
+
+		stdin.Write([]byte(exportStmts + "sudo -E bash -C '" + scriptpath + "'\n"))
 
 		// Kill all jobs (if any) and exit
 		stdin.Write([]byte("kill $(jobs -p) && exit\n"))

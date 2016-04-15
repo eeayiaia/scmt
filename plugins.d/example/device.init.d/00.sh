@@ -1,3 +1,4 @@
 #!/bin/sh
-/bin/cp /etc/passwd /tmp/epa
+
+echo "MASTER_IP:" $MASTER_IP "\nCLUSTERNAME:" $CLUSTERNAME > /tmp/epa
 
