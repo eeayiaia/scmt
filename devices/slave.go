@@ -95,7 +95,7 @@ func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
 		return nil, err
 	}
 
-	return rc.RunScript(scriptpath)
+	return rc.RunScript(scriptpath,PluginEnvSlave())
 }
 
 /*
@@ -431,9 +431,9 @@ func (slave *Slave) PluginIsInstalled(pluginName string) bool {
 /*
    Returns an array with environment variables for scripts running on slaves
 */
-func PluginEnvSlave() []string {
-	var env = make([]string, 2)
-
+func PluginEnvSlave() map[string]string {
+    env := make(map[string]string)
+    
 	masterIP, err := getMasterIP()
 
 	if err != nil {
@@ -443,8 +443,8 @@ func PluginEnvSlave() []string {
 
 	}
 
-	env = append(env, "MASTER_IP="+masterIP)
-	env = append(env, "CLUSTERNAME="+"SCMT") // TODO: this should be read from a config?
+	env["MASTER_IP"] = masterIP
+	env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config?
 
 	return env
 }

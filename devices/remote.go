@@ -260,9 +260,9 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 }
 
 /*
-    Todo; Add parameter for environment variable
+    
 */
-func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) {
+func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string) (chan string, error) {
 	ch := make(chan string)
 
 	go func() {
@@ -286,7 +286,13 @@ func (conn *RemoteConnection) RunScript(scriptpath string) (chan string, error) 
 			}).Error("could not open session")
 			return
 		}
-
+        
+        if env!=nil {
+            for k,v := range env {
+                session.Setenv(k,v)
+            }
+        }
+        
 		stdout, err := session.StdoutPipe()
 		if err != nil {
 			Log.Error("when creating stdout-pipe: ", err)
