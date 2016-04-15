@@ -57,10 +57,23 @@ echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/hduser/.bashrc
 #Configure Hadoop
 
 #First we need to set the java home directory in hadoop
+sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java--openjdk-armf/jre/bin/java}' ~/usr/local/hadoop/conf/hadoop-env.sh
 
-sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java-7-openjdk-armf/jre/bin/java}' ~/usr/local/hadoop/conf/hadoop-env.sh
+#Set Hadoop enviroment
+#Config core-site.xml
 
-/usr/lib/jvm/java-7-openjdk-armf/jre/bin/java
+
+#Config hdfs-site.xml
+
+
+
+#Config mapred-site.xml
+
+
+
+#Config hadoop-env.sh
+#Set this:  export JAVA_HOME=/usr/lib/jvm/java--openjdk-armf/jre/bin/jav export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true export HADOOP_CONF_DIR=/opt/hadoop/hadoop/conf
+
 
 
 
