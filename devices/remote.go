@@ -260,13 +260,13 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 }
 
 /*
-    
+    Note: This function no longer transfer given file, it only runs given script.
 */
 func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string) (chan string, error) {
 	ch := make(chan string)
 
 	go func() {
-		filename := path.Base(scriptpath)
+		/*filename := path.Base(scriptpath)
 		dest := fmt.Sprintf("/var/tmp/%s", filename)
 		err := conn.CopyFile(scriptpath, dest)
 		if err != nil {
@@ -275,7 +275,7 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 				"dest":   dest,
 			}).Error("could not copy script to device")
 			return
-		}
+		}*/
 
 		session, err := conn.Connection.NewSession()
 		if err != nil {
@@ -338,7 +338,7 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 		/*		for _, line := range lines {
 				stdin.Write([]byte(line + "\n"))
 			}*/
-		stdin.Write([]byte("sudo sh " + dest + "\n"))
+		stdin.Write([]byte("sudo sh " + scriptpath + "\n"))
 
 		// Kill all jobs (if any) and exit
 		stdin.Write([]byte("kill $(jobs -p) && exit\n"))

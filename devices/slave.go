@@ -12,7 +12,6 @@ import (
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/heartbeat"
 	"io/ioutil"
-	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -308,8 +307,6 @@ func (slave *Slave) RunRemoveNodeScripts() error {
 }*/
 
 func (slave *Slave) SetPluginInstalled(plugin string) {
-	slave.lock.Lock()
-	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
 	defer db.Close()
@@ -330,6 +327,9 @@ func (slave *Slave) SetPluginInstalled(plugin string) {
 }
 
 func (slave *Slave) RunPluginInstaller(plugin string) error {
+    slave.lock.Lock()
+	defer slave.lock.Unlock()
+    
 	plugin = strings.ToLower(plugin)
 
 	isInDB, _ := database.PluginInDB(plugin)
@@ -374,10 +374,14 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 	return nil
 }
 
+/*
+   This function must be called with slave.lock.Lock() set.
+*/
 func (slave *Slave) InstallPlugin(pluginName string) error {
 	pluginName = strings.ToLower(strings.Trim(pluginName, " "))
-	pluginDir := os.Getenv("PATH_TO_ROOT") + "/plugins.d/" + pluginName + "/device.init.d/" //TODO:replace path to root with actual project root?
-	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh")                                  //get info from all files in plugin/device.init.d directory
+	pluginDir := "./plugins.d/" + pluginName + "/device.init.d/"
+    
+	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh")
 
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -386,17 +390,24 @@ func (slave *Slave) InstallPlugin(pluginName string) error {
 		}).Error("Error in reading plugin directory")
 		return err
 	}
+    
+    err = slave.CopyFolder(pluginDir, "/tmp/")
+   
+   	if err != nil {
+		Log.WithFields(log.Fields{
+			"MAC":    slave.HardwareAddress,
+			"plugin": pluginName,
+		}).Error("Failed to transfer plugin")
+		return err
+	}
 
 	for _, scriptPath := range scriptsToRun {
-		ch, err := slave.RunScriptAsync(scriptPath)
+        fmt.Println("Running: " + scriptPath)
+		ch, err := slave.RunScriptAsync("/tmp/"+"/device.init.d/" + path.Base(scriptPath))
 		if err != nil {
 			return err
 		}
-		for {
-			result, more := <-ch
-			if !more {
-				break
-			}
+		for result := range ch{
 			Log.Info(result)
 		}
 	}
@@ -404,8 +415,6 @@ func (slave *Slave) InstallPlugin(pluginName string) error {
 }
 
 func (slave *Slave) PluginIsInstalled(pluginName string) bool {
-	slave.lock.Lock()
-	defer slave.lock.Unlock()
 
 	db, err := database.NewConnection()
 	defer db.Close()
@@ -434,10 +443,10 @@ func (slave *Slave) PluginIsInstalled(pluginName string) bool {
 func PluginEnvSlave() map[string]string {
     env := make(map[string]string)
     
-	masterIP, err := getMasterIP()
+    masterIP, err := getMasterIP()
 
-	if err != nil {
-		Log.WithFields(log.Fields{
+    if err != nil {
+        Log.WithFields(log.Fields{
 			"error": err,
 		}).Fatal("Failed to get master IP from /etc/hosts")
 
