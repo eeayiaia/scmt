@@ -6,22 +6,22 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh" || exit 1
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
 
-check_root
+check_invoked_by_scmt
 
 echo "OpenMPI: removing node with hostname '$NODENAME' and IP '$NODE_IP'"
 
 # Remove node from machine-file
 OPENMPI_MACHINEFILE="/home/mpiuser/openmpi-machinefile"
 
-if [[ ! -f $OPENMPI_MACHINEFILE ]]; then
+if [[ ! -f "$OPENMPI_MACHINEFILE" ]]; then
 	echo "Error: '$OPENMPI_MACHINEFILE' does not exist." 1&>2
 	exit 2
 #else
 #	Might be excessive to backup machinefile for each removed node
-#	backup_file $OPENMPI_MACHINEFILE
+#	backup_file "$OPENMPI_MACHINEFILE"
 fi
 
-sed -i".bak" '/'$NODENAME'/d' $OPENMPI_MACHINEFILE
+sed -i".bak" '/'$NODENAME'/d' "$OPENMPI_MACHINEFILE"
 

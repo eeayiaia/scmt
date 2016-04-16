@@ -9,44 +9,41 @@
 #		exit 0
 #fi
 
+# Get script directory
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+. "$DIR/../utils.sh" || exit 1
+
+check_invoked_by_scmt
 
 #Installing NFS
 echo "Installing NFS"
 
-sudo apt-get install nfs-kernel-server
+apt-get install nfs-kernel-server --assume-yes
 INSTALL_SUCCESS=$?
 
 echo ""
 write_line
 
-if [[ $INSTALL_SUCCESS != 0]]; then
+if [[ $INSTALL_SUCCESS != 0 ]]; then
 		echo "Failed to install NFS."
 		exit 1
 fi
 
 #Filesystem that is to be exported needs to exist
-sudo mkdir /var/nfs
+mkdir /var/nfs
 
 #set ownership
-sudo chown nobody:nogroup /var/nfs
+chown nobody:nogroup /var/nfs
 
 #Adding clients to the list that we will share with
-echo "/var/nfs		10.46.0.101(rw)" >> /etc/exports
-echo "/var/nfs		10.46.0.102(rw)" >> /etc/exports
-echo "/var/nfs		10.46.0.103(rw)" >> /etc/exports
+# TODO: Make sure subnet is correct
+echo "/var/nfs	10.46.0.0/24(rw,sync,no_subtree_check)" >> /etc/exports
 
 #Create the nfs table
-sudo exportfs -a
+exportfs -a
 
 #Start the service
-sudo service nfs-kernel-server start
-
-
-
-
-
-
-
-
-
+service nfs-kernel-server start
 

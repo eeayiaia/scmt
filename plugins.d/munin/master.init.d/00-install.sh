@@ -1,6 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
+# Get script directory
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
 
 MasterNodeName=`hostname`
 

@@ -1,14 +1,13 @@
 #!/bin/bash
 
-MPIUSER_UID=999
-
 # Get script directory
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh" || exit 1
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
+. "$DIR/../resources/config" || exit 1
 
-check_root
+check_invoked_by_scmt
 
 # Install OpenMPI
 echo "Installing OpenMPI"
@@ -26,12 +25,13 @@ MPIUSER_UID_CURRENT=$(id -u mpiuser)
 MPIUSER_EXISTS=$?
 
 if [[ $MPIUSER_EXISTS != 0 ]]; then
-	# No user called mpiuser
+	# Create mpiuser
 	create_user mpiuser mpi $MPIUSER_UID
 	ADDUSER_SUCCESS=$?
 
 	if [[ $ADDUSER_SUCCESS != 0 ]]; then
-		echo "Failed to create mpiuser. Is there another user with uid $MPIUSER_UID?" >&2
+		echo "Failed to create mpiuser. Is there another user with uid " \
+			"$MPIUSER_UID?" >&2
 		exit 2
 	fi
 
@@ -39,7 +39,8 @@ if [[ $MPIUSER_EXISTS != 0 ]]; then
 	backup_file /etc/fstab
 
 	# Add to fstab if not already present
-	grep -q -F 'master:/home/mpiuser' /etc/fstab || echo 'master:/home/mpiuser /home/mpiuser nfs' >> /etc/fstab
+	grep -q -F 'master:/home/mpiuser' /etc/fstab \
+		|| echo 'master:/home/mpiuser /home/mpiuser nfs' >> /etc/fstab
 
 	mount master:/home/mpiuser /home/mpiuser
 else

@@ -7,7 +7,7 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh"
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
 
 #Default send interval is 5 minutes
 send_metadata_interval=${1-300}
@@ -57,7 +57,7 @@ tcp_accept_channel_attr="
 
 data_source="data_source \"${1-my cluster}\" localhost\n"
 
-check_root
+check_invoked_by_scmt
 
 apt-get install debconf-utils
 

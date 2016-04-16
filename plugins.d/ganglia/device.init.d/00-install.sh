@@ -4,7 +4,7 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh"
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
 
 #Default send interval is 5 minutes
 send_metadata_interval=${1-300}
@@ -44,7 +44,7 @@ udp_send_channel_attr="
 "
 
 
-check_root
+check_invoked_by_scmt
 
 apt-get install -y --force-yes ganglia-monitor
 

@@ -1,14 +1,13 @@
 #!/bin/bash
 
-MPIUSER_UID=999
-
-# Script directory
-
+# Get script directory
+DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh" || exit 1
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
+. "$DIR/../resources/config" || exit 1
 
-check_root
+check_invoked_by_scmt
 
 # Install MPICH
 echo "Installing MPICH"
@@ -21,33 +20,33 @@ if [[ $INSTALL_SUCCESS != 0 ]]; then
 	exit 1
 fi
 
-#If user exists
+# Check if mpiuser exists
 MPIUSER_UID_CURRENT=$(id -u mpiuser)
 MPIUSER_EXISTS=$?
 
 if [[ $MPIUSER_EXISTS != 0 ]]; then
+	# Create mpiuser
+	create_user mpiuser mpi $MPIUSER_UID
+	ADDUSER_SUCCESS=$?
 
-		create_user mpichuser mpich $MPIUSER_UID
-		ADDUSER_SUCCESS=$?
+	if [[ $ADDUSER_SUCCESS != 0 ]]; then
+		echo "Failed create mpich user. Is there another user with uid " \
+			"$MPIUSER_UID?" >&2
+		exit 2
+	fi
 
-		if [[ $ADDUSER_SUCCESS != 0 ]]; then
-			echo "Failed create mpich user. Is there another user with uid $MPICHUSER_UID?" >&2
-			exit 2
-		fi
+	# Setup NFS mount for mpiuser home directory
+	backup_file /etc/fstab
 
-		#Setup the NFS
-		backup_file /ect/fstab
+	# Add to fstab if not already present
+	grep -q -F 'master:/home/mpiuser' /etc/fstab \
+		|| echo 'master:/home/mpiuser /home/mpiuser nfs' >> /etc/fstab
 
-		#add fstab if not present
-		grep -q -F 'master:/home/mpichuser' /ect/fstab || echo 'master:/home/mpichuser /home/mpichuser nfs' >> /ect/fstab
-
-		mount master:/home/mpichuser /home/mpichuser
-
+	mount master:/home/mpiuser /home/mpiuser
 else
-
-		if [[ $MPIUSER_UID_CURRENT != $MPIUSER_UID ]]; then
-				echo "Error: mpichuser exists but does not have the uid $MPIUSER_UID." >&2
-				exit 3
-		fi
-
+	if [[ $MPIUSER_UID_CURRENT != $MPIUSER_UID ]]; then
+		echo "Error: mpiuser exists but does not have uid '$MPIUSER_UID'." >&2
+		exit 3
+	fi
 fi
+

@@ -1,0 +1,5 @@
+# MPICH plugin for SCMT config
+# Format: <variable>=<value>
+# No spaces before or after equal sign!
+MPIUSER_UID=997 # UID for mpiuser, the user which is set up for running MPI jobs
+

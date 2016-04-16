@@ -6,9 +6,9 @@
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
-. "$DIR/../../.script-utils/installer-utils.sh"
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
 
-check_root
+check_invoked_by_scmt
 
 #Backup config file
 backup_file /etc/ganglia/gmetad.conf

@@ -1,7 +1,13 @@
 #!/bin/bash
 MASTER_INSTALLED=/usr/bin/munin-cron
-IP_ADDRESS=$1
-NODE_NAME=$2
+
+# Get script directory
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
+
+check_invoked_by_scmt
 
 if [ ! -x "$MASTER_INSTALLED" ]; then
   # if munin master is not installed (if /etc/munin is not a directory)
@@ -10,19 +16,14 @@ if [ ! -x "$MASTER_INSTALLED" ]; then
 
 fi
 
-if [[ $EUID -ne 0 ]]; then
-	echo "This installer must be run with root rights." 1>&2
-	exit 100
-fi
-
-if [ -z $IP_ADDRESS ] || [ -z $NODE_NAME ]; then
+if [ -z $NODE_IP ] || [ -z $NODENAME ]; then
 	#if either ip address or node name does not exist
 	echo please call this script "munin-add-node <node ip address> <node name>"
 	exit 2
 fi
 #format what to add in the conf file
-ADD_TO_CONF="[$NODE_NAME]
-	address $IP_ADDRESS
+ADD_TO_CONF="[$NODENAME]
+	address $NODE_IP
 	use_node_name yes"
 
 #Backup config file
