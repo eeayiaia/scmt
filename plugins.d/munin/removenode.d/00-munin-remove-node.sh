@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Input: NODE_IP
+# Input: NODENAME
 
 # Get script directory
 DIR="${BASH_SOURCE%/*}"
@@ -10,13 +10,16 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_invoked_by_scmt
 
-if [ -z $NODE_IP ]; then
-	#if either ip address or node name does not exist
-	echo please call this script "munin-remove-node <node ip address>"
+if [[ ! $NODENAME ]]; then
+	echo "Munin: removenode.d: Missing parameter 'NODENAME'. Exiting." >&2
 	exit 2
 fi
 
 #Backup config file
 backup_file /etc/munin/munin.conf
 
-python helpscript/removenode.py "$NODE_IP"
+# Remove node from munin.conf
+awk "/\[$NODENAME\]/{flag=0;next}/^\[/{flag=1}flag" /etc/munin/munin.conf \
+	> /etc/munin/munin.conf.tmp \
+	&& mv /etc/munin/munin.conf.tmp /etc/munin/munin.conf
+
