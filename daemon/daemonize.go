@@ -1,23 +1,23 @@
-package main
+package daemon
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/sevlyar/go-daemon"
+	dmn "github.com/sevlyar/go-daemon"
 	"os"
 	"syscall"
 )
 
 type postChild func()
 
-var context *daemon.Context
-var ErrStop error = daemon.ErrStop
-var isdaemon bool = false
+var context *dmn.Context
+var ErrStop error = dmn.ErrStop
+var isdmn bool = false
 
-func InitContext() {
-	context = &daemon.Context{
-		PidFileName: Conf.PidFile,
+func InitContext(pidFile string, logFile string) {
+	context = &dmn.Context{
+		PidFileName: pidFile,
 		PidFilePerm: 0644,
-		LogFileName: Conf.LogFile,
+		LogFileName: logFile,
 		LogFilePerm: 0640,
 		WorkDir:     "./",
 		Umask:       027,
@@ -34,7 +34,7 @@ func isDaemonized() bool {
 }
 
 func isDaemon() bool {
-	return isdaemon
+	return isdmn
 }
 
 func StopDaemon() {
@@ -47,20 +47,20 @@ func StopDaemon() {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
-		}).Error("could not stop daemon")
+		}).Error("could not stop dmn")
 		return
 	}
 
 	if d == nil {
-		log.Warn("tried to stop daemon, but not found")
+		log.Warn("tried to stop dmn, but not found")
 	}
 
 	d.Signal(syscall.SIGQUIT)
 }
 
-func Daemonize(childMain postChild, termHandler daemon.SignalHandlerFunc) {
-	daemon.SetSigHandler(termHandler, syscall.SIGTERM)
-	daemon.SetSigHandler(termHandler, syscall.SIGQUIT)
+func Daemonize(childMain postChild, termHandler dmn.SignalHandlerFunc) {
+	dmn.SetSigHandler(termHandler, syscall.SIGTERM)
+	dmn.SetSigHandler(termHandler, syscall.SIGQUIT)
 
 	// Don't restart it if its running!
 	if isDaemonized() {
@@ -76,15 +76,15 @@ func Daemonize(childMain postChild, termHandler daemon.SignalHandlerFunc) {
 	}
 
 	if child != nil {
-		isdaemon = false
+		isdmn = false
 		return
 	} else {
 		defer context.Release()
-		isdaemon = true
+		isdmn = true
 
 		go childMain()
 
-		err = daemon.ServeSignals()
+		err = dmn.ServeSignals()
 		if err != nil {
 			log.WithFields(log.Fields{
 				"error": err,

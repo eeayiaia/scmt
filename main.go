@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/eeayiaia/scmt/daemon"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
@@ -25,7 +26,7 @@ func termHandler(sig os.Signal) error {
 		}).Warn("could not remove pidfile")
 	}
 
-	return ErrStop
+	return daemon.ErrStop
 }
 
 func background() {
@@ -51,9 +52,9 @@ func background() {
 func main() {
 	InitConfiguration()
 	InitLogging()
-	InitContext()
+	daemon.InitContext(Conf.PidFile, Conf.LogFile)
 
-	Daemonize(background, termHandler)
+	daemon.Daemonize(background, termHandler)
 
 	log.Info("TODO: add CLI here!")
 }
