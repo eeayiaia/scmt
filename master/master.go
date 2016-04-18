@@ -3,6 +3,8 @@ package master
 import (
 	"errors"
 	"os/exec"
+	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/eeayiaia/scmt/database"
@@ -30,6 +32,29 @@ func Init() {
 }
 
 func RunNewNodeScripts(slave *devices.Slave) error {
+	files, err := filepath.Glob("./scripts.d/master.newnode.d/*.sh")
+	if err != nil {
+		return err
+	}
+
+	for _, f := range files {
+		filename := path.Base(f)
+
+		// TODO: set env vars
+
+		Log.WithFields(log.Fields{
+			"script": filename,
+		}).Info("running newnode script")
+
+		output, err := exec.Command("/bin/sh", f).Output()
+		if err != nil {
+			return err
+		}
+
+		Log.Info("Output:\n" + string(output))
+	}
+
+	return nil
 }
 
 func InstallPlugin(pluginName string) error {

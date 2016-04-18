@@ -5,6 +5,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 
 	"github.com/eeayiaia/scmt/daemon"
+	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
 )
 
@@ -38,7 +39,10 @@ func handleNewDevice(rawData bytes.Buffer) {
 		"mac": mac,
 	}).Info("new device")
 
-	//RegisterDevice(mac, ip)
+	slave := devices.RegisterDevice(mac, ip)
+	if slave != nil {
+		RunNewNodeScripts(slave)
+	}
 }
 
 /*
