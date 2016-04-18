@@ -51,3 +51,10 @@ go install github.com/eeayiaia/scmt
 ```
 
 will produce a binary in your `$GOPATH/bin` directory.
+
+### Setting up the repository
+Run `setup-repo.sh` in order to setup the proper git hooks.
+
+```bash
+$> ./setup-repo.sh
+```
