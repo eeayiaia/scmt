@@ -47,12 +47,12 @@ func StopDaemon() {
 	if err != nil {
 		log.WithFields(log.Fields{
 			"error": err,
-		}).Error("could not stop dmn")
+		}).Error("could not stop daemon")
 		return
 	}
 
 	if d == nil {
-		log.Warn("tried to stop dmn, but not found")
+		log.Warn("tried to stop daemon, but not found")
 	}
 
 	d.Signal(syscall.SIGQUIT)
