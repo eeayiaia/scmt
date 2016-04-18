@@ -45,9 +45,8 @@ func Init() {
 
 		devices = make([]*Slave, 0)
 	}
-
-	//RegisterInvokerHandlers()
-
+	RegisterInvokerHandlers()
+	
 	initialized = true
 }
 
@@ -68,13 +67,12 @@ func AddDevice(device *Slave) {
 func GetDevice(hardwareAddress string) (*Slave, error) {
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
-
+	
 	for _, slave := range devices {
 		if strings.Compare(slave.HardwareAddress, hardwareAddress) == 0 {
 			return slave, nil
 		}
 	}
-
 	return nil, errors.New("Could not find device " + hardwareAddress)
 }
 
@@ -85,8 +83,8 @@ func GetDevice(hardwareAddress string) (*Slave, error) {
 */
 func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	var slave *Slave
-
-	slave, err := GetDevice(hardwareAddress)
+	hwAddr := strings.Replace(hardwareAddress, ":", "", -1)
+	slave, err := GetDevice(hwAddr)
 	if err != nil {
 		slave = &Slave{
 			UserName:        "odroid",
@@ -99,15 +97,26 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			"mac": hardwareAddress,
 			"ip":  ipAddress,
 		}).Info("new device connected")
-
+		AddDevice(slave)
+						
+		slave.Store()
 		// only run init-scripts on a completely new device
 		err = slave.RunInitScripts()
 		if err != nil {
 			return nil // abort mission, I say!
 		}
+	}else{
+		Log.Info("exists")
 	}
-	AddDevice(slave)
-	slave.RunNewNodeScripts()
+	//slave.RunNewNodeScripts()
+	
+	// TODO: do stuff like set a static ip-address and
+	//			 prepare the device
+	//	Init:
+	//		- Hostname
+	//		- UserName & Password
+
+	// TODO: test username & password from file
 
 	return slave
 }
@@ -184,7 +193,7 @@ func getAllStoredDevices() ([]*Slave, error) {
 	db, err := database.NewConnection()
 	defer db.Close()
 
-	rows, err := db.Query("SELECT HWaddr, hname, INET_NTOA(ip), port, username, password FROM devices")
+	rows, err := db.Query("SELECT HWaddr, concat('node-',convert(id,CHAR(5))), INET_NTOA(170787072 + id), port, username, password FROM devices")
 	if err != nil {
 		Log.WithFields(log.Fields{
 			"error": err,

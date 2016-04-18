@@ -107,12 +107,12 @@ func (s *Slave) StartPinger() {
 func (slave *Slave) Store() {
 	slave.lock.Lock()
 	defer slave.lock.Unlock()
-
+	
 	db, err := database.NewConnection()
 	defer db.Close()
 
 	//INET_ATON is to convert ip to int (array-TO-number)
-	stmt, err := db.Prepare("INSERT INTO devices SET hwaddr=?, ip=INET_ATON(?), port=?, hname=?, username=?, password=?")
+	stmt, err := db.Prepare("INSERT INTO devices SET hwaddr=?, port=?, hname=?, username=?, password=?")
 	if err != nil {
 		Log.WithFields(log.Fields{
 			"error": err,
@@ -120,7 +120,7 @@ func (slave *Slave) Store() {
 		return
 	}
 
-	_, err = stmt.Exec(strings.Replace(slave.HardwareAddress, ":", "", -1), slave.IpAddress, slave.Port, slave.Hostname, slave.UserName, slave.Password)
+	_, err = stmt.Exec(strings.Replace(slave.HardwareAddress, ":", "", -1), slave.Port, slave.Hostname, slave.UserName, slave.Password)
 	if err != nil {
 		Log.WithFields(log.Fields{
 			"error": err,
@@ -181,7 +181,7 @@ func (slave *Slave) Load(HWaddr string) {
 	db, err := database.NewConnection()
 	defer db.Close()
 
-	stmt, err := db.Prepare("SELECT HWaddr, hname, INET_NTOA(ip), port, username, password FROM devices WHERE HWaddr=?")
+	stmt, err := db.Prepare("SELECT HWaddr, concat('node-',convert(id,CHAR(5))), INET_NTOA(170787072 + id), port, username, password FROM devices WHERE HWaddr=?")
 	if err != nil {
 		Log.WithFields(log.Fields{
 			"error": err,
