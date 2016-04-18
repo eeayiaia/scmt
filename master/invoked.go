@@ -3,11 +3,15 @@ package master
 import (
 	"bytes"
 	log "github.com/Sirupsen/logrus"
+
+	"github.com/eeayiaia/scmt/daemon"
 	"github.com/eeayiaia/scmt/invoker"
 )
 
 func RegisterInvokerHandlers() {
 	invoker.RegisterHandler(invoker.TYPE_NEW_DEVICE, handleNewDevice)
+
+	invoker.RegisterHandler(invoker.TYPE_STOP_DAEMON, handleStopDaemon)
 }
 
 /*
@@ -35,4 +39,14 @@ func handleNewDevice(rawData bytes.Buffer) {
 	}).Info("new device")
 
 	//RegisterDevice(mac, ip)
+}
+
+/*
+	Handle invoker.TYPE_STOP_DAEMON
+		data: none
+*/
+func handleStopDaemon(_ bytes.Buffer) {
+	Log.Info("Shutting down the daemon")
+
+	daemon.StopDaemon()
 }

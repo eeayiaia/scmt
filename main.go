@@ -1,10 +1,12 @@
 package main
 
 import (
+	"github.com/eeayiaia/scmt/cli"
 	"github.com/eeayiaia/scmt/daemon"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
+	"github.com/eeayiaia/scmt/master"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -36,6 +38,7 @@ func background() {
 
 	invoker.Init()
 	devices.Init()
+	master.Init()
 
 	terminate = make(chan bool, 1)
 	log.Info("Daemon started!")
@@ -56,5 +59,5 @@ func main() {
 
 	daemon.Daemonize(background, termHandler)
 
-	log.Info("TODO: add CLI here!")
+	cli.Start()
 }

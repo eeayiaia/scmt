@@ -2,10 +2,14 @@
 package cli
 
 import (
-	"fmt"
 	"github.com/codegangsta/cli"
-	//"github.com/eeayiaia/scmt/invoker"
-	//"bytes"
+	"github.com/eeayiaia/scmt/daemon"
+	"github.com/eeayiaia/scmt/invoker"
+
+	log "github.com/Sirupsen/logrus"
+
+	"bytes"
+	"fmt"
 )
 
 /* add plugin, remove plugin, enable/disable plugin, list nodes (status), list plugins (status), status of
@@ -14,7 +18,7 @@ specific node, ..?
 
 type ActionFunction func(*cli.Context)
 
-var commands []cli.Command = []cli.Command {
+var commands []cli.Command = []cli.Command{
 	{
 		Name:        "install-plugin",
 		Aliases:     []string{""},
@@ -45,6 +49,27 @@ var commands []cli.Command = []cli.Command {
 		Category:    "Cluster information",
 		Action:      func(c *cli.Context) { printNodeInfo(c) },
 	},
+
+	{
+		Name:        "stop-daemon",
+		Aliases:     []string{""},
+		Usage:       "scmt stop-daemon",
+		UsageText:   "Stops the daemon if it is running in the background",
+		Description: "",
+		ArgsUsage:   "",
+		Category:    "Daemon Control",
+		Action:      stopDaemon,
+	},
+	{
+		Name:        "start-daemon",
+		Aliases:     []string{""},
+		Usage:       "scmt start-daemon",
+		UsageText:   "Starts the daemon if it is not running in the background",
+		Description: "",
+		ArgsUsage:   "",
+		Category:    "Daemon Control",
+		Action:      startDaemon,
+	},
 }
 
 func getCommands() []cli.Command {
@@ -55,16 +80,16 @@ func AddCommandShort(name string, af ActionFunction) {
 	AddCommand(name, []string{""}, "No usage set", "No usage text set", "No args usage description", "", af)
 }
 
-func AddCommand(name string, aliases []string, usage string, usageText string, argsUsage string, cat string, af ActionFunction){
-	commands = append(commands, cli.Command {
-			Name:        name,
-			Aliases:     aliases,
-			Usage:       usage,
-			UsageText:   usageText,
-			ArgsUsage:   argsUsage,
-			Category:    cat,
-			Action:      af,
-		})
+func AddCommand(name string, aliases []string, usage string, usageText string, argsUsage string, cat string, af ActionFunction) {
+	commands = append(commands, cli.Command{
+		Name:      name,
+		Aliases:   aliases,
+		Usage:     usage,
+		UsageText: usageText,
+		ArgsUsage: argsUsage,
+		Category:  cat,
+		Action:    af,
+	})
 }
 
 func installPlugin(c *cli.Context) {
@@ -80,4 +105,17 @@ func uninstallPlugin(c *cli.Context) {
 
 func printNodeInfo(c *cli.Context) {
 	fmt.Println("Not implemented: print node info")
+}
+
+func stopDaemon(c *cli.Context) {
+	if !daemon.IsDaemonized() {
+		log.Error("No daemon is running!")
+		return
+	}
+
+	invoker.SendPacket(invoker.TYPE_STOP_DAEMON, *bytes.NewBufferString(""))
+	log.Info("Stopping the daemon ..")
+}
+func startDaemon(c *cli.Context) {
+	// The daemon is started by default ...
 }

@@ -24,7 +24,7 @@ func InitContext(pidFile string, logFile string) {
 	}
 }
 
-func isDaemonized() bool {
+func IsDaemonized() bool {
 	if context == nil {
 		return true
 	}
@@ -63,7 +63,7 @@ func Daemonize(childMain postChild, termHandler dmn.SignalHandlerFunc) {
 	dmn.SetSigHandler(termHandler, syscall.SIGQUIT)
 
 	// Don't restart it if its running!
-	if isDaemonized() {
+	if IsDaemonized() {
 		return
 	}
 

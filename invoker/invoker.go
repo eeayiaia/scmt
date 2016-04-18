@@ -23,6 +23,8 @@ const (
 	TYPE_ACK            int = 0
 	TYPE_NEW_DEVICE     int = 1
 	TYPE_INSTALL_PLUGIN int = 2
+
+	TYPE_STOP_DAEMON int = 3
 )
 
 /*
