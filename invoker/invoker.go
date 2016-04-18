@@ -20,11 +20,15 @@ const PORT string = "9000"
 
 // Packet types
 const (
-	TYPE_ACK            int = 0
-	TYPE_NEW_DEVICE     int = 1
-	TYPE_INSTALL_PLUGIN int = 2
+	TYPE_ACK            	int = 0
+	TYPE_NEW_DEVICE     	int = 1
+	TYPE_DEVICE_STATUS 		int = 2
 
-	TYPE_STOP_DAEMON int = 3
+	TYPE_INSTALL_PLUGIN 	int = 3
+	TYPE_UNINSTALL_PLUGIN 	int = 4
+
+
+	TYPE_STOP_DAEMON 		int = 5
 )
 
 /*

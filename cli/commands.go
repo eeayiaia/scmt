@@ -26,7 +26,7 @@ var commands []cli.Command = []cli.Command{
 		UsageText:   "Installs the plugin listed in plugins.d",
 		Description: "",
 		ArgsUsage:   "<plugin name> as first argument followed by nodes to install on, if no nodes are listed the plugin is installed on every node",
-		Category:    "Plugin",
+		Category:    "Plugin Control",
 		Action:      func(c *cli.Context) { installPlugin(c) },
 	},
 	{
@@ -36,7 +36,7 @@ var commands []cli.Command = []cli.Command{
 		UsageText:   "Uninstalls the plugin listed in plugins.d",
 		Description: "",
 		ArgsUsage:   "<plugin name> as first argument followed by nodes to uninstall from, if no nodes are listed the plugin is uninstalled on every node",
-		Category:    "Plugin",
+		Category:    "Plugin Control",
 		Action:      func(c *cli.Context) { uninstallPlugin(c) },
 	},
 	{
@@ -94,9 +94,9 @@ func AddCommand(name string, aliases []string, usage string, usageText string, a
 
 func installPlugin(c *cli.Context) {
 	//TODO: handle installation of plugins on specific nodes only, examine
-	/*buffer := bytes.NewBufferString(c.Args().First())
-	invoker.SendPacket(invoker.TYPE_INSTALL_PLUGIN, *buffer)*/
-	fmt.Println("installing plugin " + c.Args().First() + " :Not implemented")
+	buffer := bytes.NewBufferString(c.Args().First())
+	invoker.SendPacket(invoker.TYPE_INSTALL_PLUGIN, *buffer)
+	//fmt.Println("installing plugin " + c.Args().First() + " :Not implemented")
 }
 
 func uninstallPlugin(c *cli.Context) {
