@@ -16,11 +16,10 @@ import (
 var terminate chan bool
 
 func termHandler(sig os.Signal) error {
-	log.Info("terminating ..")
+	Log.Info("terminating ..")
 	terminate <- true
 
 	// Clean-up ..
-	// TODO: delete pidfile
 	err := os.Remove(Conf.PidFile)
 	if err != nil {
 		log.WithFields(log.Fields{
@@ -41,7 +40,7 @@ func background() {
 	master.Init()
 
 	terminate = make(chan bool, 1)
-	log.Info("Daemon started!")
+	Log.Info("Daemon started!")
 
 	// Wait to terminate
 	for {

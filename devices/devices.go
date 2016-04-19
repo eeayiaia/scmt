@@ -95,7 +95,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 		Log.WithFields(log.Fields{
 			"mac": hardwareAddress,
 			"ip":  ipAddress,
-		}).Info("new device connected")
+		}).Info("new device connected for the first time, setting it up")
 
 		slave.Store()
 		// only run init-scripts on a completely new device
@@ -104,9 +104,13 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			return nil // abort mission, I say!
 		}
 	} else {
-		Log.Info("exists")
+		Log.WithFields(log.Fields{
+			"mac": hardwareAddress,
+			"ip":  ipAddress,
+		}).Info("device reconnected")
 	}
 	AddDevice(slave)
+	slave.RunNewNodeScripts()
 
 	return slave
 }
