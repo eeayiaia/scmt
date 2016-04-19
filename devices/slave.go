@@ -107,7 +107,7 @@ func (s *Slave) StartPinger() {
 func (slave *Slave) Store() {
 	slave.lock.Lock()
 	defer slave.lock.Unlock()
-	
+
 	db, err := database.NewConnection()
 	defer db.Close()
 
@@ -209,97 +209,55 @@ func (slave *Slave) Load(HWaddr string) {
 	}
 }
 
-func (slave *Slave) RunInitScripts() error {
-	// Setup and copy device init scripts
-	ch := slave.RunInShellAsync("mkdir -p $HOME/device.init.d/", false)
-	Log.Info(<-ch)
-
+func (slave *Slave) RunAllScriptsInDir(dir string) error {
 	// Find all device initialisation scripts
-	files, err := filepath.Glob("./scripts.d/device.init.d/*.sh")
+	files, err := filepath.Glob(fmt.Sprintf("%s/*.sh", dir))
 	if err != nil {
-		Log.Fatal("Could not get device initialisation scripts ..", err)
 		return err
 	}
 
-	for _, f := range files {
-		filename := path.Base(f)
-		dest := fmt.Sprintf("$HOME/device.init.d/%s", filename)
+	err = slave.CopyFolder(dir, "/var/tmp/")
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"source": dir,
+			"target": "/var/tmp/",
+		}).Error("could not copy folder")
 
-		ch := slave.CopyFile(f, dest)
-		result := <-ch
+		return err
+	}
 
-		if result != nil {
+	// Run all scripts
+	dirBaseName := path.Base(dir)
+	for _, scriptpath := range files {
+		script := path.Base(scriptpath)
+
+		ch, err := slave.RunScriptAsync(fmt.Sprintf("/var/tmp/%s/%s", dirBaseName, script))
+		if err != nil {
 			Log.WithFields(log.Fields{
-				"filename": filename,
-				"dest":     dest,
-				"result":   result,
-			}).Error("could not copy")
+				"script": script,
+				"dir":    dir,
+				"error":  err,
+			}).Error("could not run script, skipping")
+
+			return err // could be fatal!
+		}
+
+		// Read & relay the script output
+		for result := range ch {
+			trimmed := strings.Trim(result, "\n")
+			Log.Info(fmt.Sprintf("%s: %s", slave.Hostname, trimmed))
 		}
 	}
 
 	return nil
+}
+
+func (slave *Slave) RunInitScripts() error {
+	return slave.RunAllScriptsInDir("./scripts.d/device.init.d")
 }
 
 func (slave *Slave) RunNewNodeScripts() error {
-	// Setup and copy device init scripts
-	ch := slave.RunInShellAsync("mkdir -p $HOME/device.newnode.d/", false)
-	Log.Info(<-ch)
-
-	// Find all device initialisation scripts
-	files, err := filepath.Glob("./scripts.d/device.newnode.d/*.sh")
-	if err != nil {
-		Log.Fatal("Could not get device new-node scripts ..", err)
-		return err
-	}
-
-	for _, f := range files {
-		filename := path.Base(f)
-		dest := fmt.Sprintf("$HOME/device.newnode.d/%s", filename)
-
-		ch := slave.CopyFile(f, dest)
-		result := <-ch
-
-		if result != nil {
-			Log.WithFields(log.Fields{
-				"filename": filename,
-				"dest":     dest,
-				"result":   result,
-			}).Error("could not copy")
-		}
-	}
-
-	return nil
-}
-
-func (slave *Slave) RunRemoveNodeScripts() error {
-	// Setup and copy device init scripts
-	ch := slave.RunInShellAsync("mkdir -p $HOME/device.removenode.d/", false)
-	Log.Info(<-ch)
-
-	// Find all device initialisation scripts
-	files, err := filepath.Glob("./scripts.d/device.removenode.d/*.sh")
-	if err != nil {
-		Log.Fatal("Could not get device remove-node scripts ..", err)
-		return err
-	}
-
-	for _, f := range files {
-		filename := path.Base(f)
-		dest := fmt.Sprintf("$HOME/device.removenode.d/%s", filename)
-
-		ch := slave.CopyFile(f, dest)
-		result := <-ch
-
-		if result != nil {
-			Log.WithFields(log.Fields{
-				"filename": filename,
-				"dest":     dest,
-				"result":   result,
-			}).Error("could not copy")
-		}
-	}
-
-	return nil
+	return slave.RunAllScriptsInDir("./scripts.d/device.newnode.d")
 }
 
 /*func (slave *Slave) TransferPlugin(plugin string) {
@@ -470,8 +428,8 @@ func getMasterIP() (string, error) {
 
 	for _, line := range lines {
 		splitted := strings.Fields(line)
-		if len(splitted) >= 2 && splitted[0] == "master" {
-			return splitted[1], nil
+		if len(splitted) >= 2 && splitted[1] == "master" {
+			return splitted[0], nil
 
 		}
 	}

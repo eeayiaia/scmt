@@ -100,7 +100,6 @@ func (conn *RemoteConnection) CopyFolder(folderpath string, destination string) 
 		return err
 	}
 
-
 	if folderpath[len(folderpath)-1] == '/' {
 		folderpath = folderpath[:len(folderpath)-1]
 	}
@@ -109,7 +108,7 @@ func (conn *RemoteConnection) CopyFolder(folderpath string, destination string) 
 	fmt.Println(path)
 
 	tmpPath := fmt.Sprintf("/tmp/%s.tar.gz", foldername)
-	cmd := exec.Command("/bin/tar", "-C", path, "-zcf", tmpPath, foldername)
+	cmd := exec.Command("tar", "-C", path, "-zcf", tmpPath, foldername)
 
 	Log.WithFields(log.Fields{
 		"target":  conn.Device.IpAddress,
@@ -142,16 +141,16 @@ func (conn *RemoteConnection) CopyFolder(folderpath string, destination string) 
 	}).Info("copied file")
 
 	shellCMD := fmt.Sprintf("/bin/tar -xf %s -C %s", tmpPath, destination)
-    
-    /*If possible run without sudo*/
-    writeCheck := "if [ -w \"" + destination + "\" ]; then echo \"WRITABLE\"; fi"
-    outp := conn.RunInShell(writeCheck, false)
-    
-    if strings.Contains(outp, "WRITABLE") {
-        conn.RunInShell(shellCMD, false)   
-    } else {
-    	conn.RunInShell(shellCMD, true)    
-    }
+
+	/*If possible run without sudo*/
+	writeCheck := "if [ -w \"" + destination + "\" ]; then echo \"WRITABLE\"; fi"
+	outp := conn.RunInShell(writeCheck, false)
+
+	if strings.Contains(outp, "WRITABLE") {
+		conn.RunInShell(shellCMD, false)
+	} else {
+		conn.RunInShell(shellCMD, true)
+	}
 
 	shellCMD = "rm " + tmpPath
 	conn.RunInShell(shellCMD, true)
