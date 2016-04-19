@@ -14,7 +14,7 @@ APPROX_PATH=$(which approx)
 if [[ ! "$APPROX_PATH" ]]; then
 	echo "approx not found, installing..."
 	write_line
-	apt-get install -y approx
+	apt-get install approx --assume-yes
 	INSTALL_SUCCESS=$?
 	write_line
 
@@ -35,7 +35,7 @@ echo "Applying approx configuration..."
 
 if [[ ! -f "$APPROX_CONF_SOURCE" ]]; then
 	echo "File missing: '<scmt-root>/config/approx/approx.conf'. Failed to set"\
-		" up approx."
+		"up approx."
 	exit 3
 fi
 
