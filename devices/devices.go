@@ -45,8 +45,7 @@ func Init() {
 
 		devices = make([]*Slave, 0)
 	}
-	RegisterInvokerHandlers()
-	
+
 	initialized = true
 }
 
@@ -67,7 +66,7 @@ func AddDevice(device *Slave) {
 func GetDevice(hardwareAddress string) (*Slave, error) {
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
-	
+
 	for _, slave := range devices {
 		if strings.Compare(slave.HardwareAddress, hardwareAddress) == 0 {
 			return slave, nil
@@ -82,6 +81,7 @@ func GetDevice(hardwareAddress string) (*Slave, error) {
 		we create the device itself
 */
 func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
+
 	var slave *Slave
 	hwAddr := strings.Replace(hardwareAddress, ":", "", -1)
 	slave, err := GetDevice(hwAddr)
@@ -97,26 +97,18 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			"mac": hardwareAddress,
 			"ip":  ipAddress,
 		}).Info("new device connected")
-		AddDevice(slave)
-						
+
 		slave.Store()
 		// only run init-scripts on a completely new device
 		err = slave.RunInitScripts()
 		if err != nil {
 			return nil // abort mission, I say!
 		}
-	}else{
+	} else {
 		Log.Info("exists")
 	}
-	//slave.RunNewNodeScripts()
-	
-	// TODO: do stuff like set a static ip-address and
-	//			 prepare the device
-	//	Init:
-	//		- Hostname
-	//		- UserName & Password
-
-	// TODO: test username & password from file
+	AddDevice(slave)
+	slave.RunNewNodeScripts()
 
 	return slave
 }
