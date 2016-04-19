@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/eeayiaia/scmt/cli"
 	"github.com/eeayiaia/scmt/daemon"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
@@ -58,5 +57,5 @@ func main() {
 
 	daemon.Daemonize(background, termHandler)
 
-	cli.Start()
+	Start()
 }

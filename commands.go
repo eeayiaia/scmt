@@ -1,5 +1,5 @@
 //command line interface
-package cli
+package main
 
 import (
 	"github.com/codegangsta/cli"
