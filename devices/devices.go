@@ -81,7 +81,6 @@ func GetDevice(hardwareAddress string) (*Slave, error) {
 		we create the device itself
 */
 func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
-
 	var slave *Slave
 	hwAddr := strings.Replace(hardwareAddress, ":", "", -1)
 	slave, err := GetDevice(hwAddr)
@@ -108,7 +107,6 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 		Log.Info("exists")
 	}
 	AddDevice(slave)
-	slave.RunNewNodeScripts()
 
 	return slave
 }

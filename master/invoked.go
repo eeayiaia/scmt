@@ -32,8 +32,6 @@ func handleNewDevice(rawData bytes.Buffer) {
 	// The rest should contain the ip-addr
 	ip := rawData.String()
 
-	// TODO: validate them
-
 	Log.WithFields(log.Fields{
 		"ip":  ip,
 		"mac": mac,
