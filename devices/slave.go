@@ -256,10 +256,6 @@ func (slave *Slave) RunInitScripts() error {
 	return slave.RunAllScriptsInDir("./scripts.d/device.init.d")
 }
 
-func (slave *Slave) RunNewNodeScripts() error {
-	return slave.RunAllScriptsInDir("./scripts.d/device.newnode.d")
-}
-
 /*func (slave *Slave) TransferPlugin(plugin string) {
 
 }*/
