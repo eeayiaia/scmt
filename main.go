@@ -6,24 +6,25 @@ import (
 	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
 	"github.com/eeayiaia/scmt/master"
+	"github.com/eeayiaia/scmt/conf"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/codegangsta/cli"
-
+	"github.com/codegangsta/cli"	
 	"os"
 )
 
 var terminate chan bool
+var Config *conf.Configuration
 
 func termHandler(sig os.Signal) error {
 	Log.Info("terminating ..")
 	terminate <- true
 
 	// Clean-up ..
-	err := os.Remove(Conf.PidFile)
+	err := os.Remove(Config.PidFile)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"pidfile": Conf.PidFile,
+			"pidfile": Config.PidFile,
 		}).Warn("could not remove pidfile")
 	}
 
@@ -33,9 +34,9 @@ func termHandler(sig os.Signal) error {
 // This is the entry-point for the
 // background-daemon
 func background() {
-	InitConfiguration()
+	conf.InitConfiguration()
 	InitLogging()
-	database.Init(Conf.Database, Conf.DatabaseUser, Conf.DatabasePassword)
+	database.Init(Config.Database, Config.DatabaseUser, Config.DatabasePassword)
 
 	invoker.Init()
 	devices.Init()
@@ -52,12 +53,13 @@ func background() {
 }
 
 func main() {
-	InitConfiguration()
+	conf.InitConfiguration()
+	Config = conf.Conf
 	InitLogging()
 	InitContextLogging()
-	daemon.InitContext(Conf.PidFile, Conf.LogFile)
+	daemon.InitContext(Config.PidFile, Config.LogFile)
 
 	Start(func(_ *cli.Context) {
 		background()
-	})
+	})	
 }

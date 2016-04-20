@@ -1,4 +1,4 @@
-package main
+package conf
 
 /*
 	Reads a configuration file with a certain set of elements
