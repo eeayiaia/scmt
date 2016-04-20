@@ -82,24 +82,26 @@ func GetDevice(hardwareAddress string) (*Slave, error) {
 */
 func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	var slave *Slave
+
 	hwAddr := strings.Replace(hardwareAddress, ":", "", -1)
 	slave, err := GetDevice(hwAddr)
 	if err != nil {
 		slave = &Slave{
 			UserName:        "odroid",
 			Password:        "odroid",
+			Hostname:        "unknown",
 			HardwareAddress: hardwareAddress,
 			IpAddress:       ipAddress,
+			Port:            "22",
 		}
+
+		// TODO: set hostname or find it out
+		// TODO: iterate through credentials
 
 		Log.WithFields(log.Fields{
 			"mac": hardwareAddress,
 			"ip":  ipAddress,
 		}).Info("new device connected for the first time, setting it up")
-
-		if err != nil {
-			return nil // abort mission, I say!
-		}
 	} else {
 		Log.WithFields(log.Fields{
 			"mac": hardwareAddress,
