@@ -97,7 +97,6 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			"ip":  ipAddress,
 		}).Info("new device connected for the first time, setting it up")
 
-		slave.Store()
 		if err != nil {
 			return nil // abort mission, I say!
 		}
@@ -108,6 +107,8 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 		}).Info("device reconnected")
 	}
 	AddDevice(slave)
+	slave.Store()
+
 	// run init-scripts on the newly connected device
 	err = slave.RunInitScripts()
 
