@@ -3,6 +3,7 @@ package master
 import (
 	"bytes"
 	log "github.com/Sirupsen/logrus"
+	"strings"
 
 	"github.com/eeayiaia/scmt/daemon"
 	"github.com/eeayiaia/scmt/devices"
@@ -13,6 +14,8 @@ func RegisterInvokerHandlers() {
 	invoker.RegisterHandler(invoker.TYPE_NEW_DEVICE, handleNewDevice)
 
 	invoker.RegisterHandler(invoker.TYPE_STOP_DAEMON, handleStopDaemon)
+
+	invoker.RegisterHandler(invoker.TYPE_INSTALL_PLUGIN, handleInstallPlugin)
 }
 
 /*
@@ -51,4 +54,17 @@ func handleStopDaemon(_ bytes.Buffer) {
 	Log.Info("Shutting down the daemon")
 
 	daemon.StopDaemon()
+}
+
+func handleInstallPlugin(b bytes.Buffer) {
+	pluginName, err := b.ReadString(32)
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"pluginName": pluginName,
+		}).Error("could not parse plugin name from invoker")
+		return
+	}
+	pluginName = strings.TrimSpace(pluginName)
+	pluginName = strings.ToLower(pluginName)
+	InstallPlugin(pluginName)
 }

@@ -95,8 +95,8 @@ func AddCommand(name string, aliases []string, usage string, usageText string, a
 func installPlugin(c *cli.Context) {
 	//TODO: handle installation of plugins on specific nodes only, examine
 	buffer := bytes.NewBufferString(c.Args().First())
+	buffer.WriteString(" ")
 	invoker.SendPacket(invoker.TYPE_INSTALL_PLUGIN, *buffer)
-	//fmt.Println("installing plugin " + c.Args().First() + " :Not implemented")
 }
 
 func uninstallPlugin(c *cli.Context) {
