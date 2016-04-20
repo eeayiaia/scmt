@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Inputs: MASTER_IP
+
 # Get script directory & include utils
 DIR="${BASH_SOURCE%/*}"
 if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
@@ -24,7 +26,7 @@ fi
 echo "rpcbind : ALL" >> /etc/hosts.deny
  
 #Adding allowed hosts
-echo "10.46.0.1" >> /etc/hosts.allow
+echo "$MASTER_IP" >> /etc/hosts.allow
 
 #Create mounted shared folder
 if [[ ! -d /var/shared ]]; then
@@ -32,7 +34,7 @@ if [[ ! -d /var/shared ]]; then
 fi
 
 #Mount the server shared folder to the local folder
-mount 10.46.0.1:/var/nfs /var/shared/
+mount "$MASTER_IP:/var/nfs" /var/shared/
 
 #Start services
 /etc/init.d/portmap restart
