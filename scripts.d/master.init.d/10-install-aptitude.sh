@@ -10,3 +10,4 @@ check_invoked_by_scmt
 
 # Install aptitude
 apt-get install aptitude --assume-yes
+
