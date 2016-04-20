@@ -70,16 +70,15 @@ func RunScriptsInDir(dir string, env map[string]string) error {
     }
     
     for _, f := range files {
-        var command exec.Cmd;
-        command.Env = envSlice
-        
 		filename := path.Base(f)
 
 		Log.WithFields(log.Fields{
 			"script": filename,
 		}).Info("running newnode script")
 
-		output, err := exec.Command("/bin/sh", f).Output()
+        cmd := exec.Command("/bin/sh", f)
+        cmd.Env = envSlice
+		output, err := cmd.Output()
 		if err != nil {
 			return err
 		}
