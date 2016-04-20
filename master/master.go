@@ -53,3 +53,39 @@ func RunNewNodeScripts(slave *devices.Slave) error {
 
 	return nil
 }
+
+func RunScriptsInDir(dir string, env map[string]string) error {
+    
+	files, err := filepath.Glob(dir+"*.sh")
+    if err != nil {
+		return err
+	}
+    
+    envSlice := make([]string, len(env))
+    
+    ind := 0
+	for k,v := range env {
+        envSlice[ind] = k+"="+v
+        ind++
+    }
+    
+    for _, f := range files {
+        var command exec.Cmd;
+        command.Env = envSlice
+        
+		filename := path.Base(f)
+
+		Log.WithFields(log.Fields{
+			"script": filename,
+		}).Info("running newnode script")
+
+		output, err := exec.Command("/bin/sh", f).Output()
+		if err != nil {
+			return err
+		}
+
+		Log.Info("Output:\n" + string(output))
+	}
+
+	return nil
+}

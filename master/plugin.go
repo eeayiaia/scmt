@@ -94,11 +94,12 @@ func PluginIsInstalled(pluginName string) (bool, error) {
    Sets environment variables for given CMD and slave on master
 */
 
-func PluginEnvMaster(command *exec.Cmd, device devices.Slave) error {
-	var env = make([]string, 4)
-	env = append(env, "NODE_IP="+device.IpAddress)
-	env = append(env, "NODENAME="+device.Hostname)
-	env = append(env, "CLUSTERNAME="+"SCMT") // TODO: this should be read from a config?
-	command.Env = env
-	return nil
+func PluginEnvMaster(device devices.Slave) (map[string]string, error) {
+	var env = make(map[string]string)
+    
+    env["NODE_IP"] = device.IpAddress
+    env["NODENAME"] = device.Hostname
+    env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config?
+
+	return env, nil
 }
