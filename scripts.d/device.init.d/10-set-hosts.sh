@@ -1,10 +1,9 @@
 #!/bin/sh
 
-# Set the hosts file to include the masternode
-
-MASTER_IP="10.46.0.1"
+# Input: MASTER_IP
+# Set the hosts file to include the master node
 
 egrep -q "^master\s" /etc/hosts \
-	&& sed "s/^master.*/master    $MASTER_IP/" -i /etc/hosts \
-	|| sed "$ a\master    $MASTER_IP" -i /etc/hosts
+	&& sed "s/master/$MASTER_IP    master/" -i /etc/hosts \
+	|| sed "$ a\$MASTER_IP    master" -i /etc/hosts
 
