@@ -1,5 +1,14 @@
 #!/bin/bash
 
+
+#Get script directory
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+. "$DIR/../../../scripts.d/utils.sh" || exit 1
+. "$DIR/../resources/config" || exit 1
+
+
 #Check java version
 if type -p java; then
 	echo found java executable in PATH
@@ -36,7 +45,7 @@ sudo adduser --ingroup hadoop hduser
 
 
 #Installing Hadoop below...
-sudo wget http://www.motorlogy.com/apache/hadoop/common/current/hadoop-2.3.0.tar.gz
+wget http://www.motorlogy.com/apache/hadoop/common/current/hadoop-2.3.0.tar.gz
 tar xfz hadoop-2.3.0.tar.gz
 mv hadoop-2.3.0 /usr/local/hadoop
 
@@ -57,7 +66,7 @@ echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/hduser/.bashrc
 #Configure Hadoop
 
 #First we need to set the java home directory in hadoop
-sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java--openjdk-armf/jre/bin/java}' ~/usr/local/hadoop/conf/hadoop-env.sh
+sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java-1.7.0-openjdk-armf}' ~/usr/local/hadoop/etc/hadoop/hadoop-env.sh
 
 #Set Hadoop enviroment
 #Config core-site.xml
