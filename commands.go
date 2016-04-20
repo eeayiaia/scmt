@@ -10,6 +10,7 @@ import (
 
 	"bytes"
 	"fmt"
+	"strings"
 )
 
 /* add plugin, remove plugin, enable/disable plugin, list nodes (status), list plugins (status), status of
@@ -48,6 +49,16 @@ var commands []cli.Command = []cli.Command{
 		ArgsUsage:   "A list of <node name | node ip> , if left blank, status on all nodes are presented",
 		Category:    "Cluster information",
 		Action:      func(c *cli.Context) { printNodeInfo(c) },
+	},
+	{
+		Name:        "register-device",
+		Aliases:     []string{""},
+		Usage:       "scmt register-device <node mac> <node ip>",
+		UsageText:   "",
+		Description: "",
+		ArgsUsage:   "Is used to add and register a new device",
+		Category:    "Cluster information",
+		Action:      registerDevice,
 	},
 
 	{
@@ -124,4 +135,13 @@ func startDaemon(c *cli.Context) {
 	}
 
 	daemon.Daemonize(background, termHandler)
+}
+
+func registerDevice(c *cli.Context) {
+	// TODO: add validation
+	mac := strings.Trim(c.Args().First(), " ")
+	ip := strings.Trim(c.Args().Get(1), " ")
+
+	buffer := bytes.NewBufferString(mac + " " + ip)
+	invoker.SendPacket(invoker.TYPE_NEW_DEVICE, *buffer)
 }

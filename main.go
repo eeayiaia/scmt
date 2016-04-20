@@ -30,6 +30,8 @@ func termHandler(sig os.Signal) error {
 	return daemon.ErrStop
 }
 
+// This is the entry-point for the
+// background-daemon
 func background() {
 	InitConfiguration()
 	InitLogging()
