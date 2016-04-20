@@ -19,7 +19,11 @@ fi
 backup_file /etc/munin/munin.conf
 
 # Remove node from munin.conf
-awk "/\[$NODENAME\]/{flag=0;next}/^\[/{flag=1}flag" /etc/munin/munin.conf \
-	> /etc/munin/munin.conf.tmp \
+awk "
+	BEGIN { flag=1 }
+	/\[$NODENAME\]/ { flag=0; next }
+	/^\[/ { flag=1 }
+	flag
+" /etc/munin/munin.conf > /etc/munin/munin.conf.tmp \
 	&& mv /etc/munin/munin.conf.tmp /etc/munin/munin.conf
 
