@@ -2,7 +2,6 @@ package master
 
 import (
 	"errors"
-	"os/exec"
 	"strings"
 
 	"github.com/eeayiaia/scmt/database"
@@ -96,10 +95,10 @@ func PluginIsInstalled(pluginName string) (bool, error) {
 
 func PluginEnvMaster(device devices.Slave) (map[string]string, error) {
 	var env = make(map[string]string)
-    
-    env["NODE_IP"] = device.IpAddress
-    env["NODENAME"] = device.Hostname
-    env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config?
+
+	env["NODE_IP"] = device.IpAddress
+	env["NODENAME"] = device.Hostname
+	env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config?
 
 	return env, nil
 }
