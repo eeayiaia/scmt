@@ -12,12 +12,19 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
+type Credentials struct {
+	Username string
+	Password string
+}
+
 type Configuration struct {
 	Production bool
 
 	Database         string
 	DatabaseUser     string
 	DatabasePassword string
+
+	LoginCredentials []*Credentials
 
 	PidFile string
 	LogFile string
