@@ -8,6 +8,7 @@ import (
 	"github.com/eeayiaia/scmt/master"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/codegangsta/cli"
 
 	"os"
 )
@@ -38,10 +39,8 @@ func background() {
 	devices.Init()
 	master.Init()
 
-	terminate = make(chan bool, 1)
-	Log.Info("Daemon started!")
-
 	// Wait to terminate
+	terminate = make(chan bool, 1)
 	for {
 		r := <-terminate
 		if r {
@@ -53,9 +52,10 @@ func background() {
 func main() {
 	InitConfiguration()
 	InitLogging()
+	InitContextLogging()
 	daemon.InitContext(Conf.PidFile, Conf.LogFile)
 
-	daemon.Daemonize(background, termHandler)
-
-	Start()
+	Start(func(_ *cli.Context) {
+		background()
+	})
 }

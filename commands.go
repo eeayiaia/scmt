@@ -116,6 +116,12 @@ func stopDaemon(c *cli.Context) {
 	invoker.SendPacket(invoker.TYPE_STOP_DAEMON, *bytes.NewBufferString(""))
 	log.Info("Stopping the daemon ..")
 }
+
 func startDaemon(c *cli.Context) {
-	// The daemon is started by default ...
+	if daemon.IsDaemonized() {
+		log.Error("Daemon is already running!")
+		return
+	}
+
+	daemon.Daemonize(background, termHandler)
 }
