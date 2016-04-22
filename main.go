@@ -15,6 +15,7 @@ import (
 
 var terminate chan bool
 var Config *conf.Configuration
+var runAsDaemon bool
 
 func termHandler(sig os.Signal) error {
 	Log.Info("terminating ..")
