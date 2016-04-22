@@ -8,8 +8,23 @@ import (
 	"github.com/eeayiaia/scmt/devices"
 	log "github.com/Sirupsen/logrus"
 )
-
+/*
+Installs plugin on master and all other devices
+*/
 func InstallPlugin(pluginName string) error {
+	err := installPluginOnMaster(pluginName)
+	if err != nil {
+		return err
+	}
+
+	err = installPluginOnSlaves(pluginName)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func installPluginOnMaster(pluginName string) error {
     pluginName = strings.ToLower(pluginName)
     
 	if tf, _ := database.PluginInDB(pluginName); !tf {
@@ -49,6 +64,16 @@ func InstallPlugin(pluginName string) error {
 	}).Info("Plugin installed on master")
     
     return nil
+}
+
+
+//TODO: support for only installing plugins on certain nodes?
+func installPluginOnSlaves(pluginName string) error {
+	err := devices.RunPluginInstallerOnAll(pluginName)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func SetPluginInstalled(pluginName string) error {

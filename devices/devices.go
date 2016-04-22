@@ -123,6 +123,22 @@ func Count() int {
 }
 
 /*
+	Runs the plugin installer on all slaves
+*/
+func RunPluginInstallerOnAll(pluginName string) error {
+	devicesMutex.Lock()
+	defer devicesMutex.Unlock()
+
+	for _, slave := range devices {
+		err := slave.RunPluginInstaller(pluginName)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+/*
 	Concurrently runs a query (bash) on all connected slaves
 		NOTE: this should *not* be used to run consecutive commands!
 */
