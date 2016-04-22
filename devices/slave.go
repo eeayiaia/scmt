@@ -11,6 +11,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/heartbeat"
+	"github.com/eeayiaia/scmt/conf"
 	"io/ioutil"
 	"path"
 	"path/filepath"
@@ -430,4 +431,21 @@ func getMasterIP() (string, error) {
 		}
 	}
 	return "", errors.New("Failed to get master IP ")
+}
+
+func TestCredentials(device *Slave) (*Slave, error){
+	for _, each := range conf.Conf.LoginCredentials {
+		device.UserName = each.Username
+		device.Password = each.Password
+		session, error := NewRemoteConnection(device)
+		if (error == nil ){
+			log.WithFields(log.Fields{
+				"Credentials" : each,
+			}).Info("Credentials found in config.")
+			session.Connection.Close()
+			return device, nil
+		}
+	}
+	log.Error("No correct credentials found in config")
+	return nil, errors.New("No correct credentials found in config")
 }
