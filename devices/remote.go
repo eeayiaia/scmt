@@ -32,7 +32,7 @@ func NewRemoteConnection(device *Slave) (*RemoteConnection, error) {
 		},
 	}
 
-	connection, err := ssh.Dial("tcp", device.IpAddress, sshConfig)
+	connection, err := ssh.Dial("tcp", (device.IpAddress+":"+device.Port), sshConfig)
 	rc := &RemoteConnection{
 		Device:     device,
 		Connection: connection,
