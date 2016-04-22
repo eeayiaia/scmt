@@ -5,11 +5,12 @@ import (
 	"path"
 	"path/filepath"
 	"github.com/eeayiaia/scmt/devices"
-
 	log "github.com/Sirupsen/logrus"
 )
 
 var initialized = false
+
+var PluginEnvGlob = make(map[string]string)
 
 /*
    RegisterInvokerHandlers requires quite a lot of other packages to be initialized, is this good to have in init?
@@ -23,6 +24,8 @@ func Init() {
 	}
 	InitContextLogging()
 	RegisterInvokerHandlers()
+
+    // TODO: Initialize PluginEnvGlob
 
 	initialized = true
 }
@@ -79,8 +82,7 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 			"script": filename,
             "environ": envSlice,
 		}).Info("running script")
-
-        cmd := exec.Command("/bin/sh", f)
+        cmd := exec.Command("/bin/sh", filename)
         cmd.Env = envSlice
         cmd.Dir = dir
 		output, err := cmd.Output()

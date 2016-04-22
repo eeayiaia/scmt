@@ -6,33 +6,55 @@ import (
 
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
-
+    "fmt"
 	log "github.com/Sirupsen/logrus"
 )
 
 func InstallPlugin(pluginName string) error {
-	/*Run scripts and save to the database that plugin is installed*/
-	return nil
-}
-
-func SetPluginInstalled(pluginName string) error {
-	pluginName = strings.ToLower(pluginName)
-
-	tf, _ := database.PluginInDB(pluginName)
-	if !tf {
+    pluginName = strings.ToLower(pluginName)
+    
+	if tf, _ := database.PluginInDB(pluginName); !tf {
 		Log.WithFields(log.Fields{
 			"plugin": pluginName,
 		}).Warn("Plugin not available on master.")
 		return errors.New("Plugin not available on master:" + pluginName)
 	}
 
-	tf, _ = PluginIsInstalled(pluginName)
-	if tf {
+	if tf := database.PluginIsEnabled(pluginName); !tf {
+		Log.WithFields(log.Fields{
+			"plugin": pluginName,
+		}).Warn("Plugin not enabled")
+		return errors.New("Plugin not enabled" + pluginName)
+	}    
+
+	if 	tf, _ := PluginIsInstalled(pluginName); tf {
 		Log.WithFields(log.Fields{
 			"plugin": pluginName,
 		}).Warn("Plugin already set to installed on master")
 		return errors.New("Plugin already set to installed on master" + pluginName)
 	}
+    
+    fmt.Println("./plugins.d/" + pluginName + "/master.init.d/")
+    err := RunScriptsInDir("./plugins.d/" + pluginName + "/master.init.d/", PluginEnvGlob)
+    
+    if err != nil {
+        Log.WithFields(log.Fields{
+			"err": err,
+		}).Warn("Failed to run script")
+        return errors.New("Failed to install plugin:" + pluginName)
+    }
+    
+    SetPluginInstalled(pluginName)
+	
+    Log.WithFields(log.Fields{
+		"plugin": pluginName,
+	}).Info("Plugin installed on master")
+    
+    return nil
+}
+
+func SetPluginInstalled(pluginName string) error {
+	pluginName = strings.ToLower(pluginName)
 
 	db, err := database.NewConnection()
 	defer db.Close()
@@ -91,10 +113,10 @@ func PluginIsInstalled(pluginName string) (bool, error) {
 
 func PluginEnvMaster(device devices.Slave) (map[string]string, error) {
 	var env = make(map[string]string)
-
+    
 	env["NODE_IP"] = device.IpAddress
 	env["NODENAME"] = device.Hostname
-	env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config?
+	env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config AND should be initialised in global env map instead of Init
 
 	return env, nil
 }
