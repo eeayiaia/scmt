@@ -87,17 +87,20 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	slave, err := GetDevice(hwAddr)
 	if err != nil {
 		slave = &Slave{
-			UserName:        "odroid",
-			Password:        "odroid",
-			Hostname:        "unknown",
 			HardwareAddress: hardwareAddress,
 			IpAddress:       ipAddress,
 			Port:            "22",
 		}
-
-		// TODO: set hostname or find it out
-		// TODO: iterate through credentials
-
+		error := slave.TestCredentials()
+		if error != nil {
+			Log.Error("No correct credentials")
+		}
+		AddDevice(slave)
+		slave.Store() //Generates the id of a host and therefore both static ip and hostname
+		slave.Load(slave.HardwareAddress) // the slave struct gets updated with the new information generated in the DB
+		//The current IPadress will now be ipAddress and the new setatic ip is slave.IpAdress
+		// TODO: Actually setting the hostname on a device
+		// TODO: Setting static ip in dhcpd.conf
 		Log.WithFields(log.Fields{
 			"mac": hardwareAddress,
 			"ip":  ipAddress,
@@ -108,8 +111,6 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			"ip":  ipAddress,
 		}).Info("device reconnected")
 	}
-	AddDevice(slave)
-	slave.Store()
 
 	// run init-scripts on the newly connected device
 	err = slave.RunInitScripts()
