@@ -433,19 +433,21 @@ func getMasterIP() (string, error) {
 	return "", errors.New("Failed to get master IP ")
 }
 
-func TestCredentials(device *Slave) (*Slave, error){
+func (slave *Slave) TestCredentials() error{
 	for _, each := range conf.Conf.LoginCredentials {
-		device.UserName = each.Username
-		device.Password = each.Password
-		session, error := NewRemoteConnection(device)
+		slave.UserName = each.Username
+		slave.Password = each.Password
+		session, error := NewRemoteConnection(slave)
 		if (error == nil ){
 			log.WithFields(log.Fields{
 				"Credentials" : each,
 			}).Info("Credentials found in config.")
 			session.Connection.Close()
-			return device, nil
+			return nil
 		}
 	}
+	slave.UserName = ""
+	slave.Password = ""
 	log.Error("No correct credentials found in config")
-	return nil, errors.New("No correct credentials found in config")
+	return errors.New("No correct credentials found in config")
 }
