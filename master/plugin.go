@@ -6,7 +6,6 @@ import (
 
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
-    "fmt"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -34,7 +33,6 @@ func InstallPlugin(pluginName string) error {
 		return errors.New("Plugin already set to installed on master" + pluginName)
 	}
     
-    fmt.Println("./plugins.d/" + pluginName + "/master.init.d/")
     err := RunScriptsInDir("./plugins.d/" + pluginName + "/master.init.d/", PluginEnvGlob)
     
     if err != nil {
