@@ -89,10 +89,6 @@ func PluginIsInstalled(pluginName string) (bool, error) {
 	}
 }
 
-/*
-   Sets environment variables for given CMD and slave on master
-*/
-
 func PluginEnvMaster(device devices.Slave) (map[string]string, error) {
 	var env = make(map[string]string)
 

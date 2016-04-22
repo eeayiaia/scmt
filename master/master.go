@@ -4,7 +4,6 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
-
 	"github.com/eeayiaia/scmt/devices"
 
 	log "github.com/Sirupsen/logrus"
@@ -54,9 +53,13 @@ func RunNewNodeScripts(slave *devices.Slave) error {
 	return nil
 }
 
+/*
+    Runs scripts in given dir with working directory set to dir
+*/
+
 func RunScriptsInDir(dir string, env map[string]string) error {
     
-	files, err := filepath.Glob(dir+"*.sh")
+	files, err := filepath.Glob(dir+"/*.sh")
     if err != nil {
 		return err
 	}
@@ -74,10 +77,12 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 
 		Log.WithFields(log.Fields{
 			"script": filename,
-		}).Info("running newnode script")
+            "environ": envSlice,
+		}).Info("running script")
 
         cmd := exec.Command("/bin/sh", f)
         cmd.Env = envSlice
+        cmd.Dir = dir
 		output, err := cmd.Output()
 		if err != nil {
 			return err
