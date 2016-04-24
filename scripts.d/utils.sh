@@ -60,7 +60,7 @@ function delete_directory(){
 	fi
 
 	if [[ ! -d "$DIRECTORY" ]]; then
-		echo "delete_directory: No such directory:\n $DIRECTORY" 1>&2
+		echo "delete_directory: No such directory:\n$DIRECTORY" 1>&2
 	else
 		echo "deleting directory:\n$DIRECTORY"
 		rm -rf -- "${DIRECTORY:?}"
@@ -74,20 +74,20 @@ function backup_file(){
 	local BACKUP_FOLDER=~/.scmt-backup
 	local DATE_STAMP=$(date "+%b_%d_%Y_%H:%M:%S")
 	local BACKUP_FILE=$1
-	local BACKUP_FILE_NAME=$(basename $BACKUP_FILE)
+	local BACKUP_FILE_NAME=$(basename "$BACKUP_FILE")
 
 	BACKUP_OUTPUT=$BACKUP_FOLDER/$BACKUP_FILE_NAME-$DATE_STAMP
 
-	if [[ ! -d $BACKUP_FOLDER ]]; then
-		mkdir $BACKUP_FOLDER
+	if [[ ! -d "$BACKUP_FOLDER" ]]; then
+		mkdir "$BACKUP_FOLDER"
 	fi
 
-	if [[ -d $BACKUP_FILE ]]; then
+	if [[ -d "$BACKUP_FILE" ]]; then
 		echo "Backing up directory $BACKUP_FILE to $BACKUP_OUTPUT..."
-		cp -r $BACKUP_FILE $BACKUP_OUTPUT
+		cp -r "$BACKUP_FILE" "$BACKUP_OUTPUT"
 	elif [[ -f $BACKUP_FILE ]]; then
 		echo "Backing up file $BACKUP_FILE to $BACKUP_OUTPUT..."
-		cp $BACKUP_FILE $BACKUP_OUTPUT
+		cp "$BACKUP_FILE" "$BACKUP_OUTPUT"
 	else
 		echo "Cannot backup $BACKUP_FILE: path is not file or directory" 1>&2
 	fi
