@@ -2,4 +2,13 @@
 
 # Input: MYSQL_PASSWORD
 
-mysql -u root -p$MYSQL_PASSWORD < create_database.sql
+# Get script directory
+DIR="${BASH_SOURCE%/*}"
+if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+
+. "$DIR/../utils.sh" || exit 1
+
+check_invoked_by_scmt
+
+mysql -u root -p$MYSQL_PASSWORD < "$DIR/resources/create_database.sql"
+
