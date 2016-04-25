@@ -76,6 +76,42 @@ func installPluginOnSlaves(pluginName string) error {
 	return nil
 }
 
+func RunNewNodePluginScripts(slave devices.Slave) error {
+	envVars, err := PluginEnvMaster(slave)
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"slave": slave.HardwareAddress,
+		}).Warn("Failed to get environment variables")
+		return errors.New("Failed to get environment variables for: " + slave.HardwareAddress)
+	}
+
+	installedPlugins, err := database.GetAllInstalledPlugins()
+	if err != nil {
+		return err
+	}
+	for _, plugin := range installedPlugins {
+		err = RunNewNodePluginScript(plugin, envVars)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func RunNewNodePluginScript(pluginName string, envVars map[string]string) error {
+	pluginName = strings.ToLower(strings.TrimSpace(pluginName))
+
+	err := RunScriptsInDir("./plugins.d/" + pluginName + "/master.newdevice.d/", envVars)
+
+    if err != nil {
+        Log.WithFields(log.Fields{
+			"err": err,
+		}).Warn("Failed to run script")
+        return errors.New("Failed to run new node scripts on master for plugin:" + pluginName)
+    }
+	return nil
+}
+
 func SetPluginInstalled(pluginName string) error {
 	pluginName = strings.ToLower(pluginName)
 
