@@ -11,7 +11,16 @@
   "databaseuser": "master",
   "databasepassword": "badpassword",
 
-  "logincredentials":[{"Username":"odroid","Password":"odroid"},{"Username":"test","Password":"badpassword"}],
+  "logincredentials": [
+    {
+      "Username":"odroid",
+      "Password":"odroid"
+    },
+    {
+      "Username":"test",
+      "Password":"badpassword"
+    }
+  ],
 
   "pidfile": "scmt.pid",
   "logfile": "scmt.log"

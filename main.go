@@ -1,15 +1,15 @@
 package main
 
 import (
+	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/daemon"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
 	"github.com/eeayiaia/scmt/master"
-	"github.com/eeayiaia/scmt/conf"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/codegangsta/cli"	
+	"github.com/codegangsta/cli"
 	"os"
 )
 
@@ -62,5 +62,5 @@ func main() {
 
 	Start(func(_ *cli.Context) {
 		background()
-	})	
+	})
 }
