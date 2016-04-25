@@ -77,14 +77,7 @@ func installPluginOnSlaves(pluginName string) error {
 }
 
 func RunNewNodePluginScripts(slave devices.Slave) error {
-	envVars, err := PluginEnvMaster(slave)
-	if err != nil {
-		Log.WithFields(log.Fields{
-			"slave": slave.HardwareAddress,
-		}).Warn("Failed to get environment variables")
-		return errors.New("Failed to get environment variables for: " + slave.HardwareAddress)
-	}
-
+	envVars := GetEnvVarGlob()
 	installedPlugins, err := database.GetAllInstalledPlugins()
 	if err != nil {
 		return err
