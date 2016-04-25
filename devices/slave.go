@@ -96,8 +96,8 @@ func (s *Slave) RunScriptAsync(scriptpath string, deviceEnv map[string]string) (
 
 	envs := pluginEnvSlave()
 	for k, v := range deviceEnv {
-		_, exists := envs[k]
-		if !exists {
+		_, ok := envs[k]
+		if ok {
 			envs[k] = v
 		} else {
 			Log.WithFields(log.Fields{
