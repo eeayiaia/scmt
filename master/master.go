@@ -1,16 +1,15 @@
 package master
 
 import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/eeayiaia/scmt/conf"
+	"github.com/eeayiaia/scmt/devices"
 	"os/exec"
 	"path"
 	"path/filepath"
-	"github.com/eeayiaia/scmt/devices"
-    "github.com/eeayiaia/scmt/conf"
-	log "github.com/Sirupsen/logrus"
 )
 
 var initialized = false
-
 
 func Init() {
 	if initialized {
@@ -20,63 +19,63 @@ func Init() {
 	InitContextLogging()
 	RegisterInvokerHandlers()
 
-    config := conf.Conf
-    
-    devices.EnvVarsGlob["CLUSTERNAME"] = config.ClusterName
-    devices.EnvVarsGlob["CLUSTER_SUBNET"] = config.ClusterSubnet
-    devices.EnvVarsGlob["MASTER_IP"] = config.MasterIP
-    devices.EnvVarsGlob["INVOKED_BY_SCMT"] = config.InvokedBySCMT
+	config := conf.Conf
+
+	devices.EnvVarsGlob["CLUSTERNAME"] = config.ClusterName
+	devices.EnvVarsGlob["CLUSTER_SUBNET"] = config.ClusterSubnet
+	devices.EnvVarsGlob["MASTER_IP"] = config.MasterIP
+	devices.EnvVarsGlob["INVOKED_BY_SCMT"] = config.InvokedBySCMT
 
 	initialized = true
 }
 
 func RunNewNodeScripts(slave *devices.Slave) error {
-    err := RunScriptsInDir("./scripts.d/master.newnode.d/", GetEnvVarComb(*slave))
-    
+	err := RunScriptsInDir("./scripts.d/master.newnode.d/", GetEnvVarComb(*slave))
+
 	if err != nil {
-        Log.WithFields(log.Fields{
-        "slave": slave.IPAddress,
-        "error": err,
-        }).Warn("Failed to run newnode scripts")
-        return err
+		Log.WithFields(log.Fields{
+			"slave": slave.IPAddress,
+			"error": err,
+		}).Warn("Failed to run newnode scripts")
+		return err
 	}
 
-    Log.WithFields(log.Fields{
-        "slave": slave.IPAddress,
-    }).Info("Ran newnode scripts")
-    
+	Log.WithFields(log.Fields{
+		"slave": slave.IPAddress,
+	}).Info("Ran newnode scripts")
+
 	return nil
 }
 
 /*
-    Runs scripts in given dir with working directory set to dir
+   Runs scripts in given dir with working directory set to dir
 */
 
 func RunScriptsInDir(dir string, env map[string]string) error {
-    
-	files, err := filepath.Glob(dir+"/*.sh")
-    if err != nil {
+
+	files, err := filepath.Glob(dir + "/*.sh")
+	if err != nil {
 		return err
 	}
-    
-    envSlice := make([]string, len(env))
-    
-    ind := 0
-	for k,v := range env {
-        envSlice[ind] = k+"="+v
-        ind++
-    }
-    
-    for _, f := range files {
+
+	envSlice := make([]string, len(env))
+
+	ind := 0
+	for k, v := range env {
+		envSlice[ind] = k + "=" + v
+		ind++
+	}
+
+	for _, f := range files {
 		filename := path.Base(f)
 
 		Log.WithFields(log.Fields{
-			"script": filename,
-            "environ": envSlice,
+			"script":  filename,
+			"environ": envSlice,
 		}).Info("running script")
-        cmd := exec.Command("/bin/sh", filename)
-        cmd.Env = envSlice
-        cmd.Dir = dir
+		cmd := exec.Command("/bin/sh", filename)
+		cmd.Env = envSlice
+		cmd.Dir = dir
 		output, err := cmd.Output()
 		if err != nil {
 			return err
@@ -89,39 +88,38 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 }
 
 /*
-    Returns global environment variables
+   Returns global environment variables
 */
 func GetEnvVarGlob() map[string]string {
-    return devices.EnvVarsGlob
+	return devices.EnvVarsGlob
 }
 
 /*
-    Returns specifc environment variables to slave
+   Returns specifc environment variables to slave
 */
 func GetEnvVarSlave(device devices.Slave) map[string]string {
-    env := make(map[string]string)
-    
-    env["NODE_IP"] = device.IPAddress
-    env["NODE_MAC"] = device.HardwareAddress
-    env["NODENAME"] = device.Hostname
-    
-    return env
+	env := make(map[string]string)
+
+	env["NODE_IP"] = device.IPAddress
+	env["NODE_MAC"] = device.HardwareAddress
+	env["NODENAME"] = device.Hostname
+
+	return env
 }
 
 /*
-    Returns global environment and slave environment variables
+   Returns global environment and slave environment variables
 */
 func GetEnvVarComb(device devices.Slave) map[string]string {
-    env := make(map[string]string)
+	env := make(map[string]string)
 
-    for k, v := range GetEnvVarGlob() {
-        env[k]=v
-    }
-    
-    for k,v := range GetEnvVarSlave(device) {
-        env[k]=v
-    }
-    
-    return env
+	for k, v := range GetEnvVarGlob() {
+		env[k] = v
+	}
+
+	for k, v := range GetEnvVarSlave(device) {
+		env[k] = v
+	}
+
+	return env
 }
-
