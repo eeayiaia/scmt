@@ -5,17 +5,13 @@ import (
 	"path"
 	"path/filepath"
 	"github.com/eeayiaia/scmt/devices"
+    "github.com/eeayiaia/scmt/conf"
 	log "github.com/Sirupsen/logrus"
 )
 
 var initialized = false
 
 var PluginEnvGlob = make(map[string]string)
-
-/*
-   RegisterInvokerHandlers requires quite a lot of other packages to be initialized, is this good to have in init?
-   Also should we initialize devices from here?
-*/
 
 func Init() {
 	if initialized {
@@ -25,7 +21,11 @@ func Init() {
 	InitContextLogging()
 	RegisterInvokerHandlers()
 
-    // TODO: Initialize PluginEnvGlob
+    config := conf.Conf
+    
+    PluginEnvGlob["CLUSTERNAME"] = config.ClusterName
+    PluginEnvGlob["CLUSTER_SUBNET"] = config.ClusterSubnet
+    PluginEnvGlob["MASTER_IP"] = config.MasterIP
 
 	initialized = true
 }

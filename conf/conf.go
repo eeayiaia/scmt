@@ -20,6 +20,10 @@ type Credentials struct {
 type Configuration struct {
 	Production bool
 
+    ClusterName      string
+    ClusterSubnet    string
+    MasterIP         string
+
 	Database         string
 	DatabaseUser     string
 	DatabasePassword string

@@ -406,6 +406,7 @@ func pluginEnvSlave() map[string]string {
 
 	}
 
+    /*Todo: Restructure so that this function also have global environment variables*/
 	env["MASTER_IP"] = masterIP
 	env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config?
 
