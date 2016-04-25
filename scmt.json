@@ -4,6 +4,8 @@
   "clustername": "scmt",
   "clustersubnet": "10.46.0.0/24",
   "masterip": "10.46.0.1",
+  
+  "invokedbyscmt": "1",
 
   "database": "cluster",
   "databaseuser": "master",

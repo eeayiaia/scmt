@@ -24,6 +24,8 @@ type Configuration struct {
     ClusterSubnet    string
     MasterIP         string
 
+    InvokedBySCMT    string
+
 	Database         string
 	DatabaseUser     string
 	DatabasePassword string
