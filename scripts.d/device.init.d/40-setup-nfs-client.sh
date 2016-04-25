@@ -30,7 +30,7 @@ HOSTS_DENY=/etc/hosts.deny
 echo "Adding rpcbind to $HOSTS_DENY"
 backup_file "$HOSTS_DENY"
 
-grep -q -F "rpcbind\s*:\*ALL" "$HOSTS_DENY" \
+grep -q -F "rpcbind\s*:\s*ALL" "$HOSTS_DENY" \
 	|| echo "rpcbind : ALL" >> "$HOSTS_DENY"
 
 HOSTS_ALLOW=/etc/hosts.allow
