@@ -78,20 +78,58 @@ echo "export HADOOP_CONF_LIB_NATIVE_DIR=${HADOOP_PREFIX:-"/lib/native"}
 export HADOOP_OPTS="-Djava.LIBRARY.PATH=$HADOOP_PREFIX/lib"" >> /usr/local/hadoop/etc/hadoop/yarn-env.sh
 
 #Config core-site.xml
+sed -e 's/<configuration>/' core-site.xml
+sed -e 's/</configuration>/' core-site.xml
 
+echo "<configuration>
+ <property>
+   <name>hadoop.tmp.dir</name>
+   <value>/app/hadoop/tmp</value>
+   <description>A base for other temporary directories.</description>
+ </property>
+
+ <property>
+   <name>fs.default.name</name>
+   <value>hdfs://localhost:54310</value>
+   <description>The name of the default file system.  A URI whose
+   scheme and authority determine the FileSystem implementation.  The
+   uri's scheme determines the config property (fs.SCHEME.impl) naming
+   the FileSystem implementation class.  The uri's authority is used to
+   determine the host, port, etc. for a filesystem.</description>
+ </property>
+</configuration>" >> /usr/local/hadoop/etc/hadoop/core-site.xml
 
 
 
 #Config hdfs-site.xml
+cd /usr/local/hadoop/etc/hadoop/
+sed -e 's/<configuration>/' hdfs-site.xml
+sed -e 's/</configuration>/' hdfs-site.xml
 
+echo "<configuration>
+<property>
+  <name>dfs.replication</name>
+  <value>3</value>
+  <description>Default block replication.
+  The actual number of replications can be specified when the file is created.
+  The default is used if replication is not specified in create time.
+  </description>
+</property>
+</configuration> " >> /usr/local/hadoop/etc/hadoop/hdfs-site.xml
 
 
 #Config mapred-site.xml
+cd /usr/local/hadoop/etc/hadoop/
+sed -e 's/<configuration>/' mapred-site.xml
+sed -e 's/</configuration>/' mapred-site.xml
+echo "<configuration>
+ <property>
+  <name>mapreduce.framework.name</name>
+  <value>yarn</value>
+ </property>
+</configuration>" >> /usr/local/hadoop/etc/hadoop/mapred-site.xml
 
 
-
-#Config hadoop-env.sh
-#Set this:  export JAVA_HOME=/usr/lib/jvm/java--openjdk-armf/jre/bin/jav export HADOOP_OPTS=-Djava.net.preferIPv4Stack=true export HADOOP_CONF_DIR=/opt/hadoop/hadoop/conf
 
 
 
