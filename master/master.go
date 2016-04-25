@@ -30,28 +30,20 @@ func Init() {
 }
 
 func RunNewNodeScripts(slave *devices.Slave) error {
-	files, err := filepath.Glob("./scripts.d/master.newnode.d/*.sh")
+    err := RunScriptsInDir("./scripts.d/master.newnode.d/", GetEnvVarComb(*slave))
+    
 	if err != nil {
-		return err
+        Log.WithFields(log.Fields{
+        "slave": slave.IPAddress,
+        "error": err,
+        }).Warn("Failed to run newnode scripts")
+        return err
 	}
 
-	for _, f := range files {
-		filename := path.Base(f)
-
-		// TODO: set env vars
-
-		Log.WithFields(log.Fields{
-			"script": filename,
-		}).Info("running newnode script")
-
-		output, err := exec.Command("/bin/sh", f).Output()
-		if err != nil {
-			return err
-		}
-
-		Log.Info("Output:\n" + string(output))
-	}
-
+    Log.WithFields(log.Fields{
+        "slave": slave.IPAddress,
+    }).Info("Ran newnode scripts")
+    
 	return nil
 }
 
