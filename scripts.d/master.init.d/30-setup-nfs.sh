@@ -25,13 +25,15 @@ if [[ $INSTALL_SUCCESS != 0 ]]; then
 fi
 
 # Filesystem that is to be exported needs to exist
-mkdir /var/nfs
+[[ ! -d /var/nfs ]] && mkdir /var/nfs
 
 # Set ownership
 chown nobody:nogroup /var/nfs
 
 # Adding clients to the list that we will share with
-echo "/var/nfs	$CLUSTER_SUBNET(rw,sync,no_subtree_check)" >> /etc/exports
+EXPORTS=/etc/exports
+backup_file "$EXPORTS"
+echo "/var/nfs	$CLUSTER_SUBNET(rw,sync,no_subtree_check)" >> "$EXPORTS"
 
 # Create the nfs table
 exportfs -a

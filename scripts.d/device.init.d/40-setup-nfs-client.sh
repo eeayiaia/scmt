@@ -10,33 +10,54 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 
 check_invoked_by_scmt
 
-#Install nfs
-apt-get install portmap nfs-common --assume-yes
+write_line
+echo "Setting up NFS client"
+
+# Install nfs
+echo "Installing NFS..."
+write_line
+apt-get install rpcbind nfs-common --assume-yes
 INSTALL_SUCCESS=$?
 
-echo ""
 write_line
 
 if [[ $INSTALL_SUCCESS != 0 ]]; then
-	echo "Failed to install NFS on node."
+	echo "Failed to install NFS on node." >&2
 	exit 1
 fi
 
-#Adding rpcbind
-echo "rpcbind : ALL" >> /etc/hosts.deny
- 
-#Adding allowed hosts
-echo "$MASTER_IP" >> /etc/hosts.allow
+HOSTS_DENY=/etc/hosts.deny
+echo "Adding rpcbind to $HOSTS_DENY"
+backup_file "$HOSTS_DENY"
 
-#Create mounted shared folder
+grep -q -F "rpcbind\s*:\*ALL" "$HOSTS_DENY" \
+	|| echo "rpcbind : ALL" >> "$HOSTS_DENY"
+
+HOSTS_ALLOW=/etc/hosts.allow
+echo "Adding allowed hosts to $HOSTS_ALLOW"
+backup_file "$HOSTS_ALLOW"
+
+grep -q -F "$MASTER_IP" "$HOSTS_ALLOW" \
+	|| echo "$MASTER_IP" >> "$HOSTS_ALLOW"
+
+# Create mounted shared folder
 if [[ ! -d /var/shared ]]; then
 	mkdir /var/shared
 fi
 
-#Mount the server shared folder to the local folder
+# Mount the server shared directory to the local folder
+echo "Mounting shared directory"
 mount "$MASTER_IP:/var/nfs" /var/shared/
 
+# Adding mount to fstab
+backup_file /etc/fstab
+
+grep -q -F "$MASTER_IP:/var/nfs" /etc/fstab \
+	|| echo "$MASTER_IP:/var/nfs /var/shared nfs" >> /etc/fstab
+
 #Start services
-/etc/init.d/portmap restart
-/etc/init.d/nfs-common restart
+echo "Starting services"
+service portmap restart
+
+echo "Finished setting up NFS client."
 
