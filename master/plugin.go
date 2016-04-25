@@ -77,7 +77,7 @@ func installPluginOnSlaves(pluginName string) error {
 }
 
 /*
-    Todo: What if newnode scripts already has ran? Maybe add support to database to keep track of or will it not hurt?
+   Todo: What if newnode scripts already has ran? Maybe add support to database to keep track of or will it not hurt?
 */
 func RunNewNodePluginScripts(slave devices.Slave) error {
 	envVars := GetEnvVarComb(slave)
@@ -97,19 +97,19 @@ func RunNewNodePluginScripts(slave devices.Slave) error {
 func RunNewNodePluginScript(pluginName string, envVars map[string]string) error {
 	pluginName = strings.ToLower(strings.TrimSpace(pluginName))
 
-	err := RunScriptsInDir("./plugins.d/" + pluginName + "/master.newdevice.d/", envVars)
+	err := RunScriptsInDir("./plugins.d/"+pluginName+"/master.newdevice.d/", envVars)
 
-    if err != nil {
-        Log.WithFields(log.Fields{
+	if err != nil {
+		Log.WithFields(log.Fields{
 			"err": err,
 		}).Warn("Failed to run script")
-        return errors.New("Failed to run new node scripts on master for plugin:" + pluginName)
-    }
+		return errors.New("Failed to run new node scripts on master for plugin:" + pluginName)
+	}
 	return nil
 }
 
 /*
-    Todo: What if newnode scripts already has ran? Maybe add support to database to keep track of or will it not hurt?
+   Todo: What if newnode scripts already has ran? Maybe add support to database to keep track of or will it not hurt?
 */
 func RunRemoveNodePluginScripts(slave devices.Slave) error {
 	envVars := GetEnvVarComb(slave)
@@ -129,14 +129,14 @@ func RunRemoveNodePluginScripts(slave devices.Slave) error {
 func RunRemoveNodePluginScript(pluginName string, envVars map[string]string) error {
 	pluginName = strings.ToLower(strings.TrimSpace(pluginName))
 
-	err := RunScriptsInDir("./plugins.d/" + pluginName + "/master.removedevice.d/", envVars)
+	err := RunScriptsInDir("./plugins.d/"+pluginName+"/master.removedevice.d/", envVars)
 
-    if err != nil {
-        Log.WithFields(log.Fields{
+	if err != nil {
+		Log.WithFields(log.Fields{
 			"err": err,
 		}).Warn("Failed to run script")
-        return errors.New("Failed to run remove node scripts on master for plugin:" + pluginName)
-    }
+		return errors.New("Failed to run remove node scripts on master for plugin:" + pluginName)
+	}
 	return nil
 }
 

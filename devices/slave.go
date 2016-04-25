@@ -101,7 +101,9 @@ func (s *Slave) RunScriptAsync(scriptpath string, deviceEnv map[string]string) (
 			envs[k] = v
 		} else {
 			Log.WithFields(log.Fields{
-				"key": k,
+				"key":   k,
+				"envsA": deviceEnv,
+				"envsB": pluginEnvSlave(),
 			}).Error("intersection between environment variables!")
 
 			return nil, errors.New("intersection between environment variables")
