@@ -76,8 +76,11 @@ func installPluginOnSlaves(pluginName string) error {
 	return nil
 }
 
+/*
+    Todo: What if newnode scripts already has ran? Maybe add support to database to keep track of or will it not hurt?
+*/
 func RunNewNodePluginScripts(slave devices.Slave) error {
-	envVars := GetEnvVarGlob()
+	envVars := GetEnvVarComb(slave)
 	installedPlugins, err := database.GetAllInstalledPlugins()
 	if err != nil {
 		return err
@@ -101,6 +104,38 @@ func RunNewNodePluginScript(pluginName string, envVars map[string]string) error 
 			"err": err,
 		}).Warn("Failed to run script")
         return errors.New("Failed to run new node scripts on master for plugin:" + pluginName)
+    }
+	return nil
+}
+
+/*
+    Todo: What if newnode scripts already has ran? Maybe add support to database to keep track of or will it not hurt?
+*/
+func RunRemoveNodePluginScripts(slave devices.Slave) error {
+	envVars := GetEnvVarComb(slave)
+	installedPlugins, err := database.GetAllInstalledPlugins()
+	if err != nil {
+		return err
+	}
+	for _, plugin := range installedPlugins {
+		err = RunNewNodePluginScript(plugin, envVars)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func RunRemoveNodePluginScript(pluginName string, envVars map[string]string) error {
+	pluginName = strings.ToLower(strings.TrimSpace(pluginName))
+
+	err := RunScriptsInDir("./plugins.d/" + pluginName + "/master.removedevice.d/", envVars)
+
+    if err != nil {
+        Log.WithFields(log.Fields{
+			"err": err,
+		}).Warn("Failed to run script")
+        return errors.New("Failed to run remove node scripts on master for plugin:" + pluginName)
     }
 	return nil
 }
