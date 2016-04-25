@@ -25,6 +25,7 @@ func Init() {
     devices.EnvVarsGlob["CLUSTERNAME"] = config.ClusterName
     devices.EnvVarsGlob["CLUSTER_SUBNET"] = config.ClusterSubnet
     devices.EnvVarsGlob["MASTER_IP"] = config.MasterIP
+    devices.EnvVarsGlob["INVOKED_BY_SCMT"] = config.InvokedBySCMT
 
 	initialized = true
 }
