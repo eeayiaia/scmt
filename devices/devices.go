@@ -18,6 +18,8 @@ import (
 var devices []*Slave
 var devicesMutex *sync.Mutex
 
+var EnvVarsGlob = make(map[string]string)
+
 var initialized = false
 
 /*
@@ -88,7 +90,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	if err != nil {
 		slave = &Slave{
 			HardwareAddress: hardwareAddress,
-			IpAddress:       ipAddress,
+			IPAddress:       ipAddress,
 			Port:            "22",
 		}
 		error := slave.TestCredentials()
@@ -96,7 +98,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			Log.Error("No correct credentials")
 		}
 		AddDevice(slave)
-		slave.Store() //Generates the id of a host and therefore both static ip and hostname
+		slave.Store()                     //Generates the id of a host and therefore both static ip and hostname
 		slave.Load(slave.HardwareAddress) // the slave struct gets updated with the new information generated in the DB
 		//The current IPadress will now be ipAddress and the new setatic ip is slave.IpAdress
 		// TODO: Actually setting the hostname on a device
@@ -184,9 +186,9 @@ func handleDisconnect(address string) {
 	defer devicesMutex.Unlock()
 
 	for _, slave := range devices {
-		if strings.Compare(slave.IpAddress, address) == 0 {
+		if strings.Compare(slave.IPAddress, address) == 0 {
 			Log.WithFields(log.Fields{
-				"IP":  slave.IpAddress,
+				"IP":  slave.IPAddress,
 				"MAC": slave.HardwareAddress,
 			}).Warn("device disconnected")
 
@@ -219,7 +221,7 @@ func getAllStoredDevices() ([]*Slave, error) {
 			Connected: false, // have no idea really ..
 			lock:      &sync.Mutex{},
 		}
-		rows.Scan(&slave.HardwareAddress, &slave.Hostname, &slave.IpAddress, &slave.Port, &slave.UserName, &slave.Password)
+		rows.Scan(&slave.HardwareAddress, &slave.Hostname, &slave.IPAddress, &slave.Port, &slave.UserName, &slave.Password)
 		ds = append(ds, slave)
 	}
 

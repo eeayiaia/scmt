@@ -32,7 +32,7 @@ func NewRemoteConnection(device *Slave) (*RemoteConnection, error) {
 		},
 	}
 
-	connection, err := ssh.Dial("tcp", (device.IpAddress+":"+device.Port), sshConfig)
+	connection, err := ssh.Dial("tcp", (device.IPAddress + ":" + device.Port), sshConfig)
 	rc := &RemoteConnection{
 		Device:     device,
 		Connection: connection,
@@ -45,7 +45,7 @@ func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 	session, err := conn.Connection.NewSession()
 	if err != nil {
 		Log.WithFields(log.Fields{
-			"IP":    conn.Device.IpAddress,
+			"IP":    conn.Device.IPAddress,
 			"MAC":   conn.Device.HardwareAddress,
 			"error": err,
 		}).Error("could not open session")
@@ -66,7 +66,7 @@ func (conn *RemoteConnection) RunInShell(query string, sudo bool) string {
 	e := session.Run(q)
 	if e != nil {
 		Log.WithFields(log.Fields{
-			"IP":    conn.Device.IpAddress,
+			"IP":    conn.Device.IPAddress,
 			"MAC":   conn.Device.HardwareAddress,
 			"error": e,
 		}).Error("could not run command")
@@ -111,13 +111,13 @@ func (conn *RemoteConnection) CopyFolder(folderpath string, destination string) 
 	cmd := exec.Command("tar", "-C", path, "-zcf", tmpPath, foldername)
 
 	Log.WithFields(log.Fields{
-		"target":  conn.Device.IpAddress,
+		"target":  conn.Device.IPAddress,
 		"command": cmd,
 	}).Info("Running command")
 
 	if err := cmd.Run(); err != nil {
 		Log.WithFields(log.Fields{
-			"target":  conn.Device.IpAddress,
+			"target":  conn.Device.IPAddress,
 			"command": cmd,
 			"error":   err,
 		}).Fatal("Failed to run command")
@@ -127,7 +127,7 @@ func (conn *RemoteConnection) CopyFolder(folderpath string, destination string) 
 
 	if err != nil {
 		Log.WithFields(log.Fields{
-			"target":  conn.Device.IpAddress,
+			"target":  conn.Device.IPAddress,
 			"command": cmd,
 			"error":   err,
 		}).Warn("Failed to copy file")
@@ -135,7 +135,7 @@ func (conn *RemoteConnection) CopyFolder(folderpath string, destination string) 
 	}
 
 	Log.WithFields(log.Fields{
-		"target":      conn.Device.IpAddress,
+		"target":      conn.Device.IPAddress,
 		"folderpath":  folderpath,
 		"destination": destination,
 	}).Info("copied file")
@@ -199,7 +199,7 @@ func (conn *RemoteConnection) CopyFile(filepath string, destination string) erro
 		fmt.Fprint(w, "\x00 \r\n")
 
 		Log.WithFields(log.Fields{
-			"target":      conn.Device.IpAddress,
+			"target":      conn.Device.IPAddress,
 			"filepath":    filepath,
 			"destination": destination,
 			"size":        size,
@@ -218,7 +218,7 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 
 	session, err := conn.Connection.NewSession()
 	if err != nil {
-		Log.Error("could not open a new session towards ", conn.Device.IpAddress, ": ", err)
+		Log.Error("could not open a new session towards ", conn.Device.IPAddress, ": ", err)
 		return nil, err
 	}
 
@@ -289,7 +289,7 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 		session, err := conn.Connection.NewSession()
 		if err != nil {
 			Log.WithFields(log.Fields{
-				"IP":  conn.Device.IpAddress,
+				"IP":  conn.Device.IPAddress,
 				"MAC": conn.Device.HardwareAddress,
 				"ERR": err,
 			}).Error("could not open session")

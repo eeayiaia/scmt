@@ -9,10 +9,9 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/Sirupsen/logrus"
+	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/heartbeat"
-	"github.com/eeayiaia/scmt/conf"
-	"io/ioutil"
 	"path"
 	"path/filepath"
 	"strings"
@@ -23,7 +22,7 @@ import (
 type Slave struct {
 	Hostname        string
 	HardwareAddress string
-	IpAddress       string
+	IPAddress       string
 	Port            string
 	UserName        string
 	Password        string
@@ -102,7 +101,7 @@ func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
    Starts the pinger service for a device/slave
 */
 func (s *Slave) StartPinger() {
-	s.pingerControl = heartbeat.Pinger(s.IpAddress, handleDisconnect)
+	s.pingerControl = heartbeat.Pinger(s.IPAddress, handleDisconnect)
 }
 
 func (slave *Slave) Store() {
@@ -190,7 +189,7 @@ func (slave *Slave) Load(HWaddr string) {
 		return
 	}
 
-	err = stmt.QueryRow(strings.Replace(HWaddr, ":", "", -1)).Scan(&slave.HardwareAddress, &slave.Hostname, &slave.IpAddress, &slave.Port, &slave.UserName, &slave.Password)
+	err = stmt.QueryRow(strings.Replace(HWaddr, ":", "", -1)).Scan(&slave.HardwareAddress, &slave.Hostname, &slave.IPAddress, &slave.Port, &slave.UserName, &slave.Password)
 	switch {
 	case err == sql.ErrNoRows:
 		Log.WithFields(log.Fields{
@@ -395,53 +394,17 @@ func (slave *Slave) pluginIsInstalled(pluginName string) bool {
    Returns an array with environment variables for scripts running on slaves
 */
 func pluginEnvSlave() map[string]string {
-	env := make(map[string]string)
-
-	masterIP, err := getMasterIP()
-
-	if err != nil {
-		Log.WithFields(log.Fields{
-			"error": err,
-		}).Fatal("Failed to get master IP from /etc/hosts")
-
-	}
-
-    /*Todo: Restructure so that this function also have global environment variables*/
-	env["MASTER_IP"] = masterIP
-	env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config?
-
-	return env
+	return EnvVarsGlob
 }
 
-/*
-   Parses IP address for master from /etc/hosts
-   Todo: Validate that second part of line actually is in correct IP format.
-*/
-func getMasterIP() (string, error) {
-	content, err := ioutil.ReadFile("/etc/hosts")
-	if err != nil {
-		return "", errors.New("Failed to read /etc/hosts ")
-	}
-	lines := strings.Split(string(content), "\n")
-
-	for _, line := range lines {
-		splitted := strings.Fields(line)
-		if len(splitted) >= 2 && splitted[1] == "master" {
-			return splitted[0], nil
-
-		}
-	}
-	return "", errors.New("Failed to get master IP ")
-}
-
-func (slave *Slave) TestCredentials() error{
+func (slave *Slave) TestCredentials() error {
 	for _, each := range conf.Conf.LoginCredentials {
 		slave.UserName = each.Username
 		slave.Password = each.Password
 		session, error := NewRemoteConnection(slave)
-		if (error == nil ){
+		if error == nil {
 			log.WithFields(log.Fields{
-				"Credentials" : each,
+				"Credentials": each,
 			}).Info("Credentials found in config.")
 			session.Connection.Close()
 			return nil

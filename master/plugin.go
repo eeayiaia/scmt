@@ -4,10 +4,11 @@ import (
 	"errors"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/database"
 	"github.com/eeayiaia/scmt/devices"
-	log "github.com/Sirupsen/logrus"
 )
+
 /*
 Installs plugin on master and all other devices
 */
@@ -25,8 +26,8 @@ func InstallPlugin(pluginName string) error {
 }
 
 func installPluginOnMaster(pluginName string) error {
-    pluginName = strings.ToLower(pluginName)
-    
+	pluginName = strings.ToLower(pluginName)
+
 	if tf, _ := database.PluginInDB(pluginName); !tf {
 		Log.WithFields(log.Fields{
 			"plugin": pluginName,
@@ -39,33 +40,32 @@ func installPluginOnMaster(pluginName string) error {
 			"plugin": pluginName,
 		}).Warn("Plugin not enabled")
 		return errors.New("Plugin not enabled" + pluginName)
-	}    
+	}
 
-	if 	tf, _ := PluginIsInstalled(pluginName); tf {
+	if tf, _ := PluginIsInstalled(pluginName); tf {
 		Log.WithFields(log.Fields{
 			"plugin": pluginName,
 		}).Warn("Plugin already set to installed on master")
 		return errors.New("Plugin already set to installed on master" + pluginName)
 	}
-    
-    err := RunScriptsInDir("./plugins.d/" + pluginName + "/master.init.d/", PluginEnvGlob)
-    
-    if err != nil {
-        Log.WithFields(log.Fields{
+
+	err := RunScriptsInDir("./plugins.d/"+pluginName+"/master.init.d/", GetEnvVarGlob())
+
+	if err != nil {
+		Log.WithFields(log.Fields{
 			"err": err,
 		}).Warn("Failed to run script")
-        return errors.New("Failed to install plugin:" + pluginName)
-    }
-    
-    SetPluginInstalled(pluginName)
-	
-    Log.WithFields(log.Fields{
+		return errors.New("Failed to install plugin:" + pluginName)
+	}
+
+	SetPluginInstalled(pluginName)
+
+	Log.WithFields(log.Fields{
 		"plugin": pluginName,
 	}).Info("Plugin installed on master")
-    
-    return nil
-}
 
+	return nil
+}
 
 //TODO: support for only installing plugins on certain nodes?
 func installPluginOnSlaves(pluginName string) error {
@@ -132,14 +132,4 @@ func PluginIsInstalled(pluginName string) (bool, error) {
 	default:
 		return false, err
 	}
-}
-
-func PluginEnvMaster(device devices.Slave) (map[string]string, error) {
-	var env = make(map[string]string)
-    
-	env["NODE_IP"] = device.IpAddress
-	env["NODENAME"] = device.Hostname
-	env["CLUSTERNAME"] = "SCMT" // TODO: this should be read from a config AND should be initialised in global env map instead of Init
-
-	return env, nil
 }

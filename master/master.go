@@ -11,7 +11,6 @@ import (
 
 var initialized = false
 
-var PluginEnvGlob = make(map[string]string)
 
 func Init() {
 	if initialized {
@@ -23,9 +22,9 @@ func Init() {
 
     config := conf.Conf
     
-    PluginEnvGlob["CLUSTERNAME"] = config.ClusterName
-    PluginEnvGlob["CLUSTER_SUBNET"] = config.ClusterSubnet
-    PluginEnvGlob["MASTER_IP"] = config.MasterIP
+    devices.EnvVarsGlob["CLUSTERNAME"] = config.ClusterName
+    devices.EnvVarsGlob["CLUSTER_SUBNET"] = config.ClusterSubnet
+    devices.EnvVarsGlob["MASTER_IP"] = config.MasterIP
 
 	initialized = true
 }
@@ -95,3 +94,41 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 
 	return nil
 }
+
+/*
+    Returns global environment variables
+*/
+func GetEnvVarGlob() map[string]string {
+    return devices.EnvVarsGlob
+}
+
+/*
+    Returns specifc environment variables to slave
+*/
+func GetEnvVarSlave(device devices.Slave) map[string]string {
+    env := make(map[string]string)
+    
+    env["NODE_IP"] = device.IPAddress
+    env["NODE_MAC"] = device.HardwareAddress
+    env["NODENAME"] = device.Hostname
+    
+    return env
+}
+
+/*
+    Returns global environment and slave environment variables
+*/
+func GetEnvVarComb(device devices.Slave) map[string]string {
+    env := make(map[string]string)
+
+    for k, v := range GetEnvVarGlob() {
+        env[k]=v
+    }
+    
+    for k,v := range GetEnvVarSlave(device) {
+        env[k]=v
+    }
+    
+    return env
+}
+
