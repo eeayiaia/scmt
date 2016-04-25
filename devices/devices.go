@@ -116,6 +116,13 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 
 	// run init-scripts on the newly connected device
 	err = slave.RunInitScripts()
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"mac":   hardwareAddress,
+			"ip":    ipAddress,
+			"error": err,
+		}).Error("error running init scripts on slave")
+	}
 
 	return slave
 }
