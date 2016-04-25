@@ -88,13 +88,27 @@ func (s *Slave) RunInShellAsync(query string, sudo bool) chan string {
    Runs the script on a slave asyncronously, delivering feedback
    from the remote in ch
 */
-func (s *Slave) RunScriptAsync(scriptpath string) (chan string, error) {
+func (s *Slave) RunScriptAsync(scriptpath string, deviceEnv map[string]string) (chan string, error) {
 	rc, err := NewRemoteConnection(s)
 	if err != nil {
 		return nil, err
 	}
 
-	return rc.RunScript(scriptpath, pluginEnvSlave())
+	envs := pluginEnvSlave()
+	for k, v := range deviceEnv {
+		_, exists := envs[k]
+		if !exists {
+			envs[k] = v
+		} else {
+			Log.WithFields(log.Fields{
+				"key": k,
+			}).Error("intersection between environment variables!")
+
+			return nil, errors.New("intersection between environment variables")
+		}
+	}
+
+	return rc.RunScript(scriptpath, envs)
 }
 
 /*
@@ -209,7 +223,7 @@ func (slave *Slave) Load(HWaddr string) {
 	}
 }
 
-func (slave *Slave) RunAllScriptsInDir(dir string) error {
+func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error {
 	// Find all device initialisation scripts
 	files, err := filepath.Glob(fmt.Sprintf("%s/*.sh", dir))
 	if err != nil {
@@ -231,7 +245,7 @@ func (slave *Slave) RunAllScriptsInDir(dir string) error {
 	for _, scriptpath := range files {
 		script := path.Base(scriptpath)
 
-		ch, err := slave.RunScriptAsync(fmt.Sprintf("/var/tmp/%s/%s", dirBaseName, script))
+		ch, err := slave.RunScriptAsync(fmt.Sprintf("/var/tmp/%s/%s", dirBaseName, script), envs)
 		if err != nil {
 			Log.WithFields(log.Fields{
 				"script": script,
@@ -252,8 +266,8 @@ func (slave *Slave) RunAllScriptsInDir(dir string) error {
 	return nil
 }
 
-func (slave *Slave) RunInitScripts() error {
-	return slave.RunAllScriptsInDir("./scripts.d/device.init.d")
+func (slave *Slave) RunInitScripts(envs map[string]string) error {
+	return slave.RunAllScriptsInDir("./scripts.d/device.init.d", envs)
 }
 
 /*func (slave *Slave) TransferPlugin(plugin string) {
@@ -356,7 +370,8 @@ func (slave *Slave) installPlugin(pluginName string) error {
 	}
 
 	for _, scriptPath := range scriptsToRun {
-		ch, err := slave.RunScriptAsync("/tmp/" + "/device.init.d/" + path.Base(scriptPath))
+		// TODO: set the right environment variables
+		ch, err := slave.RunScriptAsync("/tmp/"+"/device.init.d/"+path.Base(scriptPath), nil)
 		if err != nil {
 			return err
 		}

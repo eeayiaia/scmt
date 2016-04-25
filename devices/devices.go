@@ -84,10 +84,16 @@ func GetDevice(hardwareAddress string) (*Slave, error) {
 */
 func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	var slave *Slave
+	envs := make(map[string]string)
 
 	hwAddr := strings.Replace(hardwareAddress, ":", "", -1)
 	slave, err := GetDevice(hwAddr)
 	if err != nil {
+		Log.WithFields(log.Fields{
+			"mac": hardwareAddress,
+			"ip":  ipAddress,
+		}).Info("new device connected for the first time, setting it up")
+
 		slave = &Slave{
 			HardwareAddress: hardwareAddress,
 			IPAddress:       ipAddress,
@@ -98,15 +104,21 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			Log.Error("No correct credentials")
 		}
 		AddDevice(slave)
-		slave.Store()                     //Generates the id of a host and therefore both static ip and hostname
+
+		// This generates the id of the device, which both
+		// sets the node hostname and generated ip-address
+		slave.Store()
+
+		// Load the newly generated hostname, but not the IP (yet)
 		slave.Load(slave.HardwareAddress) // the slave struct gets updated with the new information generated in the DB
+
+		newSlaveIp := slave.IPAddress
+		envs["NODE_NEW_IP"] = newSlaveIp
+		slave.IPAddress = ipAddress
+
 		//The current IPadress will now be ipAddress and the new setatic ip is slave.IpAdress
 		// TODO: Actually setting the hostname on a device
 		// TODO: Setting static ip in dhcpd.conf
-		Log.WithFields(log.Fields{
-			"mac": hardwareAddress,
-			"ip":  ipAddress,
-		}).Info("new device connected for the first time, setting it up")
 	} else {
 		Log.WithFields(log.Fields{
 			"mac": hardwareAddress,
@@ -115,7 +127,10 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 	}
 
 	// run init-scripts on the newly connected device
-	err = slave.RunInitScripts()
+	envs["NODE_IP"] = slave.IPAddress
+	envs["NODE_HOSTNAME"] = slave.Hostname
+
+	err = slave.RunInitScripts(envs)
 	if err != nil {
 		Log.WithFields(log.Fields{
 			"mac":   hardwareAddress,
@@ -175,7 +190,7 @@ func RunScriptOnAllAsync(scriptpath string) []chan string {
 	defer devicesMutex.Unlock()
 
 	for _, slave := range devices {
-		ch, err := slave.RunScriptAsync(scriptpath)
+		ch, err := slave.RunScriptAsync(scriptpath, nil)
 		if err != nil {
 			Log.Error(err)
 		}
