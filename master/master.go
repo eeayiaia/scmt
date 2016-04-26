@@ -21,10 +21,10 @@ func Init() {
 
 	config := conf.Conf
 
-	devices.EnvVarsGlob["CLUSTERNAME"] = config.ClusterName
-	devices.EnvVarsGlob["CLUSTER_SUBNET"] = config.ClusterSubnet
-	devices.EnvVarsGlob["MASTER_IP"] = config.MasterIP
-	devices.EnvVarsGlob["INVOKED_BY_SCMT"] = config.InvokedBySCMT
+	devices.AddGlobalEnv("CLUSTERNAME", config.ClusterName)
+	devices.AddGlobalEnv("CLUSTER_SUBNET", config.ClusterSubnet)
+	devices.AddGlobalEnv("MASTER_IP", config.MasterIP)
+	devices.AddGlobalEnv("INVOKED_BY_SCMT", config.InvokedBySCMT)
 
 	initialized = true
 }
@@ -91,7 +91,7 @@ func RunScriptsInDir(dir string, env map[string]string) error {
    Returns global environment variables
 */
 func GetEnvVarGlob() map[string]string {
-	return devices.EnvVarsGlob
+	return devices.GetGlobalEnvs()
 }
 
 /*

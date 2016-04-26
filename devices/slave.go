@@ -94,16 +94,16 @@ func (s *Slave) RunScriptAsync(scriptpath string, deviceEnv map[string]string) (
 		return nil, err
 	}
 
-	envs := pluginEnvSlave()
+	envs := GetGlobalEnvs()
 	for k, v := range deviceEnv {
-		_, ok := envs[k]
+		v1, ok := envs[k]
 		if ok {
 			envs[k] = v
 		} else {
 			Log.WithFields(log.Fields{
-				"key":   k,
-				"envsA": deviceEnv,
-				"envsB": pluginEnvSlave(),
+				"key":    k,
+				"value1": v1,
+				"value2": v,
 			}).Error("intersection between environment variables!")
 
 			return nil, errors.New("intersection between environment variables")
@@ -405,13 +405,6 @@ func (slave *Slave) pluginIsInstalled(pluginName string) bool {
 	default:
 		return true
 	}
-}
-
-/*
-   Returns an array with environment variables for scripts running on slaves
-*/
-func pluginEnvSlave() map[string]string {
-	return EnvVarsGlob
 }
 
 func (slave *Slave) TestCredentials() error {

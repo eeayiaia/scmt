@@ -18,8 +18,6 @@ import (
 var devices []*Slave
 var devicesMutex *sync.Mutex
 
-var EnvVarsGlob = make(map[string]string)
-
 var initialized = false
 
 /*
