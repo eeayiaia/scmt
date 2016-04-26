@@ -13,5 +13,5 @@ check_invoked_by_scmt
 
 # Set correct hostname
 backup_file /etc/hostname
-echo $HOSTNAME > /etc/hostname
+echo $NODE_HOSTNAME > /etc/hostname
 
