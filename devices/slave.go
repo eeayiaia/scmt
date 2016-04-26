@@ -96,18 +96,7 @@ func (s *Slave) RunScriptAsync(scriptpath string, deviceEnv map[string]string) (
 
 	envs := GetGlobalEnvs()
 	for k, v := range deviceEnv {
-		v1, ok := envs[k]
-		if ok {
-			envs[k] = v
-		} else {
-			Log.WithFields(log.Fields{
-				"key":    k,
-				"value1": v1,
-				"value2": v,
-			}).Error("intersection between environment variables!")
-
-			return nil, errors.New("intersection between environment variables")
-		}
+		envs[k] = v
 	}
 
 	return rc.RunScript(scriptpath, envs)
