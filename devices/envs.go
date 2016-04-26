@@ -7,6 +7,10 @@ import (
 var global_envs map[string]string
 
 func AddGlobalEnv(k string, v string) {
+	if global_envs == nil {
+		global_envs = make(map[string]string)
+	}
+
 	_, ok := global_envs[k]
 	if !ok {
 		Log.WithFields(log.Fields{
