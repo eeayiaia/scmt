@@ -1,9 +1,9 @@
 #!/bin/bash
 
-#Script runs once to remove hadoop-slave from /etc/hosts
+#Script runs once to add hadoop-master to /etc/hosts
 
 $HOST_IP=$1
-$NODE_ID=$2
+
 
 
 #Get script directory
@@ -14,4 +14,4 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/../resources/config" || exit 1
 
 #Set ip to /etc/hosts
-sed -e "s/$HOST_IP hadoop-slave$2/" 
+echo "$HOST_IP hadoop-master"
