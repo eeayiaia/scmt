@@ -8,6 +8,7 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/../../../scripts.d/utils.sh" || exit 1
 . "$DIR/../resources/config" || exit 1
 
+
 #Create hadoop user
 useradd -m hadoop
 passwd hadoop hadoop
@@ -131,14 +132,6 @@ echo "<configuration>
   <value>yarn</value>
  </property>
 </configuration>" >> /usr/local/hadoop/etc/hadoop/mapred-site.xml
-
-
-#Set master ip to /etc/hosts
-echo "$MASTER_NODE  hadoop_master" >> /etc/hosts
-
-
-
-
 
 
 
