@@ -10,6 +10,7 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
+	"errors"
 )
 
 type Credentials struct {
@@ -47,6 +48,38 @@ func InitConfiguration() {
 	if Conf == nil {
 		panic("configuration unable to load")
 	}
+}
+
+func GenerateJSONConfiguration(conf *Configuration) error {
+	f, err := os.Create(CONFIGURATIONPATH)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"config":  *conf,
+			"error": err,
+		}).Fatal("could not create configuration file")
+		return errors.New("failed to generate conf file")
+	}
+	defer f.Close()
+
+	encoding, err := json.MarshalIndent(conf, "", "  ")
+	if err != nil {
+		log.WithFields(log.Fields{
+			"config":  *conf,
+			"error": err,
+		}).Fatal("failed to create json encoding")
+		return errors.New("failed to generate conf file")
+	}
+
+	_, err = f.Write(encoding)
+	if err != nil {
+		log.WithFields(log.Fields{
+			"config":  *conf,
+			"error": err,
+		}).Fatal("failed to write json encoding to configuration file")
+		return errors.New("failed to generate conf file")
+	}
+	f.Sync()
+	return nil
 }
 
 func ParseConfiguration(filepath string) *Configuration {
