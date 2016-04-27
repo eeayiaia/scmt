@@ -20,3 +20,16 @@ fi
 
 cp "$DIR/resources/baseDHCPD.conf" "$DHCPD_CONF"
 
+echo "
+subnet $CLUSTER_SUBNET_IP netmask $CLUSTER_SUBNET_MASK {
+  range $DEVICE_IP_RANGE_BEGIN $DEVICE_IP_RANGE_END;
+  option routers $MASTER_IP;
+  option broadcast-address $CLUSTER_BROADCAST_IP;
+
+  default-lease-time $DHCPD_LEASE_TIME_DEFAULT;
+  max-lease-time $DHCPD_LEASE_TIME_MAX;
+}
+
+# Devices in cluster
+" >> "$DHCPD_CONF"
+

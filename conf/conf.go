@@ -22,8 +22,15 @@ type Configuration struct {
 	Production bool
 
     ClusterName      string
+
     ClusterSubnet    string
+    ClusterBroadcastIP string
+    DeviceIPRangeBegin string
+    DeviceIPRangeEnd string
     MasterIP         string
+
+    DHCPDLeaseTimeDefault string
+    DHCPDLeaseTimeMax     string
 
     InvokedBySCMT    string
 

@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/devices"
+	"github.com/eeayiaia/scmt/utils"
 	"os/exec"
 	"path"
 	"path/filepath"
@@ -21,9 +22,31 @@ func Init() {
 
 	config := conf.Conf
 
+	// TODO: better error handling
+	clusterSubnetIP, clusterSubnetMask, err := utils.SubnetExpand(config.ClusterSubnet)
+
+	if (err != nil) {
+		Log.WithFields(log.Fields{
+			"cluster subnet setting": config.ClusterSubnet,
+		}).Warn("Failed to expand subnet, configuration is invalid")
+	}
+
+	// Set environment variables available to scripts
 	devices.AddGlobalEnv("CLUSTERNAME", config.ClusterName)
+
 	devices.AddGlobalEnv("CLUSTER_SUBNET", config.ClusterSubnet)
+	devices.AddGlobalEnv("CLUSTER_SUBNET_IP", clusterSubnetIP)
+	devices.AddGlobalEnv("CLUSTER_SUBNET_MASK", clusterSubnetMask)
+
+	devices.AddGlobalEnv("CLUSTER_BROADCAST_IP", config.ClusterBroadcastIP)
+	devices.AddGlobalEnv("DEVICE_IP_RANGE_BEGIN", config.DeviceIPRangeBegin)
+	devices.AddGlobalEnv("DEVICE_IP_RANGE_END", config.DeviceIPRangeEnd)
+
+	devices.AddGlobalEnv("DHCPD_LEASE_TIME_DEFAULT", config.DHCPDLeaseTimeDefault)
+	devices.AddGlobalEnv("DHCPD_LEASE_TIME_MAX", config.DHCPDLeaseTimeMax)
+
 	devices.AddGlobalEnv("MASTER_IP", config.MasterIP)
+
 	devices.AddGlobalEnv("INVOKED_BY_SCMT", config.InvokedBySCMT)
 
 	initialized = true

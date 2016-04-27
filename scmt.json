@@ -3,8 +3,15 @@
 
   "clustername": "scmt",
   "clustersubnet": "10.46.0.0/24",
+  "DeviceIpRangeBegin" : "10.46.0.10",
+  "DeviceIpRangeEnd" : "10.46.0.200",
+  "ClusterBroadcastIP" : "10.46.0.255",
+
   "masterip": "10.46.0.1",
-  
+
+  "DHCPDLeaseTimeDefault" : "86400",
+  "DHCPDLeaseTimeMax" : "172800",
+
   "invokedbyscmt": "1",
 
   "database": "cluster",
