@@ -291,6 +291,9 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 			return
 		}
 
+		stderr, err := session.StderrPipe()
+
+		// Read stdout to channel
 		go func() {
 			var read bool = false
 
@@ -308,6 +311,17 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 				if read {
 					ch <- trimmedLine
 				}
+			}
+		}()
+
+		// Read stderr to channel
+		go func() {
+			scanner := bufio.NewScanner(stderr)
+			for scanner.Scan() {
+				line := scanner.Text()
+				trimmedLine := strings.Trim(line, "\n ")
+
+				ch <- trimmedLine
 			}
 		}()
 
