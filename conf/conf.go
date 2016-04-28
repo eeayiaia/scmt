@@ -9,8 +9,8 @@ import (
 	"encoding/json"
 	"os"
 
-	log "github.com/Sirupsen/logrus"
 	"errors"
+	log "github.com/Sirupsen/logrus"
 )
 
 type Credentials struct {
@@ -21,18 +21,18 @@ type Credentials struct {
 type Configuration struct {
 	Production bool
 
-    ClusterName      string
+	ClusterName string
 
-    ClusterSubnet    string
-    ClusterBroadcastIP string
-    DeviceIPRangeBegin string
-    DeviceIPRangeEnd string
-    MasterIP         string
+	ClusterSubnet      string
+	ClusterBroadcastIP string
+	DeviceIPRangeBegin string
+	DeviceIPRangeEnd   string
+	MasterIP           string
 
-    DHCPDLeaseTimeDefault string
-    DHCPDLeaseTimeMax     string
+	DHCPDLeaseTimeDefault string
+	DHCPDLeaseTimeMax     string
 
-    InvokedBySCMT    string
+	InvokedBySCMT string
 
 	Database         string
 	DatabaseUser     string
@@ -61,8 +61,8 @@ func GenerateJSONConfiguration(conf *Configuration) error {
 	f, err := os.Create(CONFIGURATIONPATH)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"config":  *conf,
-			"error": err,
+			"config": *conf,
+			"error":  err,
 		}).Fatal("could not create configuration file")
 		return errors.New("failed to generate conf file")
 	}
@@ -71,8 +71,8 @@ func GenerateJSONConfiguration(conf *Configuration) error {
 	encoding, err := json.MarshalIndent(conf, "", "  ")
 	if err != nil {
 		log.WithFields(log.Fields{
-			"config":  *conf,
-			"error": err,
+			"config": *conf,
+			"error":  err,
 		}).Fatal("failed to create json encoding")
 		return errors.New("failed to generate conf file")
 	}
@@ -80,8 +80,8 @@ func GenerateJSONConfiguration(conf *Configuration) error {
 	_, err = f.Write(encoding)
 	if err != nil {
 		log.WithFields(log.Fields{
-			"config":  *conf,
-			"error": err,
+			"config": *conf,
+			"error":  err,
 		}).Fatal("failed to write json encoding to configuration file")
 		return errors.New("failed to generate conf file")
 	}
