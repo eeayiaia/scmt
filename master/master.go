@@ -121,7 +121,7 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 			"environ": envSlice,
 		}).Info("running script")
 
-		cmd := exec.Command("/bin/sh", filename)
+		cmd := exec.Command("/bin/bash", filename)
 		cmd.Env = envSlice
 		cmd.Dir = dir
 
