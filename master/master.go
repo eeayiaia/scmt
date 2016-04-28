@@ -8,9 +8,11 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"sync"
 )
 
 var initialized = false
+var newnode_lock *sync.Mutex
 
 func Init() {
 	if initialized {
@@ -49,10 +51,16 @@ func Init() {
 
 	devices.AddGlobalEnv("INVOKED_BY_SCMT", config.InvokedBySCMT)
 
+	newnode_lock = &sync.Mutex{}
+
 	initialized = true
 }
 
 func RunNewNodeScripts(slave *devices.Slave) error {
+	// NewNode scripts should not be run at the same time for two different kind of slaves
+	newnode_lock.Lock()
+	defer newnode_lock.Unlock()
+
 	err := RunScriptsInDir("./scripts.d/master.newnode.d/", GetEnvVarComb(*slave))
 
 	if err != nil {
