@@ -35,6 +35,12 @@ EXPORTS=/etc/exports
 backup_file "$EXPORTS"
 echo "/var/nfs	$CLUSTER_SUBNET(rw,sync,no_subtree_check)" >> "$EXPORTS"
 
+# Link the correct directories into nfs
+ln -sf "$DIR/../../scripts.d" "/var/nfs/scripts.d"
+ln -sf "$DIR/../../plugins.d" "/var/nfs/plugins.d"
+ln -sf "$DIR/../../configs" "/var/nfs/configs" 
+ln -sf "$DIR/../utils.sh" "/var/nfs/utils.sh"
+
 # Create the nfs table
 exportfs -a
 
