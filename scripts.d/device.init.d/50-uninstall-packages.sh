@@ -1,14 +1,11 @@
 #!/bin/bash
 
-# Get script directory & include utils
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-. "$DIR/../utils.sh" || exit 1
+# Include utils
+. "/var/shared/utils.sh" || exit 1
 
 check_invoked_by_scmt
 
-REMOVE_LIST_FILE=$CONFIG_DIR/package-remove-list.txt
+REMOVE_LIST_FILE="/var/shared/config/package-remove-list.txt"
 
 echo "Uninstalling packages listed in $REMOVE_LIST_FILE..."
 

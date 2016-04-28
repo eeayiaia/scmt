@@ -47,7 +47,7 @@ fi
 
 # Mount the server shared directory to the local folder
 echo "Mounting shared directory"
-mount "$MASTER_IP:/var/nfs" /var/shared/
+mount "$MASTER_IP:/var/nfs" /var/shared
 
 # Adding mount to fstab
 backup_file /etc/fstab

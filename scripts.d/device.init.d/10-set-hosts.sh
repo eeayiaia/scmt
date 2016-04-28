@@ -3,15 +3,19 @@
 # Input: MASTER_IP
 # Set the hosts file to include the master node
 
-# Get script directory & include utils
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
+[[ $INVOKED_BY_SCMT == 1 ]] || exit 1
 
-. "$DIR/../utils.sh" || exit 1
+BACKUP_FOLDER=~/.scmt-backup
+DATE_STAMP=$(date "+%b_%d_%Y_%H:%M:%S")
+BACKUP_FILE=/etc/hostname
+BACKUP_OUTPUT=$BACKUP_FOLDER/$BACKUP_FILE-$DATE_STAMP
 
-check_invoked_by_scmt
+if [[ ! -d "$BACKUP_FOLDER" ]]; then
+	mkdir "$BACKUP_FOLDER"
+fi
 
-backup_file /etc/hosts
+echo "Backing up file $BACKUP_FILE to $BACKUP_OUTPUT..."
+cp "$BACKUP_FILE" "$BACKUP_OUTPUT"
 
 egrep -q "^master\s" /etc/hosts \
 	&& sed "s/master/$MASTER_IP    master/" -i /etc/hosts \

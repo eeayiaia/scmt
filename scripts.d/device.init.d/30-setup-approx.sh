@@ -1,10 +1,7 @@
 #!/bin/bash
 
-# Get script directory & include utils
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-. "$DIR/../utils.sh" || exit 1
+# Include utils
+. "/var/shared/utils.sh"
 
 check_invoked_by_scmt
 
