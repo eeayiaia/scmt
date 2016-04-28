@@ -121,9 +121,12 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 		filename := path.Base(f)
 
 		Log.WithFields(log.Fields{
-			"script":  filename,
-			"environ": envSlice,
+			"script": filename,
 		}).Info("running script")
+
+		Log.WithFields(log.Fields{
+			"envs": envSlice,
+		}).Debug("with environment variables")
 
 		cmd := exec.Command("/bin/bash", filename)
 		cmd.Env = envSlice
