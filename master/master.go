@@ -27,7 +27,7 @@ func Init() {
 	// TODO: better error handling
 	clusterSubnetIP, clusterSubnetMask, err := utils.SubnetExpand(config.ClusterSubnet)
 
-	if (err != nil) {
+	if err != nil {
 		Log.WithFields(log.Fields{
 			"cluster subnet setting": config.ClusterSubnet,
 		}).Warn("Failed to expand subnet, configuration is invalid")
@@ -78,10 +78,24 @@ func RunNewNodeScripts(slave *devices.Slave) error {
 	return nil
 }
 
+func RunInitScripts() error {
+	err := RunScriptsInDir("./scripts.d/master.init.d/", GetEnvVarGlob())
+
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Error("could not run initialisation scripts!")
+		return err
+	}
+
+	Log.WithFields(log.Fields{}).Info("ran all init scripts!")
+
+	return nil
+}
+
 /*
    Runs scripts in given dir with working directory set to dir
 */
-
 func RunScriptsInDir(dir string, env map[string]string) error {
 
 	files, err := filepath.Glob(dir + "/*.sh")
