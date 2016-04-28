@@ -1,0 +1,23 @@
+################################################################################
+# This is the list of packages to automatically uninstall on newly connected   #
+# compute nodes.                                                               #
+#                                                                              #
+# The current list corresponds to the most space-occupying packages            #
+# pre-installed on Odroid XU4 and which are not very useful on a compute node. #
+#                                                                              #
+# Note that this will serve as input to apt-get purge, and as such package     #
+# names will be matched using apt-get's rules, including conditional           #
+# identification as POSIX regex. See 'man apt-get'.                            #
+#                                                                              #
+# BE CAREFUL and test the commands on a compute node manually before setting   #
+# them here!                                                                   #
+################################################################################
+
+gnome.*
+libreoffice.*
+chromium-browser
+kodi
+firefox
+faenza-icon-theme
+gimp
+
