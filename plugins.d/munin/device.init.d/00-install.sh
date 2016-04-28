@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Include utils
+. "/var/shared/utils.sh" || exit 1
+
 master_IP=$(awk '/^[[:space:]]*($|#)/{next} /master/{print $1; exit}' /etc/hosts)
 
 if [[ $EUID -ne 0 ]]; then

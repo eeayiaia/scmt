@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# Get script directory
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-. "$DIR/../../../scripts.d/utils.sh" || exit 1
+. "/var/shared/utils.sh" || exit 1
 
 #Default send interval is 5 minutes
 send_metadata_interval=${1-300}
