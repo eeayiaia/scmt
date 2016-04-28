@@ -231,6 +231,8 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 		return err
 	}
 
+	divider := "--------------------------------------------------------------------------------"
+
 	// Run all scripts
 	dirBaseName := path.Base(dir)
 	for _, scriptpath := range files {
@@ -248,6 +250,7 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 		}
 
 		// Read & relay the script output
+		Log.Info(divider)
 		Log.WithFields(log.Fields{
 			"script": script,
 		}).Info("running script")
@@ -256,12 +259,27 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 			trimmed := strings.Trim(result, "\n")
 			Log.Info(fmt.Sprintf("%s: %s", slave.Hostname, trimmed))
 		}
+
+		Log.Info(divider)
 	}
 
 	return nil
 }
 
+// Runs the initialisation scripts on a slave (they should be able
+// to run even though it has already been set up)
 func (slave *Slave) RunInitScripts(envs map[string]string) error {
+	// Most scripts depend on utils.sh, copy it over!
+	utils_path := "./scripts.d/utils.sh"
+	err := slave.CopyFile(utils_path, "/var/tmp/utils.sh")
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"utilspath": utils_path,
+			"error":     err,
+		}).Warning("could not copy utils.sh to device")
+	}
+	envs["UTILS_PATH"] = "/var/tmp/utils.sh"
+
 	return slave.RunAllScriptsInDir("./scripts.d/device.init.d", envs)
 }
 
