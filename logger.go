@@ -2,8 +2,8 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 	"github.com/eeayiaia/scmt/conf"
+	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 
 	logrus_syslog "github.com/Sirupsen/logrus/hooks/syslog"
 	"log/syslog"
@@ -12,6 +12,7 @@ import (
 func InitLogging() {
 	// Default to the prefixed formatter
 	log.SetFormatter(new(prefixed.TextFormatter))
+	log.SetLevel(log.DebugLevel)
 
 	// Add syslog as secondary logging (only if in production)
 	if conf.Conf.Production {
