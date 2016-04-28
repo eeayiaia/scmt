@@ -41,15 +41,20 @@ PLUGINS_PATH=$(realpath "$DIR/../../plugins.d")
 CONFIGS_PATH=$(realpath "$DIR/../../configs")
 UTILS_PATH=$(realpath "$DIR/../utils.sh")
 
-[[ -f "$SCRIPTS_PATH" ]] && delete_file "$SCRIPTS_PATH"
-[[ -f "$PLUGINS_PATH" ]] && delete_file "$PLUGINS_PATH"
-[[ -f "$CONFIGS_PATH" ]] && delete_file "$CONFIGS_PATH"
-[[ -f "$UTILS_PATH" ]] && delete_file "$UTILS_PATH"
+SCRIPTS_TARGET="/var/nfs/scripts.d"
+PLUGINS_TARGET="/var/nfs/plugins.d"
+CONFIGS_TARGET="/var/nfs/configs"
+UTILS_TARGET="/var/nfs/utils.sh"
 
-ln -sf "$SCRIPTS_PATH" "/var/nfs/scripts.d"
-ln -sf "$PLUGINS_PATH" "/var/nfs/plugins.d"
-ln -sf "$CONFIGS_PATH" "/var/nfs/configs"
-ln -sf "$UTILS_PATH" "/var/nfs/utils.sh"
+[[ -f "$SCRIPTS_TARGET" ]] && delete_file "$SCRIPTS_TARGET"
+[[ -f "$PLUGINS_TARGET" ]] && delete_file "$PLUGINS_TARGET"
+[[ -f "$CONFIGS_TARGET" ]] && delete_file "$CONFIGS_TARGET"
+[[ -f "$UTILS_TARGET" ]] && delete_file "$UTILS_TARGET"
+
+ln -sf "$SCRIPTS_PATH" "$SCRIPTS_TARGET"
+ln -sf "$PLUGINS_PATH" "$PLUGINS_TARGET"
+ln -sf "$CONFIGS_PATH" "$CONFIGS_TARGET"
+ln -sf "$UTILS_PATH" "$UTILS_TARGET"
 
 # Create the nfs table
 exportfs -a
