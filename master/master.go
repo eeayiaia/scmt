@@ -1,6 +1,7 @@
 package master
 
 import (
+	"bufio"
 	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/devices"
@@ -8,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"path/filepath"
+	"strings"
 	"sync"
 )
 
@@ -118,15 +120,49 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 			"script":  filename,
 			"environ": envSlice,
 		}).Info("running script")
+
 		cmd := exec.Command("/bin/sh", filename)
 		cmd.Env = envSlice
 		cmd.Dir = dir
-		output, err := cmd.Output()
+
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			return nil
+		}
+
+		stderr, err := cmd.StderrPipe()
+		if err != nil {
+			return nil
+		}
+
+		err = cmd.Start()
 		if err != nil {
 			return err
 		}
 
-		Log.Info("Output:\n" + string(output))
+		// Read stdin
+		go func() {
+			scanner := bufio.NewScanner(stdout)
+			for scanner.Scan() {
+				line := scanner.Text()
+				trimmedLine := strings.Trim(line, "\n ")
+
+				Log.Info(trimmedLine)
+			}
+		}()
+
+		// Read stderr
+		go func() {
+			scanner := bufio.NewScanner(stderr)
+			for scanner.Scan() {
+				line := scanner.Text()
+				trimmedLine := strings.Trim(line, "\n ")
+
+				Log.Error(trimmedLine)
+			}
+		}()
+
+		cmd.Wait()
 	}
 
 	return nil
