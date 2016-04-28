@@ -275,17 +275,6 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 	ch := make(chan string)
 
 	go func() {
-		/*filename := path.Base(scriptpath)
-		dest := fmt.Sprintf("/var/tmp/%s", filename)
-		err := conn.CopyFile(scriptpath, dest)
-		if err != nil {
-			Log.WithFields(log.Fields{
-				"script": scriptpath,
-				"dest":   dest,
-			}).Error("could not copy script to device")
-			return
-		}*/
-
 		session, err := conn.Connection.NewSession()
 		if err != nil {
 			Log.WithFields(log.Fields{
@@ -338,18 +327,22 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 		stdin.Write([]byte(fmt.Sprintf("echo %s | sudo -S echo boo >/dev/null\n", conn.Device.Password)))
 		stdin.Write([]byte("while true; do sudo echo boo >/dev/null && sleep 10; done &")) // The '&' at the end creates a job
 
-		/*		for _, line := range lines {
-				stdin.Write([]byte(line + "\n"))
-			}*/
-
-		exportStmts := ""
 		if env != nil {
 			for k, v := range env {
-				exportStmts += "export " + k + "=" + v + ";"
+				Log.Debug("export " + k + "=" + v)
+				stdin.Write([]byte("export " + k + "=" + v + "\n"))
 			}
 		}
 
-		stdin.Write([]byte(exportStmts + "sudo -E bash -C '" + scriptpath + "'\n"))
+		Log.WithFields(log.Fields{
+			"scriptpath": scriptpath,
+		}).Debug("chmod")
+		stdin.Write([]byte("sudo chmod +x " + scriptpath + "\n"))
+
+		Log.WithFields(log.Fields{
+			"scriptpath": scriptpath,
+		}).Debug("sudo -E bash -C ..")
+		stdin.Write([]byte("sudo -E bash -C '" + scriptpath + "'\n"))
 
 		// Kill all jobs (if any) and exit
 		stdin.Write([]byte("kill $(jobs -p) && exit\n"))

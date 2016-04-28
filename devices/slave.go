@@ -248,6 +248,10 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 		}
 
 		// Read & relay the script output
+		Log.WithFields(log.Fields{
+			"script": script,
+		}).Info("running script")
+
 		for result := range ch {
 			trimmed := strings.Trim(result, "\n")
 			Log.Info(fmt.Sprintf("%s: %s", slave.Hostname, trimmed))
