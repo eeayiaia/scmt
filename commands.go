@@ -4,6 +4,8 @@ package main
 import (
 	"github.com/codegangsta/cli"
 	"github.com/eeayiaia/scmt/daemon"
+	"github.com/eeayiaia/scmt/database"
+	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
 	"github.com/eeayiaia/scmt/master"
 
@@ -92,6 +94,11 @@ var commands []cli.Command = []cli.Command{
 		ArgsUsage:   "",
 		Category:    "Temporary stuff",
 		Action: func(c *cli.Context) {
+			database.Init(Config.Database, Config.DatabaseUser, Config.DatabasePassword)
+
+			invoker.Init()
+			devices.Init()
+			master.Init()
 			master.RunInitScripts()
 		},
 	},
