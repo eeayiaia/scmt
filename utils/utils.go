@@ -46,16 +46,3 @@ func SubnetExpand(subnet string) (string, string, error) {
 	return ip, netmaskString, nil
 }
 
-func main() {
-	if (len(os.Args) != 2) {
-		fmt.Println("Usage: iptest subnet/netmask")
-		os.Exit(1)
-	}
-
-	var ip string = os.Args[1]
-	subnet, netmask, err := SubnetExpand(ip)
-	if (err != nil) { log.Fatal("Failed to convert subnet") }
-
-	fmt.Printf("subnet: %s, netmask: %s\n", subnet, netmask)
-}
-
