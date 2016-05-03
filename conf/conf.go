@@ -57,7 +57,7 @@ func InitConfiguration() {
 	// Find path to config file
 	rootPath, err := utils.GetScmtRootPath()
 
-	if err == nil {
+	if err != nil {
 		panic("Unable to find SCMT root directory")
 	}
 
