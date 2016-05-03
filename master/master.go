@@ -67,7 +67,7 @@ func RunNewNodeScripts(slave *devices.Slave) error {
 	newnode_lock.Lock()
 	defer newnode_lock.Unlock()
 
-	err := RunScriptsInDir("./scripts.d/master.newnode.d/", GetEnvVarComb(*slave))
+	err := RunScriptsInDir("scripts.d/master.newnode.d/", GetEnvVarComb(*slave))
 
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -85,7 +85,7 @@ func RunNewNodeScripts(slave *devices.Slave) error {
 }
 
 func RunInitScripts() error {
-	err := RunScriptsInDir("./scripts.d/master.init.d/", GetEnvVarGlob())
+	err := RunScriptsInDir("scripts.d/master.init.d/", GetEnvVarGlob())
 
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -101,10 +101,12 @@ func RunInitScripts() error {
 
 /*
    Runs scripts in given dir with working directory set to dir
+   Parameter 'dir' should be relative to $SCMT_ROOT
 */
 func RunScriptsInDir(dir string, env map[string]string) error {
+	absPath := filepath.Join(conf.Conf.RootPath, dir)
 
-	files, err := filepath.Glob(dir + "/*.sh")
+	files, err := filepath.Glob(absPath + "/*.sh")
 	if err != nil {
 		return err
 	}

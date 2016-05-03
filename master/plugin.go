@@ -49,7 +49,7 @@ func installPluginOnMaster(pluginName string) error {
 		return errors.New("Plugin already set to installed on master" + pluginName)
 	}
 
-	err := RunScriptsInDir("./plugins.d/"+pluginName+"/master.init.d/", GetEnvVarGlob())
+	err := RunScriptsInDir("plugins.d/"+pluginName+"/master.init.d/", GetEnvVarGlob())
 
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -97,7 +97,7 @@ func RunNewNodePluginScripts(slave devices.Slave) error {
 func RunNewNodePluginScript(pluginName string, envVars map[string]string) error {
 	pluginName = strings.ToLower(strings.TrimSpace(pluginName))
 
-	err := RunScriptsInDir("./plugins.d/"+pluginName+"/master.newdevice.d/", envVars)
+	err := RunScriptsInDir("plugins.d/"+pluginName+"/master.newdevice.d/", envVars)
 
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -129,7 +129,7 @@ func RunRemoveNodePluginScripts(slave devices.Slave) error {
 func RunRemoveNodePluginScript(pluginName string, envVars map[string]string) error {
 	pluginName = strings.ToLower(strings.TrimSpace(pluginName))
 
-	err := RunScriptsInDir("./plugins.d/"+pluginName+"/master.removedevice.d/", envVars)
+	err := RunScriptsInDir("plugins.d/"+pluginName+"/master.removedevice.d/", envVars)
 
 	if err != nil {
 		Log.WithFields(log.Fields{

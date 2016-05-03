@@ -35,9 +35,12 @@ type Slave struct {
 
 /*
 	Copies a file to a slave
+	File paths are given relative to $SCMT_ROOT
 */
 func (s *Slave) CopyFile(file string, destination string) chan error {
 	ch := make(chan error)
+
+	absPath := filepath.Join(conf.Conf.RootPath, file)
 
 	go func() {
 		rc, err := NewRemoteConnection(s)
@@ -45,7 +48,7 @@ func (s *Slave) CopyFile(file string, destination string) chan error {
 			ch <- err
 		}
 
-		result := rc.CopyFile(file, destination)
+		result := rc.CopyFile(absPath, destination)
 		ch <- result
 	}()
 
@@ -53,16 +56,19 @@ func (s *Slave) CopyFile(file string, destination string) chan error {
 }
 
 /*
-	Copies a folder to a slave
-    Example: s.CopyFolder("/home/xxxx/SuperK/", "/tmp/") will copy SuperK to /tmp/SuperK
+	Copies a folder to a slave. Paths are given relative to $SCMT_ROOT
+	Example: s.CopyFolder("scripts.d", "/tmp/") will copy $SCMT_ROOT/scripts.d
+	to /tmp/scripts.d
 */
-func (s *Slave) CopyFolder(filepath string, destination string) error {
+func (s *Slave) CopyFolder(folderpath string, destination string) error {
+	absPath := filepath.Join(conf.Conf.RootPath, folderpath)
+
 	rc, err := NewRemoteConnection(s)
 	if err != nil {
 		return err
 	}
 
-	result := rc.CopyFolder(filepath, destination)
+	result := rc.CopyFolder(absPath, destination)
 	return result
 }
 
@@ -270,7 +276,7 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 // to run even though it has already been set up)
 func (slave *Slave) RunInitScripts(envs map[string]string) error {
 	// Most scripts depend on utils.sh, copy it over!
-	utils_path := "./scripts.d/utils.sh"
+	utils_path := "scripts.d/utils.sh"
 	err := slave.CopyFile(utils_path, "/var/tmp/utils.sh")
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -280,7 +286,7 @@ func (slave *Slave) RunInitScripts(envs map[string]string) error {
 	}
 	envs["UTILS_PATH"] = "/var/tmp/utils.sh"
 
-	return slave.RunAllScriptsInDir("./scripts.d/device.init.d", envs)
+	return slave.RunAllScriptsInDir("scripts.d/device.init.d", envs)
 }
 
 /*func (slave *Slave) TransferPlugin(plugin string) {
@@ -360,7 +366,7 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 */
 func (slave *Slave) installPlugin(pluginName string) error {
 	pluginName = strings.ToLower(strings.Trim(pluginName, " "))
-	pluginDir := "./plugins.d/" + pluginName + "/device.init.d/"
+	pluginDir := "plugins.d/" + pluginName + "/device.init.d/"
 
 	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh")
 

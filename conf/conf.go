@@ -10,6 +10,8 @@ import (
 	"os"
 
 	"errors"
+	"path/filepath"
+	"github.com/eeayiaia/scmt/utils"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -22,6 +24,8 @@ type Configuration struct {
 	Production bool
 
 	ClusterName string
+
+	RootPath string
 
 	ClusterSubnet      string
 	ClusterBroadcastIP string
@@ -44,21 +48,31 @@ type Configuration struct {
 	LogFile string
 }
 
-const CONFIGURATIONPATH = "scmt.json"
+const configurationPath = "scmt.json"
 
 // Global accessable conf
 var Conf *Configuration
 
 func InitConfiguration() {
-	Conf = ParseConfiguration(CONFIGURATIONPATH)
+	// Find path to config file
+	rootPath, err := utils.GetScmtRootPath()
+
+	if err == nil {
+		panic("Unable to find SCMT root directory")
+	}
+
+	Conf := ParseConfiguration(filepath.Join(rootPath, configurationPath))
 
 	if Conf == nil {
 		panic("configuration unable to load")
 	}
+
+	// Add SCMT_ROOT to config
+	Conf.RootPath = rootPath
 }
 
 func GenerateJSONConfiguration(conf *Configuration) error {
-	f, err := os.Create(CONFIGURATIONPATH)
+	f, err := os.Create(filepath.Join(conf.RootPath, configurationPath))
 	if err != nil {
 		log.WithFields(log.Fields{
 			"config": *conf,

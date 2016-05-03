@@ -3,6 +3,8 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 )
@@ -49,3 +51,17 @@ func SubnetExpand(subnet string) (string, string, error) {
 
 	return ip, netmaskString, nil
 }
+
+// Returns the path to SCMT root (without trailing slash)
+func GetScmtRootPath() (string, error) {
+	retVal := os.Getenv("SCMT_ROOT");
+
+	if retVal == "" {
+		return "", errors.New("$SCMT_ROOT is not set.")
+	}
+
+	retVal = filepath.Clean(retVal)
+
+	return retVal, nil
+}
+
