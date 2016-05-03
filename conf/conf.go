@@ -61,7 +61,7 @@ func InitConfiguration() {
 		panic("Unable to find SCMT root directory")
 	}
 
-	Conf := ParseConfiguration(filepath.Join(rootPath, configurationPath))
+	Conf = ParseConfiguration(filepath.Join(rootPath, configurationPath))
 
 	if Conf == nil {
 		panic("configuration unable to load")
