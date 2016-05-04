@@ -58,6 +58,7 @@ func quit(ans string) bool {
 func setClusterName() {
 	fmt.Println("The default cluster name is '" + config.ClusterName + "' type new name to change or press enter to keep default name")
 	ans, _ := reader.ReadString('\n')
+	ans = strings.TrimSpace(ans)
 	switch ans {
 	case "\n":
 		return
@@ -71,11 +72,35 @@ func setClusterName() {
 }
 
 func setClusterSubnet() {
-	
+	fmt.Println("The default cluster subnet is '" + config.ClusterSubnet + "' type new subnet to change or press enter to keep default name")
+	ans, _ := reader.ReadString('\n')
+	ans = strings.TrimSpace(ans)
+	switch ans {
+	case "\n":
+		return
+	case "q":
+		fmt.Println("Terminating..")
+		os.Exit(0)
+	default:
+		config.ClusterSubnet = ans
+		return
+	}
 }
 
 func setBroadcastIP() {
-	
+	fmt.Println("The default cluster broadcast IP is '" + config.ClusterBroadcastIP + "' type new IP to change or press enter to keep default name")
+	ans, _ := reader.ReadString('\n')
+	ans = strings.TrimSpace(ans)
+	switch ans {
+	case "\n":
+		return
+	case "q":
+		fmt.Println("Terminating..")
+		os.Exit(0)
+	default:
+		config.ClusterBroadcastIP = ans
+		return
+	}
 }
 
 func setDeviceIPRange() {
