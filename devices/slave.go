@@ -277,7 +277,9 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 func (slave *Slave) RunInitScripts(envs map[string]string) error {
 	// Most scripts depend on utils.sh, copy it over!
 	utils_path := "scripts.d/utils.sh"
-	err := slave.CopyFile(utils_path, "/var/tmp/utils.sh")
+	ch := slave.CopyFile(utils_path, "/var/tmp/utils.sh")
+	err := <-ch
+
 	if err != nil {
 		Log.WithFields(log.Fields{
 			"utilspath": utils_path,
