@@ -35,12 +35,9 @@ type Slave struct {
 
 /*
 	Copies a file to a slave
-	File paths are given relative to $SCMT_ROOT
 */
 func (s *Slave) CopyFile(file string, destination string) chan error {
 	ch := make(chan error)
-
-	absPath := filepath.Join(conf.Conf.RootPath, file)
 
 	go func() {
 		rc, err := NewRemoteConnection(s)
@@ -48,7 +45,7 @@ func (s *Slave) CopyFile(file string, destination string) chan error {
 			ch <- err
 		}
 
-		result := rc.CopyFile(absPath, destination)
+		result := rc.CopyFile(file, destination)
 		ch <- result
 	}()
 
@@ -56,19 +53,17 @@ func (s *Slave) CopyFile(file string, destination string) chan error {
 }
 
 /*
-	Copies a folder to a slave. Paths are given relative to $SCMT_ROOT
-	Example: s.CopyFolder("scripts.d", "/tmp/") will copy $SCMT_ROOT/scripts.d
+	Copies a folder to a slave.
+	Example: s.CopyFolder("/home/test/scripts.d", "/tmp/") will copy /home/test/scripts.d
 	to /tmp/scripts.d
 */
 func (s *Slave) CopyFolder(folderpath string, destination string) error {
-	absPath := filepath.Join(conf.Conf.RootPath, folderpath)
-
 	rc, err := NewRemoteConnection(s)
 	if err != nil {
 		return err
 	}
 
-	result := rc.CopyFolder(absPath, destination)
+	result := rc.CopyFolder(folderpath, destination)
 	return result
 }
 
@@ -222,15 +217,17 @@ func (slave *Slave) Load(HWaddr string) {
 
 func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error {
 	// Find all device initialisation scripts
-	files, err := filepath.Glob(fmt.Sprintf("%s/*.sh", dir))
+	absPath := filepath.Join(conf.Conf.RootPath, dir)
+
+	files, err := filepath.Glob(fmt.Sprintf("%s/*.sh", absPath))
 	if err != nil {
 		return err
 	}
 
-	err = slave.CopyFolder(dir, "/var/tmp/")
+	err = slave.CopyFolder(absPath, "/var/tmp/")
 	if err != nil {
 		Log.WithFields(log.Fields{
-			"source": dir,
+			"source": absPath,
 			"target": "/var/tmp/",
 		}).Error("could not copy folder")
 
@@ -240,15 +237,17 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 	divider := "--------------------------------------------------------------------------------"
 
 	// Run all scripts
-	dirBaseName := path.Base(dir)
+	dirBaseName := path.Base(absPath)
 	for _, scriptpath := range files {
 		script := path.Base(scriptpath)
 
-		ch, err := slave.RunScriptAsync(fmt.Sprintf("/var/tmp/%s/%s", dirBaseName, script), envs)
+		localPath := fmt.Sprintf("/var/tmp/%s/%s", dirBaseName, script)
+		ch, err := slave.RunScriptAsync(localPath, envs)
+
 		if err != nil {
 			Log.WithFields(log.Fields{
 				"script": script,
-				"dir":    dir,
+				"dir":    absPath,
 				"error":  err,
 			}).Error("could not run script, skipping")
 
@@ -276,7 +275,7 @@ func (slave *Slave) RunAllScriptsInDir(dir string, envs map[string]string) error
 // to run even though it has already been set up)
 func (slave *Slave) RunInitScripts(envs map[string]string) error {
 	// Most scripts depend on utils.sh, copy it over!
-	utils_path := "scripts.d/utils.sh"
+	utils_path := filepath.Join(conf.Conf.RootPath, "scripts.d/utils.sh")
 	ch := slave.CopyFile(utils_path, "/var/tmp/utils.sh")
 	err := <-ch
 
@@ -368,7 +367,7 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 */
 func (slave *Slave) installPlugin(pluginName string) error {
 	pluginName = strings.ToLower(strings.Trim(pluginName, " "))
-	pluginDir := "plugins.d/" + pluginName + "/device.init.d/"
+	pluginDir := filepath.Join(conf.Conf.RootPath, "plugins.d/" + pluginName + "/device.init.d/")
 
 	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh")
 
