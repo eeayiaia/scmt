@@ -168,6 +168,7 @@ func (conn *RemoteConnection) CopyFile(filepath string, destination string) erro
 
 	f, err := os.Open(filepath)
 	if err != nil {
+		Log.Error("could not open file", err)
 		return err
 	}
 
@@ -175,8 +176,14 @@ func (conn *RemoteConnection) CopyFile(filepath string, destination string) erro
 
 	s, err := f.Stat()
 	if err != nil {
+		Log.Error("could not stat file", err)
 		return err
 	}
+
+	Log.WithFields(log.Fields{
+		"filepath": filepath,
+		"destination": destination,
+	}).Info("Copying file to device")
 
 	go func() {
 		var stdoutBuf bytes.Buffer
