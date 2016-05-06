@@ -8,9 +8,6 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/../../../scripts.d/utils.sh" || exit 1
 . "$DIR/../resources/config" || exit 1
 
-#Create hadoop user
-useradd -m hadoop
-passwd hadoop hadoop
 
 #Check java version
 if type -p java; then
@@ -30,16 +27,19 @@ if [[ "$_java"]]; then
 		echo "version is greater than 1.5"
 	else
 		echo updating java to 1.8
-		sudo add-apt-repository ppa:webupd8team/java
-		sudo apt-get update
-		sudo apt-get install oracle-java8-installer
+		add-apt-repository ppa:webupd8team/java
+		apt-get update
+		apt-get install oracle-java8-installer
 	fi
 fi
 
-
 #Create hadoop user
-sudo addgroup hadoop
-sudo adduser --ingroup hadoop hduser
+useradd -m hduser
+passwd hduser hadoop
+
+#Create hadoop user group
+addgroup hadoop
+adduser --ingroup hadoop hduser
 
 #Dissable IPv6
 #echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /ect/systl.conf
