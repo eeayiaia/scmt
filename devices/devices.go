@@ -66,6 +66,7 @@ func AddDevice(device *Slave) {
 func GetDevice(hardwareAddress string) (*Slave, error) {
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
+    hardwareAddress = strings.Trim(hardwareAddress, " ")
 
 	for _, slave := range devices {
 		if strings.Compare(slave.HardwareAddress, hardwareAddress) == 0 {
