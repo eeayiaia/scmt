@@ -339,6 +339,7 @@ func setup() error {
 
 	//check (install) monitor
 	if monitorName != "none" {
+		//TODO: install on master aswell!!
 		Log.WithFields(log.Fields{
 				"plugin": monitorName,
 		}).Info("Installing plugin")
@@ -353,6 +354,7 @@ func setup() error {
 
 	//install mpi
 	switch clusterAppName {
+		//TODO: install on master aswell!!!
 	case "none":
 		
 	case "both":
