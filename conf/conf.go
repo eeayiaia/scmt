@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"github.com/eeayiaia/scmt/utils"
 	log "github.com/Sirupsen/logrus"
+	"fmt"
 )
 
 type Credentials struct {
@@ -129,4 +130,15 @@ func ParseConfiguration(filepath string) *Configuration {
 	}
 
 	return conf
+}
+
+//use to check if scmt has been installed
+func Exists() bool {
+	root, err := utils.GetScmtRootPath()
+	if err != nil {
+		fmt.Println("SCMT_ROOT not set")
+		os.Exit(1)
+	}
+	_, err = os.Stat(filepath.Join(root, configurationPath))
+	return err == nil
 }

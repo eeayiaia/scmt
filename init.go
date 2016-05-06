@@ -1,13 +1,17 @@
 package main 
 
 import (
-	//log "github.com/Sirupsen/logrus"
+	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/conf"
+	"github.com/eeayiaia/scmt/master"
+	"github.com/eeayiaia/scmt/devices"
 	"fmt"
 	"bufio"
 	"os"
 	"strings"
 	"golang.org/x/crypto/ssh/terminal"
+
+
 
 )
 
@@ -67,6 +71,7 @@ var functionIndex int = 0
 func FirstSetup() {
 	fmt.Println("Welcome to SCMT setup wizard! We start by setting up the configuration: (Exit by entering 'q', go back by entering ´b´)")
 	//to enable going back in the setup wizard
+	newConf.RootPath = os.Getenv("SCMT_ROOT")
 	var functions []userDataFn = []userDataFn{
 		setClusterName,
 		setClusterSubnet,
@@ -82,6 +87,7 @@ func FirstSetup() {
 	}
 	length := len(functions)
 
+	//run user input functions
 	for functionIndex < length {
 		functions[functionIndex]()
 	} 
@@ -299,6 +305,88 @@ func clusterApp() {
 	functionIndex++
 }
 
-func setup() {
+func setup() error {
+	//Write conf
+	fmt.Println("Installing")
+	fmt.Println("Generating configuration")
+	err := conf.GenerateJSONConfiguration(&newConf)
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error":	err,
+		}).Fatal("Could not generate configuration")
+		return err
+	}
 
+	conf.InitConfiguration()
+
+	InitLogging()
+
+	//init scripts master
+
+	Log.Info("Initializing master node")
+	master.Init()
+
+	err = master.RunInitScripts()
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"error": err,
+		}).Fatal("Failed to initialize master")
+		return err
+	}
+
+	//check (install) monitor
+	if monitorName != "none" {
+		Log.WithFields(log.Fields{
+				"plugin": monitorName,
+		}).Info("Installing plugin")
+		err = devices.RunPluginInstallerOnAll(monitorName)
+		if err != nil {
+			Log.WithFields(log.Fields{
+				"plugin": monitorName,
+				"error": err,
+			}).Error("Failed to install plugin")
+		}
+	}
+
+	//install mpi
+	switch clusterAppName {
+	case "none":
+		
+	case "both":
+		Log.WithFields(log.Fields{
+				"plugin": "openmpi",
+		}).Info("Installing plugin")
+		err = devices.RunPluginInstallerOnAll("openmpi")
+		if err != nil {
+			Log.WithFields(log.Fields{
+				"plugin": "openmpi",
+				"error": err,
+			}).Error("Failed to install plugin")
+		}
+
+		Log.WithFields(log.Fields{
+				"plugin": "mpich",
+		}).Info("Installing plugin")
+		err = devices.RunPluginInstallerOnAll("mpich")
+		if err != nil {
+			Log.WithFields(log.Fields{
+				"plugin": "mpich",
+				"error": err,
+			}).Error("Failed to install plugin")
+		}
+
+	default:
+		Log.WithFields(log.Fields{
+				"plugin": clusterAppName,
+		}).Info("Installing plugin")
+		err = devices.RunPluginInstallerOnAll(clusterAppName)
+		if err != nil {
+			Log.WithFields(log.Fields{
+				"plugin": clusterAppName,
+				"error": err,
+			}).Error("Failed to install plugin")
+		}
+	}
+
+	return nil
 }
