@@ -54,10 +54,15 @@ func background() {
 }
 
 func main() {
-	conf.InitConfiguration()
-	Config = conf.Conf
-	InitLogging()
-	InitContextLogging()
+	if conf.Exists() {
+		conf.InitConfiguration()
+		Config = conf.Conf
+		InitLogging()
+		InitContextLogging()
+	} else {
+		FirstSetup()
+	}
+
 	daemon.InitContext(Config.PidFile, Config.LogFile)
 
 	Start(func(_ *cli.Context) {

@@ -67,7 +67,7 @@ var monitorName string = "none"
 var clusterAppName string = "none"
 
 var functionIndex int = 0
-//TODO: check if scmt.json exists, here or in main
+//TODO: add hadoop support
 func FirstSetup() {
 	fmt.Println("Welcome to SCMT setup wizard! We start by setting up the configuration: (Exit by entering 'q', go back by entering ´b´)")
 	//to enable going back in the setup wizard
@@ -90,7 +90,9 @@ func FirstSetup() {
 	//run user input functions
 	for functionIndex < length {
 		functions[functionIndex]()
-	} 
+	}
+
+	setup()
 }
 
 func quit(ans string) bool {
@@ -318,11 +320,12 @@ func setup() error {
 	}
 
 	conf.InitConfiguration()
+	Config = conf.Conf
 
 	InitLogging()
+	InitContextLogging()
 
 	//init scripts master
-
 	Log.Info("Initializing master node")
 	master.Init()
 

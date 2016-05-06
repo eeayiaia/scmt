@@ -140,5 +140,5 @@ func Exists() bool {
 		os.Exit(1)
 	}
 	_, err = os.Stat(filepath.Join(root, configurationPath))
-	return err == nil
+	return os.IsExist(err)
 }
