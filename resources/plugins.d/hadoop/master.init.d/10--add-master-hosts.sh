@@ -10,5 +10,6 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/../../../scripts.d/utils.sh" || exit 1
 . "$DIR/../resources/config" || exit 1
 
-#Set ip to /etc/hosts
-echo "$MASTER_IP hadoop-master"
+
+#Set master ip to /etc/hosts
+echo "$MASTER_NODE  hadoop_master" >> /etc/hosts

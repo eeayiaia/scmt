@@ -9,9 +9,15 @@ if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
 . "$DIR/../resources/config" || exit 1
 
 
-#Create hadoop user
+#Create hadoop user & give sudo rights
 useradd -m hadoop
 passwd hadoop hadoop
+sudo adduser hadoop sudo
+
+#Create hadoop user group
+sudo addgroup hadoop
+sudo adduser --ingroup hadoop hadoop
+
 
 #Check java version
 if type -p java; then
@@ -22,25 +28,24 @@ elif [[ -n "$JAVA_HOME" ]] && [[ -x "$JAVA_HOME/bin/java" ]]; then
 	_java="$JAVA_HOME/bin/java"
 else
 	echo "no java"
+  echo "Installing java..."
+	sudo apt-get update
+	sudo apt-get install openjdk-8-jdk
+	echo "Java installed."
 fi
 
 if [[ "$_java"]]; then
-	version=$("$_java" - version 2>&1 | awk -F '"' '/version/ {print $2}')
+	version=$("$_java" - version 2>&1 | awk -F '"' '/version/ {print $3}')
 	echo version "$version"
-	if [[ "$version" > "1.5" ]]; then
-		echo "version is greater than 1.5"
+	if [[ "$version" == "1.8" ]]; then
+		echo "version is 8"
 	else
-		echo updating java to 1.8
-		sudo add-apt-repository ppa:webupd8team/java
+		echo "updating java to 1.8"
 		sudo apt-get update
-		sudo apt-get install oracle-java8-installer
+		sudo apt-get install openjdk-8-jdk
 	fi
 fi
 
-
-#Create hadoop user
-sudo addgroup hadoop
-sudo adduser --ingroup hadoop hduser
 
 #Dissable IPv6
 #echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /ect/systl.conf
@@ -49,16 +54,16 @@ sudo adduser --ingroup hadoop hduser
 
 
 #Installing Hadoop below...
-wget http://www.motorlogy.com/apache/hadoop/common/current/hadoop-2.3.0.tar.gz
-tar xfz hadoop-2.3.0.tar.gz
-mv hadoop-2.3.0 /usr/local/hadoop
+#Hadoop binarys needs to be shared in folder or downloaded before installation, else use line above
+tar xfz hadoop-2.7.2.tar.gz
+mv hadoop-2.7.2 /usr/local/hadoop
 
 
 #Update .bashrc
-echo "#Set Hadoop-releated enviroment variables" >> /home/hduser/.bashrc
-echo "export HADOOP_HOME=/home/hduser/hadoop" >> /home/hduser/.bashrc
-echo "#Set Java home " >> /home/hduser/.bashrc
-echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/hduser/.bashrc
+echo "#Set Hadoop-releated enviroment variables" >> /home/hadoop/.bashrc
+echo "export HADOOP_HOME=/home/hadoop" >> /home/hadoop/.bashrc
+echo "#Set Java home " >> /home/hadoop/.bashrc
+echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/h/.bashrc
 
 
 #Add nodes to hadoop system
@@ -70,20 +75,26 @@ echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/hduser/.bashrc
 #Configure Hadoop
 
 #First we need to set the java home directory in hadoop-env.sh
-sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java-1.7.0-openjdk-armf}' 
-sed 's/export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true"/export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true -Djava.library.path=$HADOOP_PREFIX/lib"'
+cd  /usr/local/hadoop/etc/hadoop/
+cp hadoop-env.sh hadoop-env-backup.sh
+sed -e 's#export JAVA_HOME=${JAVA_HOME}#export JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk-armf#g' 
+sed -e 's#export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true"#export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true -Djava.library.path=$HADOOP_PREFIX/lib"#g'
 echo "export HADOOP_IDENT_STRING=$USER
 export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_PREFIX}/lib/native" >> /usr/local/hadoop/etc/hadoop/hadoop-env.sh
 
 #Set Hadoop enviroment
 
 #Config yarn-env.sh
+cd /usr/local/hadoop/etc/hadoop/
+cp yarn-env.sh yarn-env-backup.sh
 echo "export HADOOP_CONF_LIB_NATIVE_DIR=${HADOOP_PREFIX:-"/lib/native"}
 export HADOOP_OPTS="-Djava.LIBRARY.PATH=$HADOOP_PREFIX/lib"" >> /usr/local/hadoop/etc/hadoop/yarn-env.sh
 
 #Config core-site.xml
-sed -e 's/<configuration>/' core-site.xml
-sed -e 's/</configuration>/' core-site.xml
+cd /usr/local/hadoop/etc/hadoop/
+cp core-site.xml core-site-backup.xml
+sed -e 's#<configuration># #g' core-site.xml
+sed -e 's#</configuration># #g' core-site.xml
 
 echo "<configuration>
  <property>
@@ -107,8 +118,9 @@ echo "<configuration>
 
 #Config hdfs-site.xml
 cd /usr/local/hadoop/etc/hadoop/
-sed -e 's/<configuration>/' hdfs-site.xml
-sed -e 's/</configuration>/' hdfs-site.xml
+cp hdfs-site.xml hdfs-site-backup.xml
+sed -e 's#<configuration># #g' hdfs-site.xml
+sed -e 's#</configuration># #g' hdfs-site.xml
 
 echo "<configuration>
 <property>
@@ -124,8 +136,9 @@ echo "<configuration>
 
 #Config mapred-site.xml
 cd /usr/local/hadoop/etc/hadoop/
-sed -e 's/<configuration>/' mapred-site.xml
-sed -e 's/</configuration>/' mapred-site.xml
+cp mapred-site.xml mapred-site-backup.xml
+sed -e 's#<configuration># #g' mapred-site.xml
+sed -e 's#</configuration># #g' mapred-site.xml
 echo "<configuration>
  <property>
   <name>mapreduce.framework.name</name>

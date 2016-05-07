@@ -69,6 +69,8 @@ echo "export JAVA_HOME=/usr/lib/java-8-openjdk" >> /home/hduser/.bashrc
 #Configure Hadoop
 
 #First we need to set the java home directory in hadoop-env.sh
+cd /usr/local/hadoop/etc/hadoop/
+cp hadoop-env.sh hadoop-env-backup.sh
 sed 's/export JAVA_HOME=${JAVA_HOME}/export JAVA_HOME=${/usr/lib/jvm/java-1.7.0-openjdk-armf}' 
 sed 's/export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true"/export HADOOP_OPTS="$HADOOP_OPTS -Djava.net.preferIPv4Stack=true -Djava.library.path=$HADOOP_PREFIX/lib"'
 echo "export HADOOP_IDENT_STRING=$USER
@@ -77,10 +79,14 @@ export HADOOP_COMMON_LIB_NATIVE_DIR=${HADOOP_PREFIX}/lib/native" >> /usr/local/h
 #Set Hadoop enviroment
 
 #Config yarn-env.sh
+cd /usr/local/hadoop/etc/hadoop/
+cp yarn-env.sh yarn-env-backup.sh
 echo "export HADOOP_CONF_LIB_NATIVE_DIR=${HADOOP_PREFIX:-"/lib/native"}
 export HADOOP_OPTS="-Djava.LIBRARY.PATH=$HADOOP_PREFIX/lib"" >> /usr/local/hadoop/etc/hadoop/yarn-env.sh
 
 #Config core-site.xml
+cd /usr/local/hadoop/etc/hadoop/
+cp core-site.xml core-site-backup.xml
 sed -e 's/<configuration>/' core-site.xml
 sed -e 's/</configuration>/' core-site.xml
 
@@ -106,6 +112,7 @@ echo "<configuration>
 
 #Config hdfs-site.xml
 cd /usr/local/hadoop/etc/hadoop/
+cp hdfs-site.xml hdfs-site-backup.xml
 sed -e 's/<configuration>/' hdfs-site.xml
 sed -e 's/</configuration>/' hdfs-site.xml
 
@@ -123,6 +130,7 @@ echo "<configuration>
 
 #Config mapred-site.xml
 cd /usr/local/hadoop/etc/hadoop/
+cp mapred-site.xml mapred-site-backup.xml
 sed -e 's/<configuration>/' mapred-site.xml
 sed -e 's/</configuration>/' mapred-site.xml
 echo "<configuration>
@@ -133,8 +141,6 @@ echo "<configuration>
 </configuration>" >> /usr/local/hadoop/etc/hadoop/mapred-site.xml
 
 
-#Set master ip to /etc/hosts
-echo "$MASTER_NODE  hadoop_master" >> /etc/hosts
 
 
 
