@@ -58,6 +58,9 @@ fi
 tar xfz hadoop-2.7.2.tar.gz
 mv hadoop-2.7.2 /usr/local/hadoop
 
+#Set owner of logs to hadoop
+chown hadoop /usr/local/hadoop/logs
+
 
 #Update .bashrc
 echo "#Set Hadoop-releated enviroment variables" >> /home/hadoop/.bashrc
