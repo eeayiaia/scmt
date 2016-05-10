@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"sync"
 
 	"golang.org/x/crypto/ssh"
 
@@ -280,6 +281,8 @@ func (conn *RemoteConnection) RunInShellAsync(query string, sudo bool) (chan str
 */
 func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string) (chan string, error) {
 	ch := make(chan string)
+	exit := false
+	var wg sync.WaitGroup
 
 	go func() {
 		session, err := conn.Connection.NewSession()
@@ -302,10 +305,12 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 
 		// Read stdout to channel
 		go func() {
-			var read bool = false
+			wg.Add(1)
+			defer wg.Done()
 
+			var read bool = false
 			scanner := bufio.NewScanner(stdout)
-			for scanner.Scan() {
+			for scanner.Scan() && !exit {
 				line := scanner.Text()
 				trimmedLine := strings.Trim(line, "\n ")
 
@@ -323,8 +328,11 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 
 		// Read stderr to channel
 		go func() {
+			wg.Add(1)
+			defer wg.Done()
+
 			scanner := bufio.NewScanner(stderr)
-			for scanner.Scan() {
+			for scanner.Scan() && !exit {
 				line := scanner.Text()
 				trimmedLine := strings.Trim(line, "\n ")
 
@@ -367,6 +375,9 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 		session.Wait()
 		session.Close()
 
+		exit = true
+		// Do not close until readers are done
+		wg.Wait()
 		close(ch)
 	}()
 
