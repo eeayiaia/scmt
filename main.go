@@ -60,8 +60,8 @@ func main() {
 
 	if conf.Exists() {
 		conf.InitConfiguration()
-		daemon.InitContext(Config.PidFile, Config.LogFile)
 		Config = conf.Conf
+		daemon.InitContext(Config.PidFile, Config.LogFile)
 	} else {
 		_, err := utils.GetScmtRootPath()
 		if err != nil {
