@@ -67,7 +67,7 @@ var clusterAppName string = "none"
 
 var functionIndex int = 0
 //TODO: add hadoop support
-func FirstSetup() {
+func FirstSetup() error {
 	fmt.Println("Welcome to SCMT setup wizard! We start by setting up the configuration: (Exit by entering 'q', go back by entering ´b´)")
 	//to enable going back in the setup wizard
 	newConf.RootPath = os.Getenv("SCMT_ROOT")
@@ -91,7 +91,11 @@ func FirstSetup() {
 		functions[functionIndex]()
 	}
 
-	setup()
+	err := setup()
+	if err != nil {
+		Log.Error("Failed SCMT setup")
+	}
+	return nil
 }
 
 func quit(ans string) bool {
@@ -308,8 +312,8 @@ func clusterApp() {
 
 func setup() error {
 	//Write conf
-	fmt.Println("Installing")
-	fmt.Println("Generating configuration")
+	Log.Info("Installing..")
+	Log.Info("Generating congfiguration")
 	err := conf.GenerateJSONConfiguration(&newConf)
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -320,10 +324,6 @@ func setup() error {
 
 	conf.InitConfiguration()
 	Config = conf.Conf
-
-	InitLogging()
-	InitContextLogging()
-
 	//init scripts master
 	Log.Info("Initializing master node")
 	master.Init()
