@@ -94,6 +94,7 @@ func FirstSetup() error {
 	err := setup()
 	if err != nil {
 		Log.Error("Failed SCMT setup")
+		return err
 	}
 	return nil
 }
