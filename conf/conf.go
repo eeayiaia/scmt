@@ -10,7 +10,6 @@ import (
 	"os"
 
 	"errors"
-	"fmt"
 	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/utils"
 	"path/filepath"
@@ -139,8 +138,8 @@ func ParseConfiguration(filepath string) *Configuration {
 func Exists() bool {
 	root, err := utils.GetScmtRootPath()
 	if err != nil {
-		fmt.Println("SCMT_ROOT not set")
-		os.Exit(1)
+		log.Warn("SCMT_ROOT not set")
+		return false
 	}
 	_, err = os.Stat(filepath.Join(root, configurationPath))
 	return !os.IsNotExist(err)
