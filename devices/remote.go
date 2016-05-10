@@ -181,7 +181,7 @@ func (conn *RemoteConnection) CopyFile(filepath string, destination string) erro
 	}
 
 	Log.WithFields(log.Fields{
-		"filepath": filepath,
+		"filepath":    filepath,
 		"destination": destination,
 	}).Info("Copying file to device")
 
@@ -345,8 +345,8 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 
 		// Enable sudo elevation for later entire session (this is a uglyhack in case
 		// elevation is needed)
-		stdin.Write([]byte(fmt.Sprintf("echo %s | sudo -S echo boo >/dev/null\n", conn.Device.Password)))
-		stdin.Write([]byte("while true; do sudo echo boo >/dev/null && sleep 10; done &")) // The '&' at the end creates a job
+		//stdin.Write([]byte(fmt.Sprintf("echo %s | sudo -S echo boo >/dev/null\n", conn.Device.Password)))
+		//stdin.Write([]byte("while true; do sudo echo boo >/dev/null && sleep 10; done &")) // The '&' at the end creates a job
 
 		if env != nil {
 			for k, v := range env {
@@ -355,15 +355,17 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 			}
 		}
 
+		sudo := fmt.Sprintf("echo %s | sudo -S ", conn.Device.Password)
+
 		Log.WithFields(log.Fields{
 			"scriptpath": scriptpath,
 		}).Debug("chmod")
-		stdin.Write([]byte("sudo chmod +x " + scriptpath + "\n"))
+		stdin.Write([]byte(sudo + "chmod +x " + scriptpath + "\n"))
 
 		Log.WithFields(log.Fields{
 			"scriptpath": scriptpath,
 		}).Debug("sudo -E bash -C ..")
-		stdin.Write([]byte("sudo -E bash -C '" + scriptpath + "'\n"))
+		stdin.Write([]byte(sudo + "-E bash -C '" + scriptpath + "'\n"))
 
 		// Kill all jobs (if any) and exit
 		stdin.Write([]byte("kill $(jobs -p) && exit\n"))
