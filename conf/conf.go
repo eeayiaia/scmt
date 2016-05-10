@@ -10,10 +10,10 @@ import (
 	"os"
 
 	"errors"
-	"path/filepath"
-	"github.com/eeayiaia/scmt/utils"
-	log "github.com/Sirupsen/logrus"
 	"fmt"
+	log "github.com/Sirupsen/logrus"
+	"github.com/eeayiaia/scmt/utils"
+	"path/filepath"
 )
 
 type Credentials struct {
@@ -47,6 +47,9 @@ type Configuration struct {
 
 	PidFile string
 	LogFile string
+
+	NetworkInterfaceInternal string
+	NetworkInterfaceExternal string
 }
 
 const configurationPath = "scmt.json"

@@ -55,6 +55,9 @@ func Init() {
 	devices.AddGlobalEnv("MYSQL_USER", config.DatabaseUser)
 	devices.AddGlobalEnv("MYSQL_PASSWORD", config.DatabasePassword)
 
+	devices.AddGlobalEnv("NETWORK_INTERFACE_EXTERNAL", config.NetworkInterfaceExternal)
+	devices.AddGlobalEnv("NETWORK_INTERFACE_INTERNAL", config.NetworkInterfaceInternal)
+
 	devices.AddGlobalEnv("INVOKED_BY_SCMT", config.InvokedBySCMT)
 
 	newnode_lock = &sync.Mutex{}
