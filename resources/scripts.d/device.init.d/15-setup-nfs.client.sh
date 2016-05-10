@@ -3,10 +3,7 @@
 # Inputs: MASTER_IP
 
 # Get script directory & include utils
-DIR="${BASH_SOURCE%/*}"
-if [[ ! -d "$DIR" ]]; then DIR="$PWD"; fi
-
-. "$DIR/../utils.sh" || exit 1
+. "$UTILS_PATH"
 
 check_invoked_by_scmt
 
@@ -16,7 +13,7 @@ echo "Setting up NFS client"
 # Install nfs
 echo "Installing NFS..."
 write_line
-apt-get install rpcbind nfs-common --assume-yes
+apt-get install rpcbind nfs-common --force-yes
 INSTALL_SUCCESS=$?
 
 write_line
