@@ -10,15 +10,15 @@ EXT=$NETWORK_INTERFACE_EXTERNAL
 INT=$NETWORK_INTERFACE_INTERNAL
 
 IPTABLES_CONF_FILE="/etc/iptables.rules"
-IPTABLES_RULES="* nat\n
--A POSTROUTING -o $EXT -j MASQUERADE\n
-COMMIT\n
-\n
-* accept all\n
--A INPUT -i lo -j ACCEPT\n
--A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT\n
+IPTABLES_RULES="* nat
+-A POSTROUTING -o $EXT -j MASQUERADE
+COMMIT
+
+* accept all
+-A INPUT -i lo -j ACCEPT
+-A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 COMMIT"
 
 echo "Setting up rules for iptables in file $IPTABLES_CONF_FILE"
-echo -e $IPTABLES_RULES >| "$IPTABLES_CONF_FILE"
+echo -e "$IPTABLES_RULES" >| "$IPTABLES_CONF_FILE"
 echo -e "\tenabled NAT on $EXT"
