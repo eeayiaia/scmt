@@ -367,8 +367,7 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 		}).Debug("sudo -E bash -C ..")
 		stdin.Write([]byte(sudo + "-E bash -C '" + scriptpath + "'\n"))
 
-		// Kill all jobs (if any) and exit
-		stdin.Write([]byte("kill $(jobs -p) && exit\n"))
+		stdin.Write([]byte("exit\n"))
 
 		session.Wait()
 		session.Close()
