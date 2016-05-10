@@ -343,11 +343,6 @@ func (conn *RemoteConnection) RunScript(scriptpath string, env map[string]string
 		// Set start-caret
 		stdin.Write([]byte("echo BEGIN\n"))
 
-		// Enable sudo elevation for later entire session (this is a uglyhack in case
-		// elevation is needed)
-		//stdin.Write([]byte(fmt.Sprintf("echo %s | sudo -S echo boo >/dev/null\n", conn.Device.Password)))
-		//stdin.Write([]byte("while true; do sudo echo boo >/dev/null && sleep 10; done &")) // The '&' at the end creates a job
-
 		if env != nil {
 			for k, v := range env {
 				Log.Debug("export " + k + "=" + v)
