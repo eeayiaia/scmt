@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+    "os"
 )
 
 var initialized = false
@@ -59,6 +60,12 @@ func Init() {
 	devices.AddGlobalEnv("NETWORK_INTERFACE_INTERNAL", config.NetworkInterfaceInternal)
 
 	devices.AddGlobalEnv("INVOKED_BY_SCMT", config.InvokedBySCMT)
+
+	path := os.Getenv("PATH")
+	if path == "" {
+		log.Warn("PATH enviroment variable could not be loaded")
+	}
+	devices.AddGlobalEnv("PATH",path)
 
 	newnode_lock = &sync.Mutex{}
 
@@ -135,7 +142,7 @@ func RunScriptsInDir(dir string, env map[string]string) error {
 
 		cmd := exec.Command("/bin/bash", filename)
 		cmd.Env = envSlice
-		cmd.Dir = dir
+		cmd.Dir = absPath
 
 		stdout, err := cmd.StdoutPipe()
 		if err != nil {
