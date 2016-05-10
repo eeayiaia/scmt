@@ -4,7 +4,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/master"
-	"github.com/eeayiaia/scmt/devices"
 	"fmt"
 	"bufio"
 	"os"
@@ -339,11 +338,10 @@ func setup() error {
 
 	//check (install) monitor
 	if monitorName != "none" {
-		//TODO: install on master aswell!!
 		Log.WithFields(log.Fields{
 				"plugin": monitorName,
 		}).Info("Installing plugin")
-		err = devices.RunPluginInstallerOnAll(monitorName)
+		err = master.InstallPlugin(monitorName)
 		if err != nil {
 			Log.WithFields(log.Fields{
 				"plugin": monitorName,
@@ -354,14 +352,13 @@ func setup() error {
 
 	//install mpi
 	switch clusterAppName {
-		//TODO: install on master aswell!!!
 	case "none":
 		
 	case "both":
 		Log.WithFields(log.Fields{
 				"plugin": "openmpi",
 		}).Info("Installing plugin")
-		err = devices.RunPluginInstallerOnAll("openmpi")
+		err = master.InstallPlugin("openmpi")
 		if err != nil {
 			Log.WithFields(log.Fields{
 				"plugin": "openmpi",
@@ -372,7 +369,7 @@ func setup() error {
 		Log.WithFields(log.Fields{
 				"plugin": "mpich",
 		}).Info("Installing plugin")
-		err = devices.RunPluginInstallerOnAll("mpich")
+		err = master.InstallPlugin("mpich")
 		if err != nil {
 			Log.WithFields(log.Fields{
 				"plugin": "mpich",
@@ -384,7 +381,7 @@ func setup() error {
 		Log.WithFields(log.Fields{
 				"plugin": clusterAppName,
 		}).Info("Installing plugin")
-		err = devices.RunPluginInstallerOnAll(clusterAppName)
+		err = master.InstallPlugin(clusterAppName)
 		if err != nil {
 			Log.WithFields(log.Fields{
 				"plugin": clusterAppName,
