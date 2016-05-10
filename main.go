@@ -60,6 +60,7 @@ func main() {
 
 	if conf.Exists() {
 		conf.InitConfiguration()
+		daemon.InitContext(Config.PidFile, Config.LogFile)
 		Config = conf.Conf
 	} else {
 		_, err := utils.GetScmtRootPath()
@@ -67,8 +68,6 @@ func main() {
 			FirstSetup()
 		}
 	}
-
-	daemon.InitContext(Config.PidFile, Config.LogFile)
 
 	Start(func(_ *cli.Context) {
 		background()
