@@ -64,7 +64,7 @@ func main() {
 		daemon.InitContext(Config.PidFile, Config.LogFile)
 	} else {
 		_, err := utils.GetScmtRootPath()
-		if err != nil {
+		if err == nil {
 			FirstSetup()
 		}
 	}
