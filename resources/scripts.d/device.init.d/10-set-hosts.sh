@@ -1,9 +1,12 @@
-#!/bin/bash
+i#!/bin/bash
 
 # Input: MASTER_IP
 # Set the hosts file to include the master node
 
-[[ $INVOKED_BY_SCMT == 1 ]] || exit 1
+if [[ ! $INVOKED_BY_SCMT ]]; then
+	echo "This script is intended to be invoked by SCMT, not manually." >&2
+	exit 1
+fi
 
 BACKUP_FOLDER=~/.scmt-backup
 DATE_STAMP=$(date "+%b_%d_%Y_%H:%M:%S")
@@ -18,6 +21,7 @@ echo "Backing up file $BACKUP_FILE to $BACKUP_OUTPUT..."
 cp "$BACKUP_FILE" "$BACKUP_OUTPUT"
 
 egrep -q "^master\s" /etc/hosts \
-	&& sed "s/master/$MASTER_IP    master/" -i /etc/hosts \
-	|| sed "$ a\$MASTER_IP    master" -i /etc/hosts
+	&& sed "s/master/${MASTER_IP}    master/" -i /etc/hosts \
+	|| sed "$ a\
+${MASTER_IP}    master" -i /etc/hosts
 
