@@ -5,6 +5,7 @@ import (
 	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/master"
 	"github.com/eeayiaia/scmt/invoker"
+	"github.com/eeayiaia/scmt/database"
 	"fmt"
 	"bufio"
 	"os"
@@ -368,6 +369,9 @@ func setup() error {
 
 	conf.InitConfiguration()
 	Config = conf.Conf
+
+	database.Init(Config.Database, Config.DatabaseUser, Config.DatabasePassword)
+
 	invoker.Init()
 	//init scripts master
 	Log.Info("Initializing master node")
