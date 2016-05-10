@@ -7,6 +7,7 @@ import (
 	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/invoker"
 	"github.com/eeayiaia/scmt/master"
+	"github.com/eeayiaia/scmt/utils"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/codegangsta/cli"
@@ -54,13 +55,17 @@ func background() {
 }
 
 func main() {
+	InitLogging()
+	InitContextLogging()
+
 	if conf.Exists() {
 		conf.InitConfiguration()
 		Config = conf.Conf
-		InitLogging()
-		InitContextLogging()
 	} else {
-		FirstSetup()
+		_, err := utils.GetScmtRootPath()
+		if err != nil {
+			FirstSetup()
+		}
 	}
 
 	daemon.InitContext(Config.PidFile, Config.LogFile)
