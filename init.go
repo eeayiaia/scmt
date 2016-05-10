@@ -4,6 +4,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/master"
+	"github.com/eeayiaia/scmt/invoker"
 	"fmt"
 	"bufio"
 	"os"
@@ -36,6 +37,8 @@ var config conf.Configuration = conf.Configuration{
     LoginCredentials: creds,
     PidFile: "scmt.pid",
     LogFile: "scmt.log",
+    NetworkInterfaceInternal: "eth1",
+    NetworkInterfaceExternal: "eth0",
 }
 
 type userDataFn func()
@@ -58,6 +61,8 @@ var newConf conf.Configuration = conf.Configuration{
     LoginCredentials: creds,
     PidFile: "scmt.pid",
     LogFile: "scmt.log",
+    NetworkInterfaceInternal: "eth1",
+    NetworkInterfaceExternal: "eth0",
 }
 
 var reader *bufio.Reader = bufio.NewReader(os.Stdin) 
@@ -77,6 +82,8 @@ func FirstSetup() error {
 		setBroadcastIP,
 		setDeviceIPRange,
 		setMasterIP,
+		setExtNetworkInterface,
+		setIntNetworkInterface,
 		//setDatabaseName,
 		setDatabaseUser,
 		setDatabasePw,
@@ -90,7 +97,8 @@ func FirstSetup() error {
 	for functionIndex < length {
 		functions[functionIndex]()
 	}
-
+	conf.GenerateJSONConfiguration(&newConf)
+	fmt.Print(newConf)
 	err := setup()
 	if err != nil {
 		Log.Error("Failed SCMT setup")
@@ -106,7 +114,6 @@ func quit(ans string) bool {
 func setClusterName() {
 	fmt.Println("The default cluster name is '" + config.ClusterName + "' type new name to change or press enter to keep default name")
 	ans, _ := reader.ReadString('\n')
-	ans = strings.TrimSpace(ans)
 	switch ans {
 	case "\n":
 		newConf.ClusterName = config.ClusterName
@@ -119,7 +126,7 @@ func setClusterName() {
 		}
 		return
 	default:
-		newConf.ClusterName = strings.Trim(ans, "\n")
+		newConf.ClusterName = strings.TrimSpace(ans)
 	}
 	functionIndex++
 }
@@ -127,7 +134,6 @@ func setClusterName() {
 func setClusterSubnet() {
 	fmt.Println("The default cluster subnet is '" + config.ClusterSubnet + "' type new subnet to change or press enter to keep default name")
 	ans, _ := reader.ReadString('\n')
-	ans = strings.TrimSpace(ans)
 	switch ans {
 	case "\n":
 		newConf.ClusterSubnet = config.ClusterSubnet
@@ -140,7 +146,7 @@ func setClusterSubnet() {
 		}
 		return
 	default:
-		newConf.ClusterSubnet = strings.Trim(ans, "\n")
+		newConf.ClusterSubnet = strings.TrimSpace(ans)
 	}
 	functionIndex++
 }
@@ -148,7 +154,6 @@ func setClusterSubnet() {
 func setBroadcastIP() {
 	fmt.Println("The default cluster broadcast IP is '" + config.ClusterBroadcastIP + "' type new IP to change or press enter to keep default name")
 	ans, _ := reader.ReadString('\n')
-	ans = strings.TrimSpace(ans)
 	switch ans {
 	case "\n":
 		newConf.ClusterBroadcastIP = config.ClusterBroadcastIP
@@ -161,7 +166,7 @@ func setBroadcastIP() {
 		}
 		return
 	default:
-		newConf.ClusterBroadcastIP = strings.Trim(ans, "\n")
+		newConf.ClusterBroadcastIP = strings.TrimSpace(ans)
 	}
 	functionIndex++
 }
@@ -185,7 +190,7 @@ func setDeviceIPRange() {
 	default:
 		IPrange := strings.Split(ans, " ")
 		newConf.DeviceIPRangeBegin = IPrange[0]
-		newConf.DeviceIPRangeEnd = strings.Trim(IPrange[1], "\n")
+		newConf.DeviceIPRangeEnd = strings.TrimSpace(IPrange[1])
 	}
 	functionIndex++
 }
@@ -193,7 +198,6 @@ func setDeviceIPRange() {
 func setMasterIP() {
 	fmt.Println("The default master IP is '" + config.MasterIP + "' type new IP to change or press enter to keep default")
 	ans, _ := reader.ReadString('\n')
-	ans = strings.TrimSpace(ans)
 	switch ans {
 	case "\n":
 		newConf.MasterIP = config.MasterIP
@@ -206,7 +210,7 @@ func setMasterIP() {
 		}
 		return
 	default:
-		newConf.MasterIP = strings.Trim(ans, "\n")
+		newConf.MasterIP = strings.TrimSpace(ans)
 	}
 	functionIndex++
 }
@@ -219,7 +223,6 @@ func setDatabaseName() {
 func setDatabaseUser() {
 	fmt.Println("The default database username is '" + config.DatabaseUser + "' type new username to change or press enter to keep default")
 	ans, _ := reader.ReadString('\n')
-	ans = strings.TrimSpace(ans)
 	switch ans {
 	case "\n":
 		newConf.DatabaseUser = config.DatabaseUser
@@ -232,7 +235,7 @@ func setDatabaseUser() {
 		}
 		return
 	default:
-		newConf.DatabaseUser = strings.Trim(ans, "\n")
+		newConf.DatabaseUser = strings.TrimSpace(ans)
 	}
 	functionIndex++
 }
@@ -291,7 +294,7 @@ func monitor() {
 func clusterApp() {
 	fmt.Println("Do you want to install openMPI or MPICH or both? (openMPI/mpich/both)")
 	ans, _ := reader.ReadString('\n')
-	ans = strings.TrimSpace(strings.Trim(strings.ToLower(ans), "\n"))
+	ans = strings.TrimSpace(strings.ToLower(ans))
 	switch ans {
 	case "b":
 		if functionIndex > 0 {
@@ -311,6 +314,46 @@ func clusterApp() {
 	functionIndex++
 }
 
+func setExtNetworkInterface() {
+	fmt.Println("The default external network interface is '" + config.NetworkInterfaceExternal + "' type new interface to change or press enter to keep default")
+	ans, _ := reader.ReadString('\n')
+	switch ans {
+	case "\n":
+		newConf.NetworkInterfaceExternal = config.NetworkInterfaceExternal
+	case "b":
+		if functionIndex > 0 {
+			functionIndex--
+		}
+		return
+	case "q":
+		fmt.Println("Terminating..")
+		os.Exit(0)
+	default:
+		newConf.NetworkInterfaceExternal = strings.TrimSpace(ans)
+	}
+	functionIndex++
+}
+
+func setIntNetworkInterface() {
+	fmt.Println("The default internal network interface is '" + config.NetworkInterfaceInternal + "' type new interface to change or press enter to keep default")
+	ans, _ := reader.ReadString('\n')
+	switch ans {
+	case "\n":
+		newConf.NetworkInterfaceInternal = config.NetworkInterfaceInternal
+	case "b":
+		if functionIndex > 0 {
+			functionIndex--
+		}
+		return
+	case "q":
+		fmt.Println("Terminating..")
+		os.Exit(0)
+	default:
+		newConf.NetworkInterfaceInternal = strings.TrimSpace(ans)
+	}
+	functionIndex++
+}
+
 func setup() error {
 	//Write conf
 	Log.Info("Installing..")
@@ -325,10 +368,13 @@ func setup() error {
 
 	conf.InitConfiguration()
 	Config = conf.Conf
+	invoker.Init()
 	//init scripts master
 	Log.Info("Initializing master node")
 	master.Init()
+	Log.Info("Master node initialized")
 
+	Log.Info("Running master init scripts")
 	err = master.RunInitScripts()
 	if err != nil {
 		Log.WithFields(log.Fields{
@@ -336,6 +382,7 @@ func setup() error {
 		}).Fatal("Failed to initialize master")
 		return err
 	}
+	Log.Info("Master init scripts done")
 
 	//check (install) monitor
 	if monitorName != "none" {

@@ -103,6 +103,7 @@ func GenerateJSONConfiguration(conf *Configuration) error {
 		return errors.New("failed to generate conf file")
 	}
 	f.Sync()
+	log.Info("Configuration generated")
 	return nil
 }
 
