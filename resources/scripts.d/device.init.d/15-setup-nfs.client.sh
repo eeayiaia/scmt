@@ -13,7 +13,7 @@ echo "Setting up NFS client"
 # Install nfs
 echo "Installing NFS..."
 write_line
-apt-get install rpcbind nfs-common --force-yes
+apt-get install -y --force-yes rpcbind nfs-common
 INSTALL_SUCCESS=$?
 
 write_line
