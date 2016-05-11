@@ -16,6 +16,8 @@ func RegisterInvokerHandlers() {
 	invoker.RegisterHandler(invoker.TYPE_STOP_DAEMON, handleStopDaemon)
 
 	invoker.RegisterHandler(invoker.TYPE_INSTALL_PLUGIN, handleInstallPlugin)
+
+    invoker.RegisterHandler(invoker.TYPE_REMOVE_DEVICE, handleRemoveDevice)
 }
 
 /*
@@ -67,4 +69,25 @@ func handleInstallPlugin(b bytes.Buffer) {
 	pluginName = strings.TrimSpace(pluginName)
 	pluginName = strings.ToLower(pluginName)
 	InstallPlugin(pluginName)
+}
+
+/*
+    Handle invoker.TYPE_REMOVE_DEVICE
+        data: mac
+*/
+func handleRemoveDevice(rawData bytes.Buffer) {
+    mac := rawData.String()
+    mac = strings.Replace(mac, ":", "", -1)
+    if len(mac) != 12 {
+        Log.WithFields(log.Fields{
+            "mac": mac,
+        }).Error("could not parse mac TYPE_REMOVE_DEVICE from invoker")
+        return
+    }
+
+    Log.WithFields(log.Fields{
+        "mac": mac,
+    }).Info("Remove device")
+
+    devices.RemoveDevice(mac)
 }

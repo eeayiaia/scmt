@@ -58,7 +58,6 @@ func AddDevice(device *Slave) {
 	device.lock = &sync.Mutex{}
 	device.Connected = true
 	device.StartPinger() // heartbeat monitor up
-
 	devices = append(devices, device)
 	devicesMutex.Unlock()
 }
@@ -103,7 +102,6 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			Log.Error("No correct credentials")
 		}
 		AddDevice(slave)
-
 		// This generates the id of the device, which both
 		// sets the node hostname and generated ip-address
 		slave.Store()
@@ -247,4 +245,31 @@ func getAllStoredDevices() ([]*Slave, error) {
 	}
 
 	return ds, nil
+}
+
+// Removes a device from device list.
+func RemoveDevice(hwAddress string) {
+    var slave *Slave
+
+    slave, err := GetDevice(hwAddress)
+    if err != nil {
+        Log.WithFields(log.Fields{
+            "mac": hwAddress,
+        }).Warn("No device with that mac address connected.")
+    } else {
+        slave.Delete()
+        devicesMutex.Lock()
+        slave.lock.Lock()
+        slave.pingerControl <- false
+
+        cpy := devices[:0]
+        for _, x := range devices {
+            if x != slave {
+                cpy = append(cpy, x)
+            }
+        }
+        slave.lock.Unlock()
+        devices = cpy
+        devicesMutex.Unlock()
+    }
 }

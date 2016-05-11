@@ -29,6 +29,8 @@ const (
 
 
 	TYPE_STOP_DAEMON        int = 5
+
+	TYPE_REMOVE_DEVICE      int = 6
 )
 
 /*

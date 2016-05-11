@@ -102,6 +102,16 @@ var commands []cli.Command = []cli.Command{
 			master.RunInitScripts()
 		},
 	},
+	{
+		Name:        "remove-device",
+		Aliases:     []string{""},
+		Usage:       "scmt remove-device <node mac>",
+		UsageText:   "",
+		Description: "",
+		ArgsUsage:   "Is used to remove a device",
+		Category:    "Cluster information",
+		Action:      removeDevice,
+	},
 }
 
 func getCommands() []cli.Command {
@@ -165,4 +175,12 @@ func registerDevice(c *cli.Context) {
 
 	buffer := bytes.NewBufferString(mac + " " + ip)
 	invoker.SendPacket(invoker.TYPE_NEW_DEVICE, *buffer)
+}
+
+func removeDevice(c *cli.Context) {
+	// TODO: add validation
+	mac := strings.Trim(c.Args().First(), " ")
+
+	buffer := bytes.NewBufferString(mac)
+	invoker.SendPacket(invoker.TYPE_REMOVE_DEVICE, *buffer)
 }
