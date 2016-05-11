@@ -30,10 +30,14 @@ fi
 # Set ownership
 chown nobody:nogroup /var/nfs
 
-# Adding clients to the list that we will share with
+# Adding cluster subnet to the exports list
+echo "Configuring /etc/exports"
+
 EXPORTS=/etc/exports
 backup_file "$EXPORTS"
-echo "/var/nfs	$CLUSTER_SUBNET(rw,sync,no_subtree_check)" >> "$EXPORTS"
+
+egrep -q "/var/nfs\s+$CLUSTER_SUBNET" "$EXPORTS" \
+	|| echo "/var/nfs	$CLUSTER_SUBNET(rw,sync,no_subtree_check)" >> "$EXPORTS"
 
 # Link the correct directories into nfs
 SCRIPTS_PATH=$(realpath "$DIR/../../scripts.d")
@@ -57,8 +61,10 @@ ln -sf "$CONFIGS_PATH" "$CONFIGS_TARGET"
 ln -sf "$UTILS_PATH" "$UTILS_TARGET"
 
 # Create the nfs table
+echo "Running 'exportfs -a'"
 exportfs -a
 
 # Start the service
+echo "Starting nfs-kernel-server"
 service nfs-kernel-server start
 
