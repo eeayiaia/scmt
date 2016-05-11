@@ -6,12 +6,12 @@ import (
 	"github.com/eeayiaia/scmt/conf"
 	"github.com/eeayiaia/scmt/devices"
 	"github.com/eeayiaia/scmt/utils"
+	"os"
 	"os/exec"
 	"path"
 	"path/filepath"
 	"strings"
 	"sync"
-    "os"
 )
 
 var initialized = false
@@ -65,7 +65,7 @@ func Init() {
 	if path == "" {
 		log.Warn("PATH enviroment variable could not be loaded")
 	}
-	devices.AddGlobalEnv("PATH",path)
+	devices.AddGlobalEnv("PATH", path)
 
 	newnode_lock = &sync.Mutex{}
 
@@ -77,7 +77,7 @@ func RunNewNodeScripts(slave *devices.Slave) error {
 	newnode_lock.Lock()
 	defer newnode_lock.Unlock()
 
-	err := RunScriptsInDir("scripts.d/master.newnode.d/", GetEnvVarComb(*slave))
+	err := RunScriptsInDir("scripts.d/master.newdevice.d/", GetEnvVarComb(*slave))
 
 	if err != nil {
 		Log.WithFields(log.Fields{
