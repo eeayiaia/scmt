@@ -126,6 +126,9 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			}).Error("error running init scripts on slave")
 		}
 
+		// Reset the ip
+		slave.IPAddress = newSlaveIp
+
 		// Reboot the device
 		slave.RunInShellAsync("reboot", true)
 		return slave
