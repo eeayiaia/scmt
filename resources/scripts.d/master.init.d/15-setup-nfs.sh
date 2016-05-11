@@ -42,7 +42,7 @@ egrep -q "/var/nfs\s+$CLUSTER_SUBNET" "$EXPORTS" \
 # Link the correct directories into nfs
 SCRIPTS_PATH=$(realpath "$DIR/../../scripts.d")
 PLUGINS_PATH=$(realpath "$DIR/../../plugins.d")
-CONFIGS_PATH=$(realpath "$DIR/../../configs")
+CONFIGS_PATH=$(realpath "$DIR/../../config")
 UTILS_PATH=$(realpath "$DIR/../utils.sh")
 
 SCRIPTS_TARGET="/var/nfs/scripts.d"
@@ -55,10 +55,10 @@ UTILS_TARGET="/var/nfs/utils.sh"
 [[ -f "$CONFIGS_TARGET" ]] && delete_file "$CONFIGS_TARGET"
 [[ -f "$UTILS_TARGET" ]] && delete_file "$UTILS_TARGET"
 
-cp "$SCRIPTS_PATH" "$SCRIPTS_TARGET"
-cp "$PLUGINS_PATH" "$PLUGINS_TARGET"
-cp "$CONFIGS_PATH" "$CONFIGS_TARGET"
-cp "$UTILS_PATH" "$UTILS_TARGET"
+cp -R "$SCRIPTS_PATH" "$SCRIPTS_TARGET"
+cp -R "$PLUGINS_PATH" "$PLUGINS_TARGET"
+cp -R "$CONFIGS_PATH" "$CONFIGS_TARGET"
+cp -R "$UTILS_PATH" "$UTILS_TARGET"
 
 # Create the nfs table
 echo "Running 'exportfs -a'"
