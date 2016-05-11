@@ -4,11 +4,13 @@
 DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 . "$DIR/../utils.sh" || exit 1
 
-#check_invoked_by_scmt
+check_invoked_by_scmt
 
 EXT=$NETWORK_INTERFACE_EXTERNAL
 INT=$NETWORK_INTERFACE_INTERNAL
 INTERFACES="/etc/network/interfaces"
+
+backup_file "$INTERFACES"
 
 CONF="\n
 auto lo\n
