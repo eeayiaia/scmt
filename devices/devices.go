@@ -290,3 +290,9 @@ func RemoveDevice(hwAddress string) {
 		devicesMutex.Unlock()
 	}
 }
+
+func InsertColons(HwAddr string) string {
+    var macparts []string = []string {HwAddr[0:2], HwAddr[2:4], HwAddr[4:6], HwAddr[6:8], HwAddr[8:10], HwAddr[10:12],}
+    return strings.Join(macparts,":")
+
+}

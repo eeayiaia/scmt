@@ -199,9 +199,8 @@ func GetEnvVarGlob() map[string]string {
 */
 func GetEnvVarSlave(device devices.Slave) map[string]string {
 	env := make(map[string]string)
-
 	env["NODE_IP"] = device.IPAddress
-	env["NODE_MAC"] = device.HardwareAddress
+    env["NODE_MAC"] = devices.InsertColons(device.HardwareAddress) 
 	env["NODENAME"] = device.Hostname
 
 	return env
