@@ -1,11 +1,12 @@
 #!/bin/bash
 
 # Include utils
-. "/var/shared/utils.sh"
+. "/var/shared/utils.sh" || exit 1
 
 check_invoked_by_scmt
 
-SOURCES_FILE="$DIR/../../config/approx/node-sources"
+#SOURCES_FILE="$DIR/../../config/approx/node-sources"
+SOURCES_FILE="/var/shared/config/approx/node-sources"
 SOURCES_TARGET="/etc/apt/sources.list"
 SOURCES_D_TARGET="/etc/apt/sources.list.d"
 
