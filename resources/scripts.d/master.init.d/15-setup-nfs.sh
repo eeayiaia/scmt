@@ -55,10 +55,10 @@ UTILS_TARGET="/var/nfs/utils.sh"
 [[ -f "$CONFIGS_TARGET" ]] && delete_file "$CONFIGS_TARGET"
 [[ -f "$UTILS_TARGET" ]] && delete_file "$UTILS_TARGET"
 
-ln -sf "$SCRIPTS_PATH" "$SCRIPTS_TARGET"
-ln -sf "$PLUGINS_PATH" "$PLUGINS_TARGET"
-ln -sf "$CONFIGS_PATH" "$CONFIGS_TARGET"
-ln -sf "$UTILS_PATH" "$UTILS_TARGET"
+cp "$SCRIPTS_PATH" "$SCRIPTS_TARGET"
+cp "$PLUGINS_PATH" "$PLUGINS_TARGET"
+cp "$CONFIGS_PATH" "$CONFIGS_TARGET"
+cp "$UTILS_PATH" "$UTILS_TARGET"
 
 # Create the nfs table
 echo "Running 'exportfs -a'"
