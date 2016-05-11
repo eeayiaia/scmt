@@ -210,7 +210,7 @@ func (slave *Slave) Load(HWaddr string) {
 	default:
 		Log.WithFields(log.Fields{
 			"mac": HWaddr,
-		}).Info("Device exists in database")
+		}).Info("Device loaded from database")
 		break
 	}
 }
