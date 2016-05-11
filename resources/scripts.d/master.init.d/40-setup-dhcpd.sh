@@ -21,6 +21,23 @@ fi
 cp "$DIR/resources/baseDHCPD.conf" "$DHCPD_CONF"
 
 echo "
+ddns-update-style none;
+
+# option definitions common to all supported networks...
+#option domain-name "example.org";
+option domain-name-servers $MASTER_IP
+
+default-lease-time 600;
+max-lease-time 7200;
+
+# If this DHCP server is the official DHCP server for the local
+# network, the authoritative directive should be uncommented.
+#authoritative;
+
+# Use this to send dhcp log messages to a different log file (you also
+# have to hack syslog.conf to complete the redirection).
+log-facility local7;
+
 subnet $CLUSTER_SUBNET_IP netmask $CLUSTER_SUBNET_MASK {
   range $DEVICE_IP_RANGE_BEGIN $DEVICE_IP_RANGE_END;
   option routers $MASTER_IP;
