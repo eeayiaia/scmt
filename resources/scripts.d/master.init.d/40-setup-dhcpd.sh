@@ -25,7 +25,7 @@ ddns-update-style none;
 
 # option definitions common to all supported networks...
 #option domain-name "example.org";
-option domain-name-servers $MASTER_IP
+option domain-name-servers $MASTER_IP;
 
 default-lease-time 600;
 max-lease-time 7200;
