@@ -90,6 +90,7 @@ func FirstSetup() error {
 		setDatabasePw,
 		//setLoginCred,
 		monitor,
+		clusterAppinstall,
 		clusterApp,
 	}
 	length := len(functions)
@@ -115,8 +116,8 @@ func quit(ans string) bool {
 func setClusterName() {
 	fmt.Println("The default cluster name is '" + config.ClusterName + "' type new name to change or press enter to keep default name")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.ClusterName = config.ClusterName
 	case "q":
 		fmt.Println("Terminating..")
@@ -135,8 +136,8 @@ func setClusterName() {
 func setClusterSubnet() {
 	fmt.Println("The default cluster subnet is '" + config.ClusterSubnet + "' type new subnet to change or press enter to keep default name")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.ClusterSubnet = config.ClusterSubnet
 	case "q":
 		fmt.Println("Terminating..")
@@ -155,8 +156,8 @@ func setClusterSubnet() {
 func setBroadcastIP() {
 	fmt.Println("The default cluster broadcast IP is '" + config.ClusterBroadcastIP + "' type new IP to change or press enter to keep default name")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.ClusterBroadcastIP = config.ClusterBroadcastIP
 	case "q":
 		fmt.Println("Terminating..")
@@ -176,8 +177,8 @@ func setDeviceIPRange() {
 	fmt.Println("The default device IP range is '" + config.DeviceIPRangeBegin + "' - '" + config.DeviceIPRangeEnd + "'")
 	fmt.Println("To change, type new range ´from_ip´ ´to_ip´. To keep default, press enter")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.DeviceIPRangeBegin = config.DeviceIPRangeBegin
 		newConf.DeviceIPRangeEnd = config.DeviceIPRangeEnd
 	case "q":
@@ -199,8 +200,8 @@ func setDeviceIPRange() {
 func setMasterIP() {
 	fmt.Println("The default master IP is '" + config.MasterIP + "' type new IP to change or press enter to keep default")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.MasterIP = config.MasterIP
 	case "q":
 		fmt.Println("Terminating..")
@@ -216,6 +217,7 @@ func setMasterIP() {
 	functionIndex++
 }
 
+
 func setDatabaseName() {
 	newConf.Database = config.Database
 	functionIndex++
@@ -224,8 +226,8 @@ func setDatabaseName() {
 func setDatabaseUser() {
 	fmt.Println("The default database username is '" + config.DatabaseUser + "' type new username to change or press enter to keep default")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.DatabaseUser = config.DatabaseUser
 	case "q":
 		fmt.Println("Terminating..")
@@ -292,6 +294,30 @@ func monitor() {
 
 }
 
+func clusterAppinstall() {
+	fmt.Println("Do you want to install a openMPI or MPICH for distributed program execution? (y/n)")
+	ans, _ := reader.ReadString('\n')
+	switch strings.TrimSpace(strings.ToLower(ans)) {
+	case "y":
+		functionIndex++
+		return
+	case "n":
+		functionIndex = functionIndex + 2
+		return
+	case "b":
+		if functionIndex > 0 {
+			functionIndex--
+		}
+		return
+	case "q":
+		fmt.Println("Terminating..")
+		os.Exit(0)
+	default:
+		fmt.Println("Please type 'y' or 'n'")
+		return
+	}
+}
+
 func clusterApp() {
 	fmt.Println("Do you want to install openMPI or MPICH or both? (openMPI/mpich/both)")
 	ans, _ := reader.ReadString('\n')
@@ -318,8 +344,8 @@ func clusterApp() {
 func setExtNetworkInterface() {
 	fmt.Println("The default external network interface is '" + config.NetworkInterfaceExternal + "' type new interface to change or press enter to keep default")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.NetworkInterfaceExternal = config.NetworkInterfaceExternal
 	case "b":
 		if functionIndex > 0 {
@@ -338,8 +364,8 @@ func setExtNetworkInterface() {
 func setIntNetworkInterface() {
 	fmt.Println("The default internal network interface is '" + config.NetworkInterfaceInternal + "' type new interface to change or press enter to keep default")
 	ans, _ := reader.ReadString('\n')
-	switch ans {
-	case "\n":
+	switch strings.Trim(ans, "\n") {
+	case "":
 		newConf.NetworkInterfaceInternal = config.NetworkInterfaceInternal
 	case "b":
 		if functionIndex > 0 {
