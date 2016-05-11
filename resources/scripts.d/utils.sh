@@ -43,9 +43,9 @@ function delete_file(){
 	fi
 
 	if [[ ! -f "$FILE" ]]; then
-		echo "delete_file: No such file:\n $FILE" 1>&2
+		printf "delete_file: No such file:\n $FILE\n" 1>&2
 	else
-		echo "deleting file:\n$FILE"
+		printf "deleting file:\n $FILE\n"
 		rm -- "${FILE:?}"
 	fi
 }
@@ -60,9 +60,9 @@ function delete_directory(){
 	fi
 
 	if [[ ! -d "$DIRECTORY" ]]; then
-		echo "delete_directory: No such directory:\n$DIRECTORY" 1>&2
+		printf "delete_directory: No such directory:\n$DIRECTORY\n" 1>&2
 	else
-		echo "deleting directory:\n$DIRECTORY"
+		printf "deleting directory:\n$DIRECTORY\n"
 		rm -rf -- "${DIRECTORY:?}"
 	fi
 }
