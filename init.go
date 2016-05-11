@@ -34,6 +34,7 @@ var config conf.Configuration = conf.Configuration{
     InvokedBySCMT: "1",
     Database: "cluster",
     DatabaseUser: "master",
+    DatabaseRootPassword: "drowssapdab",
     DatabasePassword: "badpassword",
     LoginCredentials: creds,
     PidFile: "scmt.pid",
@@ -87,6 +88,7 @@ func FirstSetup() error {
 		setIntNetworkInterface,
 		//setDatabaseName,
 		setDatabaseUser,
+        setDatabaseRootPw,
 		setDatabasePw,
 		//setLoginCred,
 		monitor,
@@ -107,8 +109,8 @@ func FirstSetup() error {
 		return err
 	}
 	return nil
-}
 
+}
 func quit(ans string) bool {
 	return strings.Compare("q", strings.ToLower(strings.TrimSpace(ans))) == 0
 }
@@ -239,6 +241,34 @@ func setDatabaseUser() {
 		return
 	default:
 		newConf.DatabaseUser = strings.TrimSpace(ans)
+	}
+	functionIndex++
+}
+
+func setDatabaseRootPw() {
+	fmt.Println("Please type root password for database: ")
+	pw, _ := terminal.ReadPassword(0)
+	ans := string(pw)
+	switch ans {
+	case "":
+		newConf.DatabasePassword = config.DatabasePassword
+	case "q":
+		fmt.Println("Terminating..")
+		os.Exit(0)
+	case "b":
+		if functionIndex > 0 {
+			functionIndex--
+		}
+		return
+	default:
+		fmt.Println("Type again to confirm: ")
+		confirm, _ := terminal.ReadPassword(0)
+		if ans != string(confirm) {
+			fmt.Println("Passwords does not match, try again")
+			return
+		}
+
+		newConf.DatabaseRootPassword = ans
 	}
 	functionIndex++
 }

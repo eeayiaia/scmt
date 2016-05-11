@@ -55,6 +55,7 @@ func Init() {
 	devices.AddGlobalEnv("MYSQL_DATABASE", config.Database)
 	devices.AddGlobalEnv("MYSQL_USER", config.DatabaseUser)
 	devices.AddGlobalEnv("MYSQL_PASSWORD", config.DatabasePassword)
+    devices.AddGlobalEnv("MYSQL_ROOT_PASSWORD", config.DatabaseRootPassword)
 
 	devices.AddGlobalEnv("NETWORK_INTERFACE_EXTERNAL", config.NetworkInterfaceExternal)
 	devices.AddGlobalEnv("NETWORK_INTERFACE_INTERNAL", config.NetworkInterfaceInternal)
@@ -200,7 +201,7 @@ func GetEnvVarGlob() map[string]string {
 func GetEnvVarSlave(device devices.Slave) map[string]string {
 	env := make(map[string]string)
 	env["NODE_IP"] = device.IPAddress
-    env["NODE_MAC"] = devices.InsertColons(device.HardwareAddress) 
+    env["NODE_MAC"] = devices.InsertColons(device.HardwareAddress)
 	env["NODENAME"] = device.Hostname
 
 	return env

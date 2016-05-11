@@ -41,6 +41,7 @@ type Configuration struct {
 	Database         string
 	DatabaseUser     string
 	DatabasePassword string
+    DatabaseRootPassword    string
 
 	LoginCredentials []*Credentials
 
