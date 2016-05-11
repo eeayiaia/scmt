@@ -65,7 +65,7 @@ func AddDevice(device *Slave) {
 func GetDevice(hardwareAddress string) (*Slave, error) {
 	devicesMutex.Lock()
 	defer devicesMutex.Unlock()
-    hardwareAddress = strings.Trim(hardwareAddress, " ")
+	hardwareAddress = strings.Trim(hardwareAddress, " ")
 
 	for _, slave := range devices {
 		if strings.Compare(slave.HardwareAddress, hardwareAddress) == 0 {
@@ -113,9 +113,22 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 		envs["NODE_NEW_IP"] = newSlaveIp
 		slave.IPAddress = ipAddress
 
-		//The current IPadress will now be ipAddress and the new setatic ip is slave.IpAdress
-		// TODO: Actually setting the hostname on a device
-		// TODO: Setting static ip in dhcpd.conf
+		// run init-scripts on the newly connected device
+		envs["NODE_IP"] = slave.IPAddress
+		envs["NODE_HOSTNAME"] = slave.Hostname
+
+		err = slave.RunInitScripts(envs)
+		if err != nil {
+			Log.WithFields(log.Fields{
+				"mac":   hardwareAddress,
+				"ip":    ipAddress,
+				"error": err,
+			}).Error("error running init scripts on slave")
+		}
+
+		// Reboot the device
+		slave.RunInShellAsync("reboot", true)
+		return slave
 	} else {
 		Log.WithFields(log.Fields{
 			"mac": hardwareAddress,
@@ -135,6 +148,7 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 			"error": err,
 		}).Error("error running init scripts on slave")
 	}
+	slave.Connected = true
 
 	return slave
 }
@@ -249,27 +263,27 @@ func getAllStoredDevices() ([]*Slave, error) {
 
 // Removes a device from device list.
 func RemoveDevice(hwAddress string) {
-    var slave *Slave
+	var slave *Slave
 
-    slave, err := GetDevice(hwAddress)
-    if err != nil {
-        Log.WithFields(log.Fields{
-            "mac": hwAddress,
-        }).Warn("No device with that mac address connected.")
-    } else {
-        slave.Delete()
-        devicesMutex.Lock()
-        slave.lock.Lock()
-        slave.pingerControl <- false
+	slave, err := GetDevice(hwAddress)
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"mac": hwAddress,
+		}).Warn("No device with that mac address connected.")
+	} else {
+		slave.Delete()
+		devicesMutex.Lock()
+		slave.lock.Lock()
+		slave.pingerControl <- false
 
-        cpy := devices[:0]
-        for _, x := range devices {
-            if x != slave {
-                cpy = append(cpy, x)
-            }
-        }
-        slave.lock.Unlock()
-        devices = cpy
-        devicesMutex.Unlock()
-    }
+		cpy := devices[:0]
+		for _, x := range devices {
+			if x != slave {
+				cpy = append(cpy, x)
+			}
+		}
+		slave.lock.Unlock()
+		devices = cpy
+		devicesMutex.Unlock()
+	}
 }
