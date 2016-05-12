@@ -14,7 +14,7 @@ IPTABLES_RULES="* nat
 -A POSTROUTING -o $EXT -j MASQUERADE
 COMMIT
 
-* accept all
+* filter
 -A INPUT -i lo -j ACCEPT
 -A INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
 COMMIT"
