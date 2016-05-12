@@ -43,6 +43,7 @@ func (s *Slave) CopyFile(file string, destination string) chan error {
 		rc, err := NewRemoteConnection(s)
 		if err != nil {
 			ch <- err
+			return
 		}
 
 		result := rc.CopyFile(file, destination)
@@ -77,6 +78,7 @@ func (s *Slave) RunInShellAsync(query string, sudo bool) chan string {
 		rc, err := NewRemoteConnection(s)
 		if err != nil {
 			ch <- "error: " + err.Error()
+			return
 		}
 
 		ch <- rc.RunInShell(query, sudo)
@@ -367,7 +369,7 @@ func (slave *Slave) RunPluginInstaller(plugin string) error {
 */
 func (slave *Slave) installPlugin(pluginName string) error {
 	pluginName = strings.ToLower(strings.Trim(pluginName, " "))
-	pluginDir := filepath.Join(conf.Conf.RootPath, "plugins.d/" + pluginName + "/device.init.d/")
+	pluginDir := filepath.Join(conf.Conf.RootPath, "plugins.d/"+pluginName+"/device.init.d/")
 
 	scriptsToRun, err := filepath.Glob(pluginDir + "*.sh")
 
