@@ -17,13 +17,14 @@ auto lo\n
 iface lo inet loopback\n
 \n
 auto $EXT\n
-\tiface $EXT inet dhcp\n
+iface $EXT inet dhcp\n
 \n
 auto $INT\n
 iface $INT inet static\n
 \taddress $MASTER_IP\n
 \tbroadcast $CLUSTER_BROADCAST_IP\n
-\tnetmask $CLUSTER_SUBNET_MASK\n"
+\tnetmask $CLUSTER_SUBNET_MASK\n
+\tpost-up /sbin/iptables-restore < /etc/iptables.rules\n"
 
 function setup_interfaces {
   echo -e $CONF >| "$INTERFACES"
