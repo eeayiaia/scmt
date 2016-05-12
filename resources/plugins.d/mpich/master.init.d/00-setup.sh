@@ -47,7 +47,7 @@ if [[ $MPIUSER_EXISTS != 0 ]]; then
 	grep -q -F '/home/mpiuser' /etc/exports \
 		|| echo "/home/mpiuser *(rw,sync,no_subtree_check)" >> /etc/exports
 
-	service nfs-kernel-service restart
+	service nfs-kernel-server restart
 
 	# Allow passwordless ssh between mpiusers
 	if [[ ! -f /home/mpiuser/.ssh/id_rsa ]]; then
