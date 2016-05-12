@@ -1,0 +1,55 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides: scmt
+# Required-Start: $remote_fs $syslog $network $mysql
+# Required-Stop: $remote_fs $syslog $network $mysql
+# Default-Start: 2 3 4 5
+# Default-Stop: 0 1 6
+# Short-Description: Super Cluster Management Tool 
+# Description: This file starts and stops SCMT
+# 
+### END INIT INFO
+
+SCMT="$SCMT_ROOT"
+
+LOG="/var/log/scmt.log"
+PID="/var/run/scmtd.pid"
+
+start(){
+    export SCMT_ROOT=$SCMT
+    if [ -f "$PID" ]; then
+       echo "Service already running"
+    else
+	echo "Starting service"
+	PIDNUMBER=$(/usr/bin/scmt > $LOG 2>&1 & echo $!)
+	echo "$PIDNUMBER" > "$PID"
+	echo "Service started"
+  fi  
+}
+
+stop() {
+	if [ ! -f "$PID" ]; then
+		echo "Service not running"
+	else
+		echo "Stopping service"
+		kill -HUP $(cat $PID)	
+		rm -f "$PID"
+		echo "Service stopped"
+	fi
+}
+
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+esac
