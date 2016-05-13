@@ -265,7 +265,7 @@ func getAllStoredDevices() ([]*Slave, error) {
 }
 
 // Removes a device from device list.
-func RemoveDevice(hwAddress string) {
+func RemoveDevice(hwAddress string) *Slave {
 	var slave *Slave
 
 	slave, err := GetDevice(hwAddress)
@@ -288,7 +288,9 @@ func RemoveDevice(hwAddress string) {
 		slave.lock.Unlock()
 		devices = cpy
 		devicesMutex.Unlock()
+        return slave
 	}
+    return nil
 }
 
 func InsertColons(HwAddr string) string {

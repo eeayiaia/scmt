@@ -89,5 +89,8 @@ func handleRemoveDevice(rawData bytes.Buffer) {
 		"mac": mac,
 	}).Info("Remove device")
 
-	devices.RemoveDevice(mac)
+    slave := devices.RemoveDevice(mac)
+    if slave != nil {
+        RunRemoveNodeScripts(slave)
+    }
 }

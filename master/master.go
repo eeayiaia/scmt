@@ -15,7 +15,7 @@ import (
 )
 
 var initialized = false
-var newnode_lock *sync.Mutex
+var nodeScript_lock *sync.Mutex
 
 func Init() {
 	if initialized {
@@ -68,15 +68,15 @@ func Init() {
 	}
 	devices.AddGlobalEnv("PATH", path)
 
-	newnode_lock = &sync.Mutex{}
+	nodeScript_lock = &sync.Mutex{}
 
 	initialized = true
 }
 
 func RunNewNodeScripts(slave *devices.Slave) error {
 	// NewNode scripts should not be run at the same time for two different kind of slaves
-	newnode_lock.Lock()
-	defer newnode_lock.Unlock()
+	nodeScript_lock.Lock()
+	defer nodeScript_lock.Unlock()
 
 	err := RunScriptsInDir("scripts.d/master.newdevice.d/", GetEnvVarComb(*slave))
 
@@ -222,4 +222,25 @@ func GetEnvVarComb(device devices.Slave) map[string]string {
 	}
 
 	return env
+}
+
+func RunRemoveNodeScripts(slave *devices.Slave) error {
+	nodeScript_lock.Lock()
+	defer nodeScript_lock.Unlock()
+
+	err := RunScriptsInDir("scripts.d/master.removedevice.d/", GetEnvVarComb(*slave))
+
+	if err != nil {
+		Log.WithFields(log.Fields{
+			"slave": slave.IPAddress,
+			"error": err,
+		}).Warn("Failed to run removenode scripts")
+		return err
+	}
+
+	Log.WithFields(log.Fields{
+		"slave": slave.IPAddress,
+	}).Info("Ran removenode scripts")
+
+	return nil
 }
