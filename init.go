@@ -251,7 +251,7 @@ func setDatabaseRootPw() {
 	ans := string(pw)
 	switch ans {
 	case "":
-		newConf.DatabasePassword = config.DatabasePassword
+		newConf.DatabaseRootPassword = config.DatabaseRootPassword
 	case "q":
 		fmt.Println("Terminating..")
 		os.Exit(0)
