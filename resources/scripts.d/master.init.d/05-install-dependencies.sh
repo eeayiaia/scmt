@@ -24,6 +24,8 @@ write_line
 
 # Install mysql-server
 write_line
+echo "mysql-server mysql-server/root_password password $MYSQL_ROOT_PASSWORD" | sudo debconf-set-selections
+echo "mysql-server mysql-server/root_password_again password $MYSQL_ROOT_PASSWORD" | sudo debconf-set-selections
 echo "Installing mysql-server..."
 apt-get install mysql-server --assume-yes
 [[ ! $? ]] && echo "Failed to install mysql-server" >&2
