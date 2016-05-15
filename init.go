@@ -24,7 +24,7 @@ var config conf.Configuration = conf.Configuration{
    	Production: false,
    	ClusterName: "scmt",
    	RootPath: "",
-   	ClusterSubnet: "10.46.0.0/24",
+   	ClusterSubnet: "10.46.0.0/18",
    	ClusterBroadcastIP: "10.46.0.255",
    	DeviceIPRangeBegin: "10.46.0.10",
    	DeviceIPRangeEnd: "10.46.0.200",
