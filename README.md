@@ -82,7 +82,7 @@ Make sure you know the name of the external and internal interfaces, as this is 
 The next step is to build scmt - see above; once scmt is built proceed to the next section.
 
 ### Setting up the master-node
-All you need to do in order to configure the master-node properly is to run scmt. In order to run scmt requires the environment variable `$SCMT_ROOT` to be set to the root of the repository. You can choose whether to use our wrapper-script `run-scmt.sh` or by setting the environment variable by yourself.
+All you need to do in order to configure the master-node properly is to run scmt. In order to run scmt requires the environment variable `$SCMT_ROOT` to be set to the resources folder of the repository. You can choose whether to use our wrapper-script `run-scmt.sh` or by setting the environment variable by yourself.
 
 Run `scmt` to generate a configuration file. If you wish to change any configuration parameters later you can edit the file `resources/scmt.json`.
 
