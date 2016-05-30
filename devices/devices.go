@@ -133,6 +133,10 @@ func RegisterDevice(hardwareAddress string, ipAddress string) *Slave {
 		slave.RunInShellAsync("reboot", true)
 		return slave
 	} else {
+		if slave.Connected {
+			return nil
+		}
+
 		Log.WithFields(log.Fields{
 			"mac": hardwareAddress,
 			"ip":  ipAddress,
@@ -288,13 +292,13 @@ func RemoveDevice(hwAddress string) *Slave {
 		slave.lock.Unlock()
 		devices = cpy
 		devicesMutex.Unlock()
-        return slave
+		return slave
 	}
-    return nil
+	return nil
 }
 
 func InsertColons(HwAddr string) string {
-    var macparts []string = []string {HwAddr[0:2], HwAddr[2:4], HwAddr[4:6], HwAddr[6:8], HwAddr[8:10], HwAddr[10:12],}
-    return strings.Join(macparts,":")
+	var macparts []string = []string{HwAddr[0:2], HwAddr[2:4], HwAddr[4:6], HwAddr[6:8], HwAddr[8:10], HwAddr[10:12]}
+	return strings.Join(macparts, ":")
 
 }
