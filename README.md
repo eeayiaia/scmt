@@ -164,7 +164,7 @@ Upon disconnection, the `master.removedevice.d` actions is being run.
 Plugins follow the very same event-action system as described above, but in an isolated folder structure.
 
 ```bash
-$> tree resources/plugins.d                                                                        cpluss@empousai 
+$> tree resources/plugins.d
 resources/plugins.d
 ├── ganglia
 │   ├── device.init.d
